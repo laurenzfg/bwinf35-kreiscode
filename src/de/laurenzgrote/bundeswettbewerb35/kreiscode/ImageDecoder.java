@@ -194,8 +194,6 @@ public class ImageDecoder {
      * Sucht Kreise
      */
     private void scanForCircles() {
-        // Ambigous Formula
-        double max_delta = width * height;
         int kreiseCnt = 0;
         for (int x = rgbImage.getMinX(); x < width; ++x) {
             for (int y = rgbImage.getMinY(); y < height; y++) {
