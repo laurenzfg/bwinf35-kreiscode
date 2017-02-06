@@ -76,57 +76,78 @@ public class ImageDecoder {
      * Generiert S/W-Bild aus buntem Bild
      */
     private void generateSW () {
-        int cnt = 0;
-        for (int x = rgbImage.getMinX(); x < width; x++) {
-            for (int y = rgbImage.getMinY(); y < height; y++) {
+        double max = -1;
+        // Hellsten Punkt finden
+        for (int x = 0; x < width; x++) {
+            for (int y = 0; y < height; y++) {
                 Color color = new Color(rgbImage.getRGB(x, y));
-                double percentile = (color.getRed() / 255.0) +
-                        (color.getGreen() / 255.0) +
-                        (color.getBlue()  / 255.0);
-                percentile /= 3.0;
-
-                if (percentile <= minAVGBlack) {
-                    swImage[x][y] = true;
-                    cnt++;
-                } else {
-                    swImage[x][y] = false;
-                }
+                double here = color.getRed() + color.getGreen() +
+                            color.getBlue();
+                here /= 3;
+                if (here > max)
+                    max = here;
             }
         }
-        int corrected;
+        // Helligkeitswert für jeden Pixel berechnen
+        double[][] brightness = new double[width][height];
+        for (int x = 0; x < width; x++) {
+            for (int y = 0; y < height; y++) {
+                // Durchschnitt der Helligkeit jeder Primärfarbe
+                // 0 nicht da, 255 100%
+                // --> 0,0,0 Schwarz, 255,255,255 Weiß
+                Color color = new Color(rgbImage.getRGB(x, y));
+                double percentile = (color.getRed() / max) +
+                        (color.getGreen() / max) +
+                        (color.getBlue()  / max);
+                percentile /= 3.0;
+
+                brightness[x][y] = percentile;
+            }
+        }
+
+        // Glättung n mal vornehmen
+        for (int n = 0; n < 3; n++) {
+            double[][] newBrightness = new double[width][height];
+            for (int x = 1; x < width - 1; x++) {
+                for (int y = 1; y < height - 1; y++) {
+                        double avg = 0;
+                        for (int x1 = x - 1; x1 <= x + 1; x1++)
+                            for (int y1 = y - 1; y1 <= y + 1; y1++)
+                                avg += brightness[x1][y1];
+                        avg /= 10;
+                        newBrightness[x][y] = avg;
+                }
+            }
+            brightness = newBrightness;
+        }
+
+        // Was unterm Treshold liegt wird als Schwarz gespeichert
+        for (int x = 0; x < width; x++)
+            for (int y = 0; y < height; y++)
+                if (brightness[x][y] < minAVGBlack)
+                    swImage[x][y] = true;
+
+        // Vervollsändigung
+        int cnt;
         do {
-            System.err.println("INVOKED");
-            corrected = complete();
-        } while (corrected > 0);
-        System.err.println("Found so many black fields: " + cnt);
-    }
-
-
-    /**
-     * Vervollständigt wahrscheinlich Schwarze Felder
-     * @return Anzahl der Vervollständigungen
-     */
-    private int complete () {
-        int cnt = 0;
-
-        // TODO sobald absehbar dass das nichts wird continue
-        for (int x = 1; x < width - 1; x++) {
-            for (int y = 1; y < height - 1; y++) {
-                if (!swImage[x][y]) {
-                    int adj = -1;
-                    for (int x1 = x - 1; x1 <= x + 1; x1++)
-                        for (int y1 = y - 1; y1 <= y + 1; y1++)
-                            if (swImage[x1][y1])
-                                adj++;
-                    if (adj >= minADJ) {
-                        swImage[x][y] = true;
-                        cnt++;
+            cnt = 0;
+            // TODO sobald absehbar dass das nichts wird continue
+            for (int x = 1; x < width - 1; x++) {
+                for (int y = 1; y < height - 1; y++) {
+                    if (!swImage[x][y]) {
+                        int adj = -1;
+                        for (int x1 = x - 1; x1 <= x + 1; x1++)
+                            for (int y1 = y - 1; y1 <= y + 1; y1++)
+                                if (swImage[x1][y1])
+                                    adj++;
+                        if (adj >= minADJ) {
+                            swImage[x][y] = true;
+                            cnt++;
+                        }
                     }
                 }
             }
-        }
-
-        return cnt;
+        } while (cnt > 0);
     }
 
     /**
