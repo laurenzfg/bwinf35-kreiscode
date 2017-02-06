@@ -194,51 +194,64 @@ public class ImageDecoder {
      * Sucht Kreise
      */
     private void scanForCircles() {
-        int kreiseCnt = 0;
-        for (int x = rgbImage.getMinX(); x < width; ++x) {
-            for (int y = rgbImage.getMinY(); y < height; y++) {
+        // Horizontal über das Bild iterieren
+        for (int x = 0; x < width; ++x) {
+            for (int y = 0; y < height; y++) {
+                // Horizontale Streak-Länge
                 int lengthHere = hStreak[x][y];
-                if (lengthHere > 0) {
-                    // Überprüfen auf Kreismittelpunkt
+
+                // Sind wir in einer Streak UND fängt sie in dieser Zeile an?
+                if (lengthHere > 0 && (x == 0 || !swImage[x-1][y])) {
+                    // Bestimmen des Mittelpunktes der Streak
                     int center = x + (lengthHere / 2);
+                    // Ist am Mittelpunkt der vertikale Streak genauso lang? (siehe Doku)
+                    // TODO: Fuzzyness-nötig ?!
                     if (center < width && vStreak[center][y] == lengthHere) {
-                        Coordinate coordinate = new Coordinate(center, y);
+                        // Kreiskriterium I erfüllt,
+                        // --> Kandidat für Mittelpunkt also Mittelpunkt der Streak
+                        Coordinate coord = new Coordinate(center, y);
+
+                        // Fäche nach Kreisformel
+                        double circleSize = (Math.PI * lengthHere * lengthHere) / 4.0;
+
+                        int structNo; // ID der Fläche (Zusammenhangskomponente)
+                        double actualSize; // Gemessene Größe
+
+                        double maxDelta = 100; // Maximal akzeptiertes Delta zur Akzeptanz als Kreis
+                        // 100 ist willkürlich
+
+                        // Wurde schon per Flood-Fill die Flächengröße bestimmt?
                         if (structureNos[center][y] == -1) {
-                            int structNo = aktStructure;
+                            // Nein
+                            // Flächen-ID ist also eine neue Nummer
+                            structNo = aktStructure;
 
-                            double circle_size = (Math.PI * lengthHere * lengthHere) / 4.0;
-                            double actual_size = floodFill(coordinate);
-                            double delta = Math.abs(circle_size - actual_size);
+                            // Messen der Fläche
+                            actualSize = floodFill(coord);
 
-                            // Ist es ein Kreis?
-                            // lengthHere ist willkürlich
-                            if (delta < lengthHere) {
-                                circleCenters.put(structNo, new CircleCenterCoordinate(coordinate, delta));
-                                kreiseCnt++;
-                            }
                         } else {
-                            // Wurde schon als Kreis erkannt
-                            int structNo = structureNos[center][y];
+                            // Ja
+                            // actualSize u. Flächen-ID wurde schon bei der letzten Flood-Fill ermittelt
+                            // --> laden aus dem Arbeitsspeicher
+                            structNo = structureNos[center][y];
+                            actualSize = structureSizes.get(structNo);
 
-                            // actual_size wurde schon bei der letzten Flood-Fill ermittelt
-                            double actual_size = structureSizes.get(structNo);
-                            double circle_size = (Math.PI * lengthHere * lengthHere) / 4.0;
-
-                            double lastDelta = lengthHere;
-                            if (circleCenters.containsKey(structNo)) {
-                                // JA --> Diese Postion kleineres Delta
-                                lastDelta = circleCenters.get(structNo).delta;
-                            }
-                            double delta = Math.abs(circle_size - actual_size);
-
-                            if (delta < lastDelta)
-                                circleCenters.put(structNo, new CircleCenterCoordinate(coordinate, delta));
+                            // Maximales Delta ist das bei der letzten Kreisplatzierung gemessene Delta.
+                            // Wenn bei der letzten Messung zwar die Fläche ausgemessen wurde,
+                            // aber Kreiskriterium II nicht erfüllt war, gilt das allgemeine maxDelta.
+                            if (circleCenters.containsKey(structNo))
+                                maxDelta = circleCenters.get(structNo).delta;
                         }
+
+                        // Delta zwischen Fläche nach Kreisformel und gemessener Fläche bestimmen
+                        double delta = Math.abs(actualSize - circleSize);
+                        // Ist das Delta zwischen Fläche nach Kreisformal und gemessener Fläche klein genug?
+                        if (delta < maxDelta)
+                            circleCenters.put(structNo, new CircleCenterCoordinate(coord, delta));
                     }
                 }
             }
         }
-        System.err.println(kreiseCnt);
     }
 
     /**
