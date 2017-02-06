@@ -22,7 +22,7 @@ public class ImageDecoder {
 
     // Konstanten
     // Ab wann ist Grau Schwarz?
-    private final double minAVGBlack = 0.4; // From 0.0 (black) to 1.0 (white)
+    private final double minAVGBlack = 0.4; // Von 0.0 (black) zu 1.0 (white)
     private final int minADJ = 4; // Wieviele Felder müssen bei der Vervollständigung Schwarz sein?
 
     // Daten des bunten Eingabebildes
