@@ -1,0 +1,52 @@
+\documentclass{scrreprt}
+\usepackage{scrlayer-scrpage}
+
+% Umlaute und Font-Encoding
+\usepackage[T1]{fontenc}
+\usepackage[utf8]{inputenc}
+
+% Deutsch
+\usepackage[ngerman]{babel}
+
+% Das muss fucking nochmal GEIL aussehen!
+% \usepackage{microtype} - Erst im Final actimelisieren
+
+% Mathe
+\usepackage{amsmath}
+
+% Coole Links im PDF
+%\usepackage[hidelinks]{hyperref}
+
+% Aliase zum abdrucken von Shell-CMDs
+\newcommand{\shellcmd}[1]{\texttt{\$ #1}\\}
+\newcommand{\shellout}[1]{\texttt{#1}\\}
+
+% Alias für Aufgabenname
+\newcommand{\task}[1]{Kreis-Code}
+
+
+\ihead{\task} \ohead{Laurenz Grote, Teilnahme 6745 (Team 00001)}
+\renewcommand{\chapterpagestyle}{scrheadings}
+\pagestyle{scrheadings}
+
+\begin{document}
+
+	\titlehead{Teilnahme 6745 (Team 00001) \hfill Laurenz Grote}
+	\title{\task}
+	\subtitle{Aufgabe 3}
+	\author{Laurenz Friedrich Grote}
+	\date{}
+	\maketitle
+	\tableofcontents
+	
+	\vspace {2em}
+	Meine Umsetzung für "`\task"' erfolgte unter Ubuntu mit Java (OpenJDK 1.8). Ich habe ihnen den Programmcode sowie eine ausführbare .jar-Datei beigelegt.
+	\pagebreak
+	% ----------------------------------------------------------------------------
+	\chapter{Erkennung von Grafiken}
+		\input{swbild.tex}
+	\chapter{Dekodiermodul}
+		\input{dekod.tex}
+	\chapter{Erkennung von Fotos}
+		\input{fotos.tex}
+\end{document}

@@ -1,4 +1,24 @@
+### Java ###
 .idea/
 *.iml
 /out/
 /javadoc/
+
+### LaTeX ###
+## Core latex/pdflatex auxiliary files:
+*.aux
+*.lof
+*.log
+*.lot
+*.fls
+*.out
+*.toc
+*.fmt
+*.fot
+*.cb
+*.cb2
+*.fdb_latexmk
+*.pdf
+
+## Result PDF:
+doku.pdf
