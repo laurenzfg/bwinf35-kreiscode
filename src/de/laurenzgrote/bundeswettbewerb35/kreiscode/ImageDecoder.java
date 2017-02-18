@@ -103,21 +103,8 @@ public class ImageDecoder {
             }
         }
 
-        // Glättung n mal vornehmen
-        for (int n = 0; n < 3; n++) {
-            double[][] newBrightness = new double[width][height];
-            for (int x = 1; x < width - 1; x++) {
-                for (int y = 1; y < height - 1; y++) {
-                        double average = 0;
-                        for (int x1 = x - 1; x1 <= x + 1; x1++)
-                            for (int y1 = y - 1; y1 <= y + 1; y1++)
-                                average += brightness[x1][y1];
-                        average /= 10;
-                        newBrightness[x][y] = average;
-                }
-            }
-            brightness = newBrightness;
-        }
+        // 0mal glätten
+        brightness = glaette(brightness, 0);
 
         // Was unterm Treshold liegt wird als Schwarz gespeichert
         for (int x = 0; x < width; x++)
@@ -125,6 +112,30 @@ public class ImageDecoder {
                 if (brightness[x][y] < minAVGBlack)
                     swImage[x][y] = true;
 
+        // vervollstaendige();
+
+    }
+
+    private double[][] glaette (double[][] in, int n) {
+        // Glättung n mal vornehmen
+        for (int i = 0; i < 3; i++) {
+            double[][] newBrightness = new double[width][height];
+            for (int x = 1; x < width - 1; x++) {
+                for (int y = 1; y < height - 1; y++) {
+                    double average = 0;
+                    for (int x1 = x - 1; x1 <= x + 1; x1++)
+                        for (int y1 = y - 1; y1 <= y + 1; y1++)
+                            average += in[x1][y1];
+                    average /= 10;
+                    newBrightness[x][y] = average;
+                }
+            }
+            in = newBrightness;
+        }
+        return in;
+    }
+
+    private void vervollstaendige() {
         // Vervollsändigung
         int cnt;
         do {
@@ -224,8 +235,7 @@ public class ImageDecoder {
                     // Bestimmen des Mittelpunktes der Streak
                     int center = x + (lengthHere / 2);
                     // Ist am Mittelpunkt der vertikale Streak genauso lang? (siehe Doku)
-                    // TODO: Fuzzyness-nötig ?!
-                    if (center < width && vStreak[center][y] == lengthHere) {
+                    if (center < width &&  Math.abs(lengthHere - vStreak[center][y]) < 2) {
                         // Kreiskriterium I erfüllt,
                         // --> Kandidat für Mittelpunkt also Mittelpunkt der Streak
                         Coordinate coord = new Coordinate(center, y);
