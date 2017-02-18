@@ -22,7 +22,7 @@ public class ImageDecoder {
 
     // Konstanten
     // Ab wann ist Grau Schwarz?
-    private final double minAVGBlack = 0.4; // Von 0.0 (black) zu 1.0 (white)
+    private final double minAVGBlack = 0.1; // Von 0.0 (black) zu 1.0 (white)
     private final int minADJ = 4; // Wieviele Felder müssen bei der Vervollständigung Schwarz sein?
 
     // Daten des bunten Eingabebildes
@@ -76,18 +76,16 @@ public class ImageDecoder {
      * Generiert S/W-Bild aus buntem Bild
      */
     private void generateSW () {
-        double max = -1;
+        double avg = 0;
         // Hellsten Punkt finden
         for (int x = 0; x < width; x++) {
             for (int y = 0; y < height; y++) {
                 Color color = new Color(rgbImage.getRGB(x, y));
-                double here = color.getRed() + color.getGreen() +
+                avg += color.getRed() + color.getGreen() +
                             color.getBlue();
-                here /= 3;
-                if (here > max)
-                    max = here;
             }
         }
+        avg /= width * height;
         // Helligkeitswert für jeden Pixel berechnen
         double[][] brightness = new double[width][height];
         for (int x = 0; x < width; x++) {
@@ -96,9 +94,9 @@ public class ImageDecoder {
                 // 0 nicht da, 255 100%
                 // --> 0,0,0 Schwarz, 255,255,255 Weiß
                 Color color = new Color(rgbImage.getRGB(x, y));
-                double percentile = (color.getRed() / max) +
-                        (color.getGreen() / max) +
-                        (color.getBlue()  / max);
+                double percentile = (color.getRed() / avg) +
+                        (color.getGreen() / avg) +
+                        (color.getBlue()  / avg);
                 percentile /= 3.0;
 
                 brightness[x][y] = percentile;
@@ -110,12 +108,12 @@ public class ImageDecoder {
             double[][] newBrightness = new double[width][height];
             for (int x = 1; x < width - 1; x++) {
                 for (int y = 1; y < height - 1; y++) {
-                        double avg = 0;
+                        double average = 0;
                         for (int x1 = x - 1; x1 <= x + 1; x1++)
                             for (int y1 = y - 1; y1 <= y + 1; y1++)
-                                avg += brightness[x1][y1];
-                        avg /= 10;
-                        newBrightness[x][y] = avg;
+                                average += brightness[x1][y1];
+                        average /= 10;
+                        newBrightness[x][y] = average;
                 }
             }
             brightness = newBrightness;
