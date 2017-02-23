@@ -7,19 +7,6 @@ import java.util.List;
 
 public class ImageDecoder {
 
-    /**
-     * POJO für eine Koordinate mit Abweichung von der berechneten Kreismitte
-     */
-    private class CircleCenterCoordinate {
-        Coordinate coordinate;
-        double delta;
-
-        public CircleCenterCoordinate(Coordinate coordinate, double delta) {
-            this.coordinate = coordinate;
-            this.delta = delta;
-        }
-    }
-
     // Konstanten
     // Ab wann ist Grau Schwarz?
     private final double minAVGBlack = 0.1; // Von 0.0 (black) zu 1.0 (white)
@@ -42,10 +29,8 @@ public class ImageDecoder {
     private int[][] structureNos; // Zusammenhangskomponente-ID nach Bildpixel
     private ArrayList<Integer> structureSizes = new ArrayList<>(); // Größen je Zusammenhangskomponten
 
-    // Map der Kreismittelpunkte
-    // Key: Zusammenhangskomponente-ID des Kreises
-    private HashMap<Integer, CircleCenterCoordinate> circleCenters = new HashMap<>();
-
+    // Liste über die Kreismittelpunkte, indiziert nach Zusammenhangskomponentenid
+    ArrayList<Coordinate> circleCenters = new ArrayList<>();
     public ImageDecoder(BufferedImage rgbImage) {
         // Boilerplate-Code
         this.rgbImage = rgbImage;
@@ -258,25 +243,13 @@ public class ImageDecoder {
                             // Messen der Fläche
                             actualSize = floodFill(coord);
 
-                        } else {
-                            // Ja
-                            // actualSize u. Flächen-ID wurde schon bei der letzten Flood-Fill ermittelt
-                            // --> laden aus dem Arbeitsspeicher
-                            structNo = structureNos[center][y];
-                            actualSize = structureSizes.get(structNo);
-
-                            // Maximales Delta ist das bei der letzten Kreisplatzierung gemessene Delta.
-                            // Wenn bei der letzten Messung zwar die Fläche ausgemessen wurde,
-                            // aber Kreiskriterium II nicht erfüllt war, gilt das allgemeine maxDelta.
-                            if (circleCenters.containsKey(structNo))
-                                maxDelta = circleCenters.get(structNo).delta;
+                            // Delta zwischen Fläche nach Kreisformel und gemessener Fläche bestimmen
+                            double delta = Math.abs(actualSize - circleSize);
+                            // Ist das Delta zwischen Fläche nach Kreisformal und gemessener Fläche klein genug?
+                            if (delta < maxDelta)
+                                circleCenters.add(coord);
                         }
 
-                        // Delta zwischen Fläche nach Kreisformel und gemessener Fläche bestimmen
-                        double delta = Math.abs(actualSize - circleSize);
-                        // Ist das Delta zwischen Fläche nach Kreisformal und gemessener Fläche klein genug?
-                        if (delta < maxDelta)
-                            circleCenters.put(structNo, new CircleCenterCoordinate(coord, delta));
                     }
                 }
             }
@@ -324,13 +297,6 @@ public class ImageDecoder {
         return swImage;
     }
     public List<Coordinate> getCircleCenters() {
-        // Einfache Koordinatenliste, Delta zum berechneten Punkt wird entfernt.
-        ArrayList<Coordinate> out = new ArrayList<>();
-
-        for (CircleCenterCoordinate ccc : circleCenters.values()) {
-            out.add(ccc.coordinate);
-        }
-
-        return out;
+        return circleCenters;
     }
 }
