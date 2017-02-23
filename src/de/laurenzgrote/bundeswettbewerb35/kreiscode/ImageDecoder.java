@@ -71,6 +71,7 @@ public class ImageDecoder {
             }
         }
         avg /= width * height;
+
         // Helligkeitswert für jeden Pixel berechnen
         double[][] brightness = new double[width][height];
         for (int x = 0; x < width; x++) {
@@ -169,7 +170,7 @@ public class ImageDecoder {
                 }
             }
 
-            // Neue Zeile, akt. Streak damit abgeschlossen
+            // Neue Zeile, akt. Streak damit wenn vorhanden abgeschlossen
             if (streakLength > 0) {
                 for (int i = width - 1; i >= width - streakLength; i--) {
                     hStreak[i][y] = streakLength;
@@ -195,7 +196,7 @@ public class ImageDecoder {
                 }
             }
 
-            // Neue Spalte, akt. Streak damit abgeschlossen
+            // Neue Spalte, akt. Streak damit wenn vorhanden abgeschlossen
             if (streakLength > 0) {
                 for (int i = height - 1; i >= height - streakLength; i--) {
                     vStreak[x][i] = streakLength;
