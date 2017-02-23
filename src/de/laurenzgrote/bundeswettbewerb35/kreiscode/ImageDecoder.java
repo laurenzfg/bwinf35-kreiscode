@@ -227,8 +227,6 @@ public class ImageDecoder {
 
                         // Fäche nach Kreisformel
                         double circleSize = (Math.PI * lengthHere * lengthHere) / 4.0;
-
-                        int structNo; // ID der Fläche (Zusammenhangskomponente)
                         double actualSize; // Gemessene Größe
 
                         double maxDelta = 100; // Maximal akzeptiertes Delta zur Akzeptanz als Kreis
@@ -237,8 +235,6 @@ public class ImageDecoder {
                         // Wurde schon per Flood-Fill die Flächengröße bestimmt?
                         if (structureNos[center][y] == -1) {
                             // Nein
-                            // Flächen-ID ist also eine neue Nummer
-                            structNo = aktStructure;
 
                             // Messen der Fläche
                             actualSize = floodFill(coord);
