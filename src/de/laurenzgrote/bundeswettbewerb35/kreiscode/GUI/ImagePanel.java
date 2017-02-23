@@ -42,11 +42,19 @@ class ImagePanel extends JPanel implements ComponentListener{
 
     void markCoordinate (int x, int y) {
         for (int i = x - 10; i <= x + 10; i++) {
-            for (int j = y - 10; j <= y + 10; j++) {
-                if (i < unscaledImage.getWidth() && i >= 0 && j < unscaledImage.getHeight() && j >= 0)
-                    unscaledImage.setRGB(i, j, overlayColor);
+            for (int j = y - 2; j <= y + 2; j++) {
+                highlightPixel(i, j);
             }
         }
+        for (int i = y - 10; i <= y + 10; i++) {
+            for (int j = x - 2; j <= x + 2; j++) {
+                highlightPixel(j, i);
+            }
+        }
+    }
+    void highlightPixel (int x, int y) {
+        if (x < unscaledImage.getWidth() && x >= 0 && y < unscaledImage.getHeight() && y >= 0)
+            unscaledImage.setRGB(x, y, overlayColor);
     }
 
     @Override
