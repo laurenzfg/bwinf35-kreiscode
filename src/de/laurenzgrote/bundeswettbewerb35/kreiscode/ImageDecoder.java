@@ -220,8 +220,9 @@ public class ImageDecoder {
                 if (lengthHere > 0 && (x == 0 || !swImage[x-1][y])) {
                     // Bestimmen des Mittelpunktes der Streak
                     int center = x + (lengthHere / 2);
-                    // Ist am Mittelpunkt der vertikale Streak genauso lang? (siehe Doku)
-                    if (center < width &&  Math.abs(lengthHere - vStreak[center][y]) < 2) {
+                    // Ist am Mittelpunkt die vertikale Streak genauso lang? (siehe Doku)
+                    // Wurde schon per Flood-Fill die Flächengröße bestimmt?
+                    if (center < width && Math.abs(lengthHere - vStreak[center][y]) < 2 && structureNos[center][y] == -1) {
                         // Kreiskriterium I erfüllt,
                         // --> Kandidat für Mittelpunkt also Mittelpunkt der Streak
                         Coordinate coord = new Coordinate(center, y);
@@ -233,20 +234,14 @@ public class ImageDecoder {
                         double maxDelta = 100; // Maximal akzeptiertes Delta zur Akzeptanz als Kreis
                         // 100 ist willkürlich
 
-                        // Wurde schon per Flood-Fill die Flächengröße bestimmt?
-                        if (structureNos[center][y] == -1) {
-                            // Nein
+                        // Messen der Fläche
+                        actualSize = floodFill(coord);
 
-                            // Messen der Fläche
-                            actualSize = floodFill(coord);
-
-                            // Delta zwischen Fläche nach Kreisformel und gemessener Fläche bestimmen
-                            double delta = Math.abs(actualSize - circleSize);
-                            // Ist das Delta zwischen Fläche nach Kreisformal und gemessener Fläche klein genug?
-                            if (delta < maxDelta)
-                                circleCenters.add(coord);
-                        }
-
+                        // Delta zwischen Fläche nach Kreisformel und gemessener Fläche bestimmen
+                        double delta = Math.abs(actualSize - circleSize);
+                        // Ist das Delta zwischen Fläche nach Kreisformal und gemessener Fläche klein genug?
+                        if (delta < maxDelta)
+                            circleCenters.add(coord);
                     }
                 }
             }
