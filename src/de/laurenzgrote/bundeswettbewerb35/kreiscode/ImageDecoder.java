@@ -234,8 +234,25 @@ public class ImageDecoder {
                         // Delta zwischen Fläche nach Kreisformel und gemessener Fläche bestimmen
                         double delta = Math.min(circleSize, actualSize) / Math.max(circleSize, actualSize);
                         // Ist das Delta zwischen Fläche nach Kreisformal und gemessener Fläche klein genug?
-                        if (delta >= 0.95)
-                            circleCenters.add(coord);
+                        if (delta >= 0.95) {
+                            // Jetzt Test auf umgebenden schwarzen Ring
+                            double third = lengthHere * (1.0/3.0);
+                            double delta2 = 0;
+
+                            delta2 += Math.min(hStreak[center+lengthHere][y], third) /
+                                        Math.max(hStreak[center+lengthHere][y], third);
+                            delta2 += Math.min(hStreak[center-lengthHere][y], third) /
+                                        Math.max(hStreak[center-lengthHere][y], third);
+                            delta2 += Math.min(vStreak[center][y+lengthHere], third) /
+                                        Math.max(vStreak[center][y+lengthHere], third);
+                            delta2 += Math.min(vStreak[center][y-lengthHere], third) /
+                                        Math.max(vStreak[center][y-lengthHere], third);
+
+                            delta2 /= 4.0;
+                            if (delta2 >= 0.95)
+                                circleCenters.add(coord);
+                        }
+
                     }
                 }
             }
