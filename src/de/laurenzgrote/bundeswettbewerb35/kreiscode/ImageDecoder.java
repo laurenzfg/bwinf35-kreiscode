@@ -229,18 +229,12 @@ public class ImageDecoder {
 
                         // Fäche nach Kreisformel
                         double circleSize = (Math.PI * lengthHere * lengthHere) / 4.0;
-                        double actualSize; // Gemessene Größe
-
-                        double maxDelta = 100; // Maximal akzeptiertes Delta zur Akzeptanz als Kreis
-                        // 100 ist willkürlich
-
-                        // Messen der Fläche
-                        actualSize = floodFill(coord);
+                        double actualSize = floodFill(coord); // Gemessene Größe
 
                         // Delta zwischen Fläche nach Kreisformel und gemessener Fläche bestimmen
-                        double delta = Math.abs(actualSize - circleSize);
+                        double delta = Math.min(circleSize, actualSize) / Math.max(circleSize, actualSize);
                         // Ist das Delta zwischen Fläche nach Kreisformal und gemessener Fläche klein genug?
-                        if (delta < maxDelta)
+                        if (delta >= 0.95)
                             circleCenters.add(coord);
                     }
                 }
