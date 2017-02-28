@@ -1,0 +1,16 @@
+\begin{tikzpicture}[scale=0.3]
+\fill[black!90!white] (0,0) circle [radius=1.5];
+\fill[black!90!white, even odd rule] (0,0) circle[radius=2.5] circle[radius=3.5];
+\fill[black!60!white, even odd rule] (0,0) circle[radius=4.5] circle[radius=5.5];
+
+\foreach \angle in {0, 22.5, 45, 67.590, 90, 112.5, 135, 157.5, 180, 202.5, 225, 247.5, 270, 292.5, 315, 337.5} 
+	\draw[thick] (\angle:4.5) -- (\angle:5.5);
+
+\draw[color=blue!60!violet, thick] (0,0) -- (0,-6.7) -- +(-1.5, 0) -- (-1.5,0);
+\draw[color=blue!60!violet, thick] (0,0) -- (0,-8) -- +(-2.5, 0) -- (-2.5,0);
+\draw[color=blue!60!violet, thick] (0,0) -- (0,-9.3) -- +(-3, 0) -- (-3,0);
+
+\draw (-0.75, -6) node{\tiny{\(\frac{3}{2}u\)}};
+\draw (-1.25, -7.4) node{\tiny{\(\frac{5}{2}u\)}};
+\draw (-1.25, -8.7) node{\tiny{\(\frac{6}{2}u\)}};
+\end{tikzpicture}
