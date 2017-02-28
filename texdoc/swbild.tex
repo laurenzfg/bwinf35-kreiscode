@@ -3,7 +3,8 @@ Um möglichst effizient Kreismittelpunkte zu bestimmen, mache ich mir zunächst 
 
 In einem Bild lassen sich solche Punkte finden, indem man von jedem schwarzen Bildpunkt misst, wie weit man sich auf dem Bild in vertikale wie horizontale Richtung "`bewegen"' kann, ohne auf ein weißes Feld zu stoßen. Wenn dieser Abstand nach rechts, links, oben und unten gleich groß ist, genügt der Punkt der erstgenannten Eigenschaft von Kreisen. 
 
-Von einem Vergleich des Abstandes in andere Richtungen (wie z.B. in diagonale Richtung) sollte man bei einem Bild aus Pixeln absehen, da bei der Speicherung eines Kreises als Bitmap aus quadratischen Pixeln diagonale Messungen oder gar Messungen unter beliebigem Winkel ungenaue Ergebnisse liefern. Zwar sind solche Messungen prinzipiell möglich, liefern aber anders als rein vertikale oder horizontale Messungen kein ganzzahligen Ergebnisse, da eine Pixeldiagonale \(\sqrt{2}\) Pixelseiten lang ist.\footnote{: \(|\vectwo{1}{1}| = \sqrt{2}\)}
+Von einem Vergleich des Abstandes in andere Richtungen (wie z.B. in diagonale Richtung) sollte man bei einem Bild aus Pixeln absehen, da bei der Speicherung eines Kreises als Bitmap aus quadratischen Pixeln diagonale Messungen oder gar Messungen unter beliebigem Winkel ungenaue Ergebnisse liefern. Zwar sind solche Messungen prinzipiell möglich, liefern aber anders als rein vertikale oder horizontale Messungen kein ganzzahligen Ergebnisse, da eine Pixeldiagonale \(\sqrt{2}\) Pixelseiten lang ist.
+\footnote{: \( \vert \begin{pmatrix}1\\1\end{pmatrix} \vert = \sqrt{2}\)}
 
 \begin{figure}[!ht]
 	\centering	
@@ -24,7 +25,7 @@ Danach gilt es noch zu bestimmen, ob es sich bei dem Kreis um einen Mittelpunkt 
 
 Der Durchmesser ist als \(3u\) definiert, jeder Kreisring und die Zwischenräume haben eine Breite von \(1u\). Daraus folgt, dass wenn man den Mittelpunkt in eine beliebige Richtung um \(3u\) verschiebt, der neue Punkt im mittleren Kreisring liegen muss.
 
-Um nun das Vorhandensein des mittleren Ringes zu überprüfen, nehmen wir vier Punktproben vor. Wir verschieben den Mittelpunkt in alle Himmelsrichtugen um \(u\). Dort vergleichen wir die Länge der entsprechenden linearen Zusammenhangskomponente mit dem Soll \(\1u\). Weitere Punktproben sind prinzipiell möglich, jedoch würden diese die Laufzeit erhöhen. \textbf{Ggfs. weitere Flood-Fill auf Fläche des Kreisringes hinzufügen!}
+Um nun das Vorhandensein des mittleren Ringes zu überprüfen, nehmen wir vier Punktproben vor. Wir verschieben den Mittelpunkt in alle Himmelsrichtugen um \(u\). Dort vergleichen wir die Länge der entsprechenden linearen Zusammenhangskomponente mit dem Soll \(1u\). Weitere Punktproben sind prinzipiell möglich, jedoch würden diese die Laufzeit erhöhen. \textbf{Ggfs. weitere Flood-Fill auf Fläche des Kreisringes hinzufügen!}
 
 Die Wahrscheinlichkeit eines Erkennungsfehlers ist nach dem Durchmesservergleich, dem Flächenvergleich und den vier Punktproben sehr gering. Im Beispielbild, dass ich um einen Kreis, der kein \task ist ergänzt habe,liegt die Erkennungsrate bei 100\%.
 
@@ -36,13 +37,20 @@ Zunächst implementierte ich mithilfe von ImageIO eine Bildeinleseprozedur. Da I
 
 Zunächst überlegte ich mir eine möglichst effiziente Datenstruktur für Grafiken, da die Interaktion über ImageIO mit Bitmaps nicht sonderlich effizient ist. Da für die Erkennung von Kreisen in einer Grafik genaue Informationen über die Farbe eines Bildpunktes nicht relevant sind, kann das Bild beim Einlesevorgang in ein boolesches 2D-Array überführt werden: In diesem Array, das die gleiche Größe wie das eingelesene Bild besitzt, sind die Bildpunkte als True gespeichert, die Teil eines \task{}s sein könnten. In der in Teilaufgabe 1 gegebenen Schwarz-Weiß-Grafik ist diese Einstufung noch simpel: Schwarze Bildpunkte können Teil eines \task{}s sein, sonstige nicht.
 
-Um in diesem Array die Punkte zu bestimmen, deren Kreisradien sich in alle vier Richtungen gleichen, muss zunächst die Länge von aufeinanderfolgenden Streifen aus möglichen \task{}-Feldern ermittelt werden. Diese nenne ich nun lineare Zusammenhängigkeitskomponenten. In seperaten Arrays für horizontale und vertikale Streifen speichere ich für jedes Feld die Länge seiner linearen Zusammenhängigkeitskomponente. Für ein mögliches \task{}-Feld liegt diese für horizontale Zusmmenhängikeitskomponenten bei \(1 \le l \le width\), für vertikale entsprechend bei
-\(1 \le l \le height\)
-. Bei allen Feldern, die kein Teil einer Zusmmenhängikeitskomponente sind, liegt dieser Wert bei 0. 
+Um in diesem Array die Punkte zu bestimmen, deren Kreisradien sich in alle vier Richtungen gleichen, bestimme ich zunächst die Länge von aufeinanderfolgenden Streifen aus möglichen \task{}-Feldern. Diese nenne ich nun lineare Zusammenhängigkeitskomponenten. In seperaten Arrays für horizontale und vertikale Streifen speichere ich für jedes Feld die gesamte Länge seiner linearen Zusammenhängigkeitskomponente. \textbf{Zeichnung?} 
+Für ein mögliches \task{}-Feld liegt die Länge für horizontale Zusmmenhängikeitskomponenten in \(1 \le l \le width\), für vertikale entsprechend in \(1 \le l \le height\). Allen Feldern, die kein Teil einer Zusmmenhängikeitskomponente sind, haben in den Arrays einen Wert von \(0\). 
 
-Danach kann für jede Koordinate die horizontale und vertikale Zusammenhängigkeitskomponentenlänge verglichen werden. Gleichen sie sich, handelt es sich um einen möglichen Mittelpunkt. Von diesem Punkt aus kann die Soll-Fläche mit der Kreisformel berechnet werden, denn derer Durchmesser des Kreises ist nun mit der Länge einer der beiden Zusammenhängigkeitskomponenten gegeben. Die tatsächliche Länge der Fläche kann mit einer Flood-Fill ermittelt werden.
+Die erste Eigenschaft aus der Aufgabenstellung lässt sich mit dieser Information nun dahingehend vereinfacht werden, dass sich überlappende Mittelpunkte gleich langer Zusammenhängigkeitskomponenten gesucht wird. Dann ist die Eigenschaft gegeben, da in alle Richtungen die Länge gleich ist.
 
-Schließlich muss noch das Vorhandensein des Kreisringes wie in der Lösungsidee beschrieben verifiziert werden. Auch hier akzeptiert das Programm eine Abweichung im Mittel von 5\%, da durch Anti-Aliasing oder Unschärfen bei der Bildaufnahme Abweichungen vom mathematischen Ideal der Spezifikation zwangsläufig auftreten.
+Dafür bestimme ich zunächst alle Mittelpunkte horizontaler linearer Zusammenhängigkeitskomponenten. Dies geschieht, indem ich mit einer linearen Suche über das ganze Bild alle Koordinaten bestimme, deren Zusammenhängigkeitskomponentenlänge größer null ist und der kein Feld vorausgeht, dass Teil einer Zusammenhängigkeitskomponente ist. Feldern am linken Rand gehen grundsätzlich keine Zusammenhängigkeitskomponentenfelder voraus, d. h. dass Komponenten sich meiner Definition nach nicht über Zeilengrenzen hinweg erstrecken. Diese Funktion liefert erst einmal Anfangsstellen von horizontalen Zusammenhängigkeitskomponenten. Wenn ich auf diese Anfangsstelle allerdings nun die Hälfte der Länge der Komponente hinzuaddiere, erhalte ich die x-Koordinate des Mittelpunktes der Zusammenhängigkeitskomponente. Die y-Koordinate ist für eine \textit{horizontale} Komponente durchgehend gleich und daher aus der linearen Suche gegeben.
+
+An dieser Stelle lese ich nun die Länge der vertikalen linearen Zusammenhängigkeitskomponente aus. Wenn die Differenz zwischen dieser und der Länge der horizontalen Komponente 0 oder 1 ist, werte ich die Längen der Komponenten als gleich. Ein Fehler von 1 kann ich durch Rundungsfehler bei ganzzahligen Divisionen entstehen.
+
+Zuletzt überprüfe ich noch, ob der Mittelpunkt der vertikalen Kompontenten auf dem Schnittpunkt der beiden Komponenten liegt. Wenn dies der Fall ist, muss man den Schnittpunkt um eine halbe Komponentenlänge (halber Durchmesser = Radius) verschieben können und immernoch innerhalb der schwarzen Fläche sein können. Auch hier arbeitet das Programm wegen Divisionsfehlern mit einer Ungenauigkeit von 1, d.h. dass die Verschiebungen um 1 Pixel zum Mittelpunkt zurückgeschoben werden.
+
+Von diesem Punkt aus kann die Soll-Fläche mit der Kreisformel berechnet werden, denn derer Durchmesser des Kreises ist nun mit der Länge einer der beiden Zusammenhängigkeitskomponenten gegeben. Die tatsächliche Länge der Fläche kann mit einer Flood-Fill ermittelt werden.
+
+Schließlich muss noch das Vorhandensein des Kreisringes wie in der Lösungsidee beschrieben verifiziert werden. Dafür wird an den Punkten die Abweichung vom Soll ermittelt und arithmetisch gemittelt. Auch hier akzeptiert das Programm eine Abweichung im Mittel von 5\%, da durch Anti-Aliasing oder Unschärfen bei der Bildaufnahme Abweichungen vom mathematischen Ideal der Lösungsidee zwangsläufig auftreten.
 \pagebreak
 \section{Beispiele}
 Die erkannten Kreismittelpunkte sind mit violetten Kreuzen markiert.

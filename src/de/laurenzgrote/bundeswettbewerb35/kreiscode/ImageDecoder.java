@@ -221,12 +221,16 @@ public class ImageDecoder {
                     // Bestimmen des Mittelpunktes der Streak
                     int center = x + (hStreakLength / 2);
                     // Ist der Mittelpunkt der Streak innerhalb des Bildes?
-                    if (center < width) {
+                    // Wurde schon per Flood-Fill die Flächengröße bestimmt?
+                    if (center < width && structureNos[center][y] == -1) {
                         // Ist am Mittelpunkt d. Horizontalen die vertikale Streak genauso lang und
                         // hat die vertikale Streak hier ihren Mittelpunkt? (siehe Doku)
-                        // Wurde schon per Flood-Fill die Flächengröße bestimmt?
                         int vStreakLength = vStreak[center][y];
-                        if (Math.abs(hStreakLength - vStreakLength) < 2 && (y == 0 || !swImage[center][y-vStreakLength/2]) && structureNos[center][y] == -1){
+                        int halfVLength = vStreakLength / 2;
+                        int first = y - halfVLength + 1;
+                        int last = y + halfVLength - 1;
+                        if (Math.abs(hStreakLength - vStreakLength) < 2 && first > 0 && last < height &&
+                                (swImage[center][first]) && swImage[center][last]){
                             // Kreiskriterium I erfüllt,
                             // --> Kandidat für Mittelpunkt also Mittelpunkt der Streak
                             Coordinate coord = new Coordinate(center, y);
