@@ -214,45 +214,49 @@ public class ImageDecoder {
         for (int x = 0; x < width; ++x) {
             for (int y = 0; y < height; y++) {
                 // Horizontale Streak-Länge
-                int lengthHere = hStreak[x][y];
+                int hStreakLength = hStreak[x][y];
 
                 // Sind wir in einer Streak UND fängt sie in dieser Zeile an?
-                if (lengthHere > 0 && (x == 0 || !swImage[x-1][y])) {
+                if (hStreakLength > 0 && (x == 0 || !swImage[x-1][y])) {
                     // Bestimmen des Mittelpunktes der Streak
-                    int center = x + (lengthHere / 2);
-                    // Ist am Mittelpunkt die vertikale Streak genauso lang? (siehe Doku)
-                    // Wurde schon per Flood-Fill die Flächengröße bestimmt?
-                    if (center < width && Math.abs(lengthHere - vStreak[center][y]) < 2 && structureNos[center][y] == -1) {
-                        // Kreiskriterium I erfüllt,
-                        // --> Kandidat für Mittelpunkt also Mittelpunkt der Streak
-                        Coordinate coord = new Coordinate(center, y);
+                    int center = x + (hStreakLength / 2);
+                    // Ist der Mittelpunkt der Streak innerhalb des Bildes?
+                    if (center < width) {
+                        // Ist am Mittelpunkt d. Horizontalen die vertikale Streak genauso lang und
+                        // hat die vertikale Streak hier ihren Mittelpunkt? (siehe Doku)
+                        // Wurde schon per Flood-Fill die Flächengröße bestimmt?
+                        int vStreakLength = vStreak[center][y];
+                        if (Math.abs(hStreakLength - vStreakLength) < 2 && (y == 0 || !swImage[center][y-vStreakLength/2]) && structureNos[center][y] == -1){
+                            // Kreiskriterium I erfüllt,
+                            // --> Kandidat für Mittelpunkt also Mittelpunkt der Streak
+                            Coordinate coord = new Coordinate(center, y);
 
-                        // Fäche nach Kreisformel
-                        double circleSize = (Math.PI * lengthHere * lengthHere) / 4.0;
-                        double actualSize = floodFill(coord); // Gemessene Größe
+                            // Fäche nach Kreisformel
+                            double circleSize = (Math.PI * hStreakLength * hStreakLength) / 4.0;
+                            double actualSize = floodFill(coord); // Gemessene Größe
 
-                        // Delta zwischen Fläche nach Kreisformel und gemessener Fläche bestimmen
-                        double delta = Math.min(circleSize, actualSize) / Math.max(circleSize, actualSize);
-                        // Ist das Delta zwischen Fläche nach Kreisformal und gemessener Fläche klein genug?
-                        if (delta >= 0.95) {
-                            // Jetzt Test auf umgebenden schwarzen Ring
-                            double third = lengthHere * (1.0/3.0);
-                            double delta2 = 0;
+                            // Delta zwischen Fläche nach Kreisformel und gemessener Fläche bestimmen
+                            double delta = Math.min(circleSize, actualSize) / Math.max(circleSize, actualSize);
+                            // Ist das Delta zwischen Fläche nach Kreisformal und gemessener Fläche klein genug?
+                            if (delta >= 0.95) {
+                                // Jetzt Test auf umgebenden schwarzen Ring
+                                double third = hStreakLength * (1.0 / 3.0);
+                                double delta2 = 0;
 
-                            delta2 += Math.min(hStreak[center+lengthHere][y], third) /
-                                        Math.max(hStreak[center+lengthHere][y], third);
-                            delta2 += Math.min(hStreak[center-lengthHere][y], third) /
-                                        Math.max(hStreak[center-lengthHere][y], third);
-                            delta2 += Math.min(vStreak[center][y+lengthHere], third) /
-                                        Math.max(vStreak[center][y+lengthHere], third);
-                            delta2 += Math.min(vStreak[center][y-lengthHere], third) /
-                                        Math.max(vStreak[center][y-lengthHere], third);
+                                delta2 += Math.min(hStreak[center + hStreakLength][y], third) /
+                                        Math.max(hStreak[center + hStreakLength][y], third);
+                                delta2 += Math.min(hStreak[center - hStreakLength][y], third) /
+                                        Math.max(hStreak[center - hStreakLength][y], third);
+                                delta2 += Math.min(vStreak[center][y + hStreakLength], third) /
+                                        Math.max(vStreak[center][y + hStreakLength], third);
+                                delta2 += Math.min(vStreak[center][y - hStreakLength], third) /
+                                        Math.max(vStreak[center][y - hStreakLength], third);
 
-                            delta2 /= 4.0;
-                            if (delta2 >= 0.95)
-                                circleCenters.add(coord);
+                                delta2 /= 4.0;
+                                if (delta2 >= 0.95)
+                                    circleCenters.add(coord);
+                            }
                         }
-
                     }
                 }
             }
