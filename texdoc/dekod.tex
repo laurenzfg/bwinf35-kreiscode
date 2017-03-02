@@ -1,123 +1,47 @@
 \section{Lösungsidee}
-\begin{tikzpicture}[scale=0.5]
-	\fill[black!90!white] (0,0) circle [radius=1.5];
-	\fill[black!90!white, even odd rule] (0,0) circle[radius=2.5] circle[radius=3.5];
-	\fill[black!60!white, even odd rule] (0,0) circle[radius=4.5] circle[radius=5.5];
+\begin{wrapfigure}{r}{0.35\textwidth}
+  \centering
+  \input{spidergrafik.tex}
+  \caption{Geraden der Kreisringsegmente}
+  \label{abb:spidergrafik}
+\end{wrapfigure}
+Zunächst habe ich den \task{} mit TikZ nachgezeichnet, um den genauen Aufbau durch Nachbau zu verstehen. Die 16 gleichgroßen Kreissegmente sind durch Geraden getrennt, die im Abstand von \(22,5^{\circ}\) vom Pol (dem Mittelpunkt) aus gezeichnet werden.
 
-	\foreach \angle in {0, 22.5, 45, 67.590, 90, 112.5, 135, 157.5, 180, 202.5, 225, 247.5, 270, 292.5, 315, 337.5} 
-    	\draw[thick] (\angle:4.5) -- (\angle:5.5);
+Für die Dekodierung stehen mir aus dem Kreismittelpunkterkennungsprozess noch folgende Informationen zur Verfügung: Ein Liste der Kreismittelpunkte und der Kreisdurchmesser. Die Kreisdurchmesser entsprechen der Länge der Zusammenhangskomponenten an den Mittelpunktskoordinaten. Aus diesen Informationen kann ich dank bekannter Proportionen eines \task{}s auf die Positionen der Ringe schließen (siehe Abb. \ref{abb:dims}). Wie in der Lösungsidee zur Kreismittelpunkterkennung festgestellt, beträgt gilt \(u=\frac{1}{3}d\).
 
-	\draw[very thin] (-6, -6) grid (6, 6);
-	\fill[red] (0,0) circle[radius=0.2];
-\end{tikzpicture}
+\begin{figure}[!ht]
+	\centering	
+	\input{geradengleichungen.tex}
+	\caption{Punkt einer Gerade, eine Kästchenseite entpricht einem \(u\)}
+	\label{abb:trigon}
+\end{figure}
 
-\begin{tikzpicture}[scale=0.5]
-	\fill[black!90!white] (0,0) circle [radius=1.5];
-	\fill[black!90!white, even odd rule] (0,0) circle[radius=2.5] circle[radius=3.5];
-	\fill[black!60!white, even odd rule] (0,0) circle[radius=4.5] circle[radius=5.5];
+Insbesondere kann ich mithilfe von polaren Koordinaten\footnote{\url{https://www.lernhelfer.de/schuelerlexikon/mathematik-abitur/artikel/polarkoordinatensystem}} die Strecken, die die Kreisringe in Segmente einteilen, bestimmen. Jede der Strecken ist ein Teile einer Geraden, die vom Mittelpunkt ausgehend in einem Vielfachen von \(22,5^{\circ}\) durch den Kreis läuft. Die eigentlichen Strecken, die auf dem Kreisring liegen, beginnen nach einem Abstand von \(4,5u\) und enden bei \(5,5u\). Die Punkte aller Strecken lauten also:
 
-	\foreach \angle in {0, 22.5, 45, 67.590, 90, 112.5, 135, 157.5, 180, 202.5, 225, 247.5, 270, 292.5, 315, 337.5} 
-    	\draw[blue, thick] (\angle:4.5) -- (\angle:5.5) -- (\angle+22.5:5.5) -- (\angle+22.5:4.5) -- cycle;
+\begin{displaymath}
+A(k:4,5u) \hspace{2em} B(k:5,5u) \hspace{2em} k := \{22,5 \cdot x \in \mathbb{N}_0 \cup 0 \le x \le 359\}
+\end{displaymath}
 
-	\draw[very thin] (-6, -6) grid (6, 6);
-	\fill[red] (0,0) circle[radius=0.2];
-\end{tikzpicture}
+Nun können wir diese Koordinatenmenge unter Ausnutzung der Regeln im rechtwinkligen Dreieck (s. Abb \ref{abb:trigon}) die kartesischen Koordinaten bestimmen. Das Koordinatensystem ist in der bereits definierten Einheit \(u\).
 
-\begin{tikzpicture}[scale=0.75]
-	\fill[black!60!white, even odd rule] (0,0) circle[radius=4.5] circle[radius=5.5];
-
-	\foreach \angle in {0, 22.5, 45, 67.590, 90, 112.5, 135, 157.5, 180, 202.5, 225, 247.5, 270, 292.5, 315, 337.5} 
-    	\draw[blue, thick] (\angle:4.5) -- (\angle:5.5) -- (\angle+22.5:5.5) -- (\angle+22.5:4.5) -- cycle;
-
-	\draw[thick] (-6,0) -- (6,0);
-
-	\filldraw[fill=green!20,draw=green!50!black] (0,0) -- (1.5,0) arc[start angle=0, end angle=22.5, radius=1.5];
-	\draw[green!50!black, thick] (0,0) -- (22.5:4.5) -- (22.5:4.5 |- 0,0) -- (0,0);
-
-	\draw (2, 1.3) node {\(4.5u\)};
-	\draw (2.2, 0.3) node {\(22,5^{\circ}\)};
-
-	\filldraw[fill=green!20,draw=green!50!black] (0,0) -- (-2,0) arc[start angle=180, end angle=135, radius=2];
-	\draw[green!50!black, thick] (0,0) -- (135:5.5) -- (135:5.5 |- 0,0) -- (0,0);
-
-	\draw (-1.6, 2.3) node {\(5.5u\)};
-	\draw (-1.3, 0.5) node {\(45^{\circ}\)};
-
-	\draw[very thin] (-6, -6) grid (6, 6);
-	\fill[red] (0,0) circle[radius=0.2];
-\end{tikzpicture}
-
-\begin{align}
+\begin{gather}
+k := \{22,5 \cdot x \in \mathbb{N}_0 \cup 0 \le x \le 359\} \\
 \begin{split}
-\text{Innerer Ring:} \\
-x = cos(w) * 4,5 \\
-y = sin(w) * 4,5
+x &= cos(k) \cdot 4,5 \\
+y &= sin(k) \cdot 4,5
 \end{split}
+\hspace{5em}
 \begin{split}
-\text{Äußerer Ring:} \\
-x = cos(w) * 5,5 \\
-y = sin(w) * 5,5
+x &= cos(k) \cdot 5,5 \\
+y &= sin(k) \cdot 5,5
 \end{split}
-\end{align}
+\end{gather}
 
-\begin{tikzpicture}[scale=0.5]
-	\fill[black!90!white] (0,0) circle [radius=1.5];
-	\fill[black!90!white, even odd rule] (0,0) circle[radius=2.5] circle[radius=3.5];
-	\fill[black!60!white, even odd rule] (0,0) circle[radius=4.5] circle[radius=5.5];
-
-    \coordinate (A) at (1,5);
-    \coordinate (B) at (3, 4);
-    \coordinate (C) at (4, 3);
-    \coordinate (D) at (5, 1);
-    \coordinate (E) at (5, -1);
-    \coordinate (F) at (4, -3);
-    \coordinate (G) at (3, -4);
-    \coordinate (H) at (1, -5);
-    \coordinate (I) at (-1, 5);
-    \coordinate (J) at (-3, 4);
-    \coordinate (K) at (-4, 3);
-    \coordinate (L) at (-5, 1);
-    \coordinate (M) at (-5, -1);
-    \coordinate (N) at (-4, -3);
-    \coordinate (O) at (-3, -4);
-    \coordinate (P) at (-1, -5); 
-
-    \foreach \koord in {A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, P}
-    	\fill[red] (\koord) circle[radius=0.1];
-
-	\draw[very thin] (-6, -6) grid (6, 6);
-	\fill[red] (0,0) circle[radius=0.2];
-\end{tikzpicture}
-
-\begin{tikzpicture}[scale=0.75]
-	\draw (5,5) circle (4);
-	\draw (5,5) circle (6);
-
-	\draw (5, 5) node {\vectwo{0}{0}};
-
-	\draw (4,10) node {\vectwo{-1}{5}};
-	\draw (6,10) node {\vectwo{1}{5}};
-
-	\draw (2,9) node {\vectwo{-3}{4}};
-	\draw (8,9) node {\vectwo{3}{4}};
-
-	\draw (1,8) node {\vectwo{-4}{3}};
-	\draw (9,8) node {\vectwo{4}{3}};
-
-	\draw (0,6) node {\vectwo{-5}{1}};
-	\draw (10,6) node {\vectwo{5}{1}};
-
-	\draw (0,4) node {\vectwo{-5}{-1}};
-	\draw (10,4) node {\vectwo{5}{-1}};
-
-	\draw (1,2) node {\vectwo{-4}{-3}};
-	\draw (9,2) node {\vectwo{4}{-3}};
-
-	\draw (2,1) node {\vectwo{-3}{-4}};
-	\draw (8,1) node {\vectwo{3}{-4}};
-
-	\draw (4,0) node {\vectwo{-1}{-5}};
-	\draw (6,0) node {\vectwo{1}{-5}};
-\end{tikzpicture}
+Da es sehr schwer ist, mit Kreisringsegmenten zu rechnen, nehme ich auch hier eine Vereinfachung vor: Mit den Punkten der segmentbegrenzenden Strecken mit den äußeren Umrandungen des Kreisringes lässt sich 16 Trapeze aufspannen, die den Großteil der Kreissegmente abdecken.:
+\begin{figure}[!ht]
+	\centering	
+	\input{segmentgrafik.tex}
+	\caption{Einteilung der 16 Kreisringsegmente in 16 Trapeze}
+\end{figure}
 \section{Umsetzung}
 \section{Beispiele}
