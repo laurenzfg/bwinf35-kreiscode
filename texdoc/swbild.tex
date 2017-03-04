@@ -14,7 +14,7 @@ Von einem Vergleich des Abstandes in weitere Richtungen (wie z.B. in diagonale R
 
 Da diese Eigenschaft jedoch auch auf Punkte in Quadraten und anderen unregelmäßigen Formen zutrifft (s. Grafik), muss für eine zuverlässige Erkennung eine zweite Eigenschaft von Kreisen genutzt werden: Bei bekanntem Durchmesser kann die Fläche eines Kreises mit der Kreisformel\footnote{: \(\frac{\pi d^2}{4}\)} bestimmt werden. Diese Soll-Fläche kann mit der tatsächlichen Fläche verglichen werden. Sollte das Delta zwischen diesen beiden Flächengrößen nahe 0 sein, handelt es sich mit sehr großer Wahrscheinlichkeit um einen Kreismittelpunkt.
 
-Da die Wahrscheinlichkeit eines False Positives nach überprüfen beider Kriterien sehr gering ist, nehme ich an, dass jeder Punkt, auf den beide Kriterien zutreffen, ein Kreismittelpunkt ist. Allerdings ist es aufgrund von Kompressionsartefakten o.ä. manchmal möglich, dass es mehrere Punkte gibt, auf die die Bedingungen zutreffen. Damit der Mittelpunkt eindeutig bestimmt wird, vergebe ich bei der Flood-Fill ID's für jede Zusammenhangskomponente. Daher kann ich bei Pixeln, für die schon eine ID vergeben wurde, die Suche abbrechen. Schließlich wurde entweder schon ein Mittelpunkt gefunden oder es hat sich herausgestellt, dass es sich nicht um einen Kreis handelt.
+Da die Wahrscheinlichkeit eines False Positives nach Überprüfen beider Kriterien sehr gering ist, nehme ich an, dass jeder Punkt, auf den beide Kriterien zutreffen, ein Kreismittelpunkt ist. Allerdings ist es aufgrund von Kompressionsartefakten o.ä. manchmal möglich, dass es mehrere Punkte gibt, auf die diese Bedingungen zutreffen. Damit der Mittelpunkt eindeutig bestimmt wird, merkt sich der Algorithmus bei der Flächenermittlung die Felder, von denen bereits die Fläche ermittelt wurde. Anschließend kann bei Feldern, deren Fläche schon einmal ermittelt wurde die weitere Überprüfung abgebrochen werden. Schließlich wurde entweder schon ein Mittelpunkt gefunden oder es hat sich herausgestellt, dass es sich nicht um einen Kreis handelt.
 
 \begin{wrapfigure}{r}{0.35\textwidth}
   \centering
@@ -28,7 +28,7 @@ Der Durchmesser des Kreises ist als \(3u\) definiert, der Kreisring und die Zwis
 
 Um nun das Vorhandensein eines mittleren Ringes zu überprüfen, nehmen wir vier Punktproben vor. Wir verschieben den Mittelpunkt in alle Himmelsrichtugen um \(u\). Dort vergleichen wir die Länge der entsprechenden linearen Zusammenhangskomponente mit dem Soll \(1u\). Weitere Punktproben sind prinzipiell möglich, jedoch würden diese die Laufzeit erhöhen. \textbf{Ggfs. weitere Flood-Fill auf Fläche des Kreisringes hinzufügen!}
 
-Die Wahrscheinlichkeit eines Erkennungsfehlers ist nach dem Durchmesservergleich, dem Flächenvergleich und den vier Punktproben sehr gering. Im Beispielbild, dass ich um einen Kreis, der kein \task{} ist ergänzt habe, liegt die Erkennungsrate bei 100\%.
+Die Wahrscheinlichkeit eines Erkennungsfehlers ist nach dem Durchmesservergleich, dem Flächenvergleich und den vier Punktproben sehr gering. Im Beispielbild, dass ich um einen Kreis, der kein \task{} ist ergänzt habe, liegt die Erkennungsrate bei 100\%. Abschließend gibt der Algorithmus eine Liste über alle Kreismittelpunkte aus.
 
 \pagebreak
 \section{Umsetzung}
