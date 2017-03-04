@@ -1,7 +1,7 @@
 package de.laurenzgrote.bundeswettbewerb35.kreiscode;
 
 public class Coordinate {
-    int x, y;
+    private int x, y;
 
     public Coordinate() {
     }
