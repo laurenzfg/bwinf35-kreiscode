@@ -1,48 +1,57 @@
 \section{Lösungsidee}
 \begin{wrapfigure}{r}{0.35\textwidth}
-  \centering
-  \input{spidergrafik.tex}
-  \caption{Geraden der Kreisringsegmente}
-  \label{abb:spidergrafik}
+	\setlength\intextsep{0pt}
+	\centering
+	\input{spidergrafik.tex}
+	\caption{Geraden}
+	\label{abb:spidergrafik}
+	\vspace{-20pt}
 \end{wrapfigure}
-Zunächst habe ich den \task{} mit TikZ nachgezeichnet, um den genauen Aufbau durch Nachbau zu verstehen. Die 16 gleichgroßen Kreissegmente sind durch Geraden getrennt, die im Abstand von \(22,5^{\circ}\) vom Pol (dem Mittelpunkt) aus gezeichnet werden.
+Zunächst habe ich den \task{} mit TikZ nachgezeichnet, um den genauen Aufbau durch Nachbau zu verstehen. Die 16 gleichgroßen Kreissegmente sind durch Strahkel getrennt, die im Abstand von \(22,5^{\circ}\) vom Pol (dem Mittelpunkt) aus gezeichnet werden.
 
-Für die Dekodierung stehen mir aus dem Kreismittelpunkterkennungsprozess noch folgende Informationen zur Verfügung: Ein Liste der Kreismittelpunkte und der Kreisdurchmesser. Die Kreisdurchmesser entsprechen der Länge der Zusammenhangskomponenten an den Mittelpunktskoordinaten. Aus diesen Informationen kann ich dank bekannter Proportionen eines \task{}s auf die Position des äußeren Ringes, der die Information trägt, schließen (siehe Abb. \ref{abb:dims}). Wie in der Lösungsidee zur Kreismittelpunkterkennung festgestellt gilt \(u=\frac{1}{3}d\).
+Für die Dekodierung steht mir aus dem Kreismittelpunkterkennungsprozess die Liste der Kreismittelpunkte zur Verfügung. Die Kreisdurchmesser entsprechen der Länge der Zusammenhangskomponenten an den Mittelpunktskoordinaten. Mit diesen Informationen kann ich dank bekannter Proportionen eines \task{}s auf die Position des äußeren Ringes, der die Informationen trägt, schließen (siehe Abb. \ref{abb:dims}). Wie in der Lösungsidee zur Kreismittelpunkterkennung festgestellt gilt \(u=\frac{1}{3}d\).
 
-\begin{figure}[!ht]
+\begin{wrapfigure}{r}{0.25\textwidth}
+	\setlength\intextsep{0pt}
 	\centering	
 	\input{geradengleichungen.tex}
-	\caption{Punkt einer Gerade, eine Kästchenseite entpricht einem \(u\)}
+	\caption{}
 	\label{abb:trigon}
-\end{figure}
-
-Daher kann ich mithilfe von polaren Koordinaten\footnote{\url{https://www.lernhelfer.de/schuelerlexikon/mathematik-abitur/artikel/polarkoordinatensystem}} die Strecken, die die Kreisringe in Segmente einteilen, bestimmen. Jede der Strecken ist ein Teil einer Geraden, die vom Mittelpunkt ausgehend in einem Vielfachen von \(22,5^{\circ}\) durch den Kreis läuft. Die eigentlichen Strecken, die auf dem Kreisring liegen, beginnen nach einem Abstand von \(4,5u\) und enden bei \(5,5u\). Die Punkte aller Strecken lauten also:
+\end{wrapfigure}
+Daher kann ich mithilfe von polaren Koordinaten\footnote{\url{https://www.lernhelfer.de/schuelerlexikon/mathematik-abitur/artikel/polarkoordinatensystem}} die Strecken, die die Kreisringe in Segmente einteilen, bestimmen. Jede der Strecken ist Teil eines Strahls, der am Mittelpunkt in einem Vielfachen von \(22,5^{\circ}\) beginnt. Die eigentlichen Strecken, die auf dem äußeren Kreisring liegen, beginnen nach einem Abstand von \(4,5u\) und enden bei \(5,5u\). Die Anfangs- und Endpunkte aller Strecken lauten also:
 
 \begin{displaymath}
-A(k \cdot 22.5:4,5u) \hspace{2em} B(k \cdot 22.5:5,5u) \hspace{2em} k = \{\mathbb{N}_0 \hspace{0.3em}|\hspace{0.3em} 0 \le x \le 15\}
+A(k \cdot 22,5^{\circ}:4,5u) \hspace{2em} B(k \cdot 22,5^{\circ}:5,5u) \hspace{2em} k = \{\mathbb{N}_0 \hspace{0.3em}|\hspace{0.3em} 0 \le x \le 15\}
 \end{displaymath}
 
-Nun können wir aus dieser Koordinatenmenge unter Ausnutzung der Regeln im rechtwinkligen Dreieck (s. Abb \ref{abb:trigon}) die kartesischen Koordinaten bestimmen. Das Koordinatensystem ist in der Einheit \(u\).
+Nun können wir aus dieser Koordinatenmenge unter Ausnutzung der Regeln im rechtwinkligen Dreieck (s. Abb \ref{abb:trigon}) die nützlicheren kartesischen Koordinaten bestimmen. Das Koordinatensystem ist in der Einheit \(u\). Bitte beachten Sie, dass sie je nach Programmiersprache oder Taschenrechner zuerst eine Umrechnung der Winkel in Bogenmaß durchführen müssen.
 
 \begin{gather}
 k = \{\mathbb{N}_0 \hspace{0.3em}|\hspace{0.3em} 0 \le x \le 15\} \\
 \begin{split}
-x &= cos(k \cdot 22.5) \cdot 4,5 \\
-y &= sin(k \cdot 22.5) \cdot 4,5
+x &= cos(k \cdot 22,5^{\circ}) \cdot 4,5 \\
+y &= sin(k \cdot 22,5^{\circ}) \cdot 4,5
 \end{split}
 \hspace{5em}
 \begin{split}
-x &= cos(k \cdot 22.5) \cdot 5,5 \\
-y &= sin(k \cdot 22.5) \cdot 5,5
+x &= cos(k \cdot 22,5^{\circ}) \cdot 5,5 \\
+y &= sin(k \cdot 22,5^{\circ}) \cdot 5,5
 \end{split}
 \end{gather}
 
-Wenn wir nun alle benachbarten Koordinaten verbinden, erhalten wir 16 Trapeze, die fast den Kreissegmenten entsprechen. Da die Abweichung zwischen dem jeweiligen Trapez und dem jeweiligen Kreissegment sehr gering ist, kann aus den Pixeln im Trapez auf die Farbe des Ringsegmentes geschlossen werden. Da das ganze Ringsegment entweder ganz weiß oder ganz schwarz ist, entspricht die vorherrschende Farbe im Trapez der Farbe des Kreissegmentes.
-
 \begin{figure}[!ht]
-	\centering	
-	\input{segmentgrafik.tex}
-	\caption{Einteilung der 16 Kreisringsegmente in 16 Trapeze}
+	\begin{subfigure}[b]{0.5\textwidth}
+		\centering	
+		\input{allepunkte.tex}
+		\caption{Einteilenende Punkte}
+	\end{subfigure}
+	\begin{subfigure}[b]{0.5\textwidth}
+		\centering	
+		\input{segmentgrafik.tex}
+		\caption{Trapeze}
+	\end{subfigure}
 \end{figure}
+
+Wenn wir nun alle benachbarten Koordinaten verbinden, erhalten wir 16 Trapeze, die fast den Kreissegmenten entsprechen. Da die Abweichung zwischen dem jeweiligen Trapez und dem jeweiligen Kreissegment sehr gering ist, kann aus den Pixeln im Trapez auf die Farbe des Ringsegmentes geschlossen werden. Da das ganze Ringsegment entweder ganz weiß oder ganz schwarz ist, entspricht die vorherrschende Farbe im Trapez der Farbe des Kreissegmentes.
 \section{Umsetzung}
 \section{Beispiele}
