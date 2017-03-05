@@ -7,7 +7,7 @@
 \end{wrapfigure}
 Zunächst habe ich den \task{} mit TikZ nachgezeichnet, um den genauen Aufbau durch Nachbau zu verstehen. Die 16 gleichgroßen Kreissegmente sind durch Geraden getrennt, die im Abstand von \(22,5^{\circ}\) vom Pol (dem Mittelpunkt) aus gezeichnet werden.
 
-Für die Dekodierung stehen mir aus dem Kreismittelpunkterkennungsprozess noch folgende Informationen zur Verfügung: Ein Liste der Kreismittelpunkte und der Kreisdurchmesser. Die Kreisdurchmesser entsprechen der Länge der Zusammenhangskomponenten an den Mittelpunktskoordinaten. Aus diesen Informationen kann ich dank bekannter Proportionen eines \task{}s auf die Positionen der Ringe schließen (siehe Abb. \ref{abb:dims}). Wie in der Lösungsidee zur Kreismittelpunkterkennung festgestellt, beträgt gilt \(u=\frac{1}{3}d\).
+Für die Dekodierung stehen mir aus dem Kreismittelpunkterkennungsprozess noch folgende Informationen zur Verfügung: Ein Liste der Kreismittelpunkte und der Kreisdurchmesser. Die Kreisdurchmesser entsprechen der Länge der Zusammenhangskomponenten an den Mittelpunktskoordinaten. Aus diesen Informationen kann ich dank bekannter Proportionen eines \task{}s auf die Position des äußeren Ringes, der die Information trägt, schließen (siehe Abb. \ref{abb:dims}). Wie in der Lösungsidee zur Kreismittelpunkterkennung festgestellt gilt \(u=\frac{1}{3}d\).
 
 \begin{figure}[!ht]
 	\centering	
@@ -16,28 +16,29 @@ Für die Dekodierung stehen mir aus dem Kreismittelpunkterkennungsprozess noch f
 	\label{abb:trigon}
 \end{figure}
 
-Insbesondere kann ich mithilfe von polaren Koordinaten\footnote{\url{https://www.lernhelfer.de/schuelerlexikon/mathematik-abitur/artikel/polarkoordinatensystem}} die Strecken, die die Kreisringe in Segmente einteilen, bestimmen. Jede der Strecken ist ein Teile einer Geraden, die vom Mittelpunkt ausgehend in einem Vielfachen von \(22,5^{\circ}\) durch den Kreis läuft. Die eigentlichen Strecken, die auf dem Kreisring liegen, beginnen nach einem Abstand von \(4,5u\) und enden bei \(5,5u\). Die Punkte aller Strecken lauten also:
+Daher kann ich mithilfe von polaren Koordinaten\footnote{\url{https://www.lernhelfer.de/schuelerlexikon/mathematik-abitur/artikel/polarkoordinatensystem}} die Strecken, die die Kreisringe in Segmente einteilen, bestimmen. Jede der Strecken ist ein Teil einer Geraden, die vom Mittelpunkt ausgehend in einem Vielfachen von \(22,5^{\circ}\) durch den Kreis läuft. Die eigentlichen Strecken, die auf dem Kreisring liegen, beginnen nach einem Abstand von \(4,5u\) und enden bei \(5,5u\). Die Punkte aller Strecken lauten also:
 
 \begin{displaymath}
-A(k:4,5u) \hspace{2em} B(k:5,5u) \hspace{2em} k := \{22,5 \cdot x \in \mathbb{N}_0 \cup 0 \le x \le 359\}
+A(k \cdot 22.5:4,5u) \hspace{2em} B(k \cdot 22.5:5,5u) \hspace{2em} k = \{\mathbb{N}_0 \hspace{0.3em}|\hspace{0.3em} 0 \le x \le 15\}
 \end{displaymath}
 
-Nun können wir diese Koordinatenmenge unter Ausnutzung der Regeln im rechtwinkligen Dreieck (s. Abb \ref{abb:trigon}) die kartesischen Koordinaten bestimmen. Das Koordinatensystem ist in der bereits definierten Einheit \(u\).
+Nun können wir aus dieser Koordinatenmenge unter Ausnutzung der Regeln im rechtwinkligen Dreieck (s. Abb \ref{abb:trigon}) die kartesischen Koordinaten bestimmen. Das Koordinatensystem ist in der Einheit \(u\).
 
 \begin{gather}
-k := \{22,5 \cdot x \in \mathbb{N}_0 \cup 0 \le x \le 359\} \\
+k = \{\mathbb{N}_0 \hspace{0.3em}|\hspace{0.3em} 0 \le x \le 15\} \\
 \begin{split}
-x &= cos(k) \cdot 4,5 \\
-y &= sin(k) \cdot 4,5
+x &= cos(k \cdot 22.5) \cdot 4,5 \\
+y &= sin(k \cdot 22.5) \cdot 4,5
 \end{split}
 \hspace{5em}
 \begin{split}
-x &= cos(k) \cdot 5,5 \\
-y &= sin(k) \cdot 5,5
+x &= cos(k \cdot 22.5) \cdot 5,5 \\
+y &= sin(k \cdot 22.5) \cdot 5,5
 \end{split}
 \end{gather}
 
-Da es sehr schwer ist, mit Kreisringsegmenten zu rechnen, nehme ich auch hier eine Vereinfachung vor: Mit den Punkten der segmentbegrenzenden Strecken mit den äußeren Umrandungen des Kreisringes lässt sich 16 Trapeze aufspannen, die den Großteil der Kreissegmente abdecken.:
+Wenn wir nun alle benachbarten Koordinaten verbinden, erhalten wir 16 Trapeze, die fast den Kreissegmenten entsprechen. Da die Abweichung zwischen dem jeweiligen Trapez und dem jeweiligen Kreissegment sehr gering ist, kann aus den Pixeln im Trapez auf die Farbe des Ringsegmentes geschlossen werden. Da das ganze Ringsegment entweder ganz weiß oder ganz schwarz ist, entspricht die vorherrschende Farbe im Trapez der Farbe des Kreissegmentes.
+
 \begin{figure}[!ht]
 	\centering	
 	\input{segmentgrafik.tex}

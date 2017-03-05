@@ -9,7 +9,7 @@ public class ImageDecoder {
 
     // Konstanten
     // Ab wann ist Grau Schwarz?
-    private final double minAVGBlack = 0.1; // Von 0.0 (black) zu 1.0 (white)
+    private final double minAVGBlack = 0.3; // Von 0.0 (black) zu 1.0 (white)
     private final int minADJ = 4; // Wieviele Felder müssen bei der Vervollständigung Schwarz sein?
 
     // Daten des bunten Eingabebildes
@@ -31,6 +31,7 @@ public class ImageDecoder {
 
     // Liste über die Kreismittelpunkte, indiziert nach Zusammenhangskomponentenid
     ArrayList<Coordinate> circleCenters = new ArrayList<>();
+
     public ImageDecoder(BufferedImage rgbImage) {
         // Boilerplate-Code
         this.rgbImage = rgbImage;
@@ -61,17 +62,6 @@ public class ImageDecoder {
      * Generiert S/W-Bild aus buntem Bild
      */
     private void generateSW () {
-        double avg = 0;
-        // Hellsten Punkt finden
-        for (int x = 0; x < width; x++) {
-            for (int y = 0; y < height; y++) {
-                Color color = new Color(rgbImage.getRGB(x, y));
-                avg += color.getRed() + color.getGreen() +
-                            color.getBlue();
-            }
-        }
-        avg /= width * height;
-
         // Helligkeitswert für jeden Pixel berechnen
         double[][] brightness = new double[width][height];
         for (int x = 0; x < width; x++) {
@@ -80,9 +70,9 @@ public class ImageDecoder {
                 // 0 nicht da, 255 100%
                 // --> 0,0,0 Schwarz, 255,255,255 Weiß
                 Color color = new Color(rgbImage.getRGB(x, y));
-                double percentile = (color.getRed() / avg) +
-                        (color.getGreen() / avg) +
-                        (color.getBlue()  / avg);
+                double percentile = (color.getRed() / 255) +
+                        (color.getGreen() / 255) +
+                        (color.getBlue()  / 255);
                 percentile /= 3.0;
 
                 brightness[x][y] = percentile;
