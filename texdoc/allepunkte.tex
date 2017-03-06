@@ -3,38 +3,8 @@
 	\fill[black!90!white, even odd rule] (0,0) circle[radius=2.5] circle[radius=3.5];
 	\fill[black!60!white, even odd rule] (0,0) circle[radius=4.5] circle[radius=5.5];
 	
-	\fill[red] (4.5,0) circle [radius=0.1]; 
-	\fill[red] (5.5,0) circle [radius=0.1]; 
-	\fill[red] (4.157457896,1.722075446) circle [radius=0.1]; 
-	\fill[red] (5.081337429,2.104758878) circle [radius=0.1]; 
-	\fill[red] (3.181980515,3.181980515) circle [radius=0.1]; 
-	\fill[red] (3.889087297,3.889087297) circle [radius=0.1]; 
-	\fill[red] (1.722075446,4.157457896) circle [radius=0.1]; 
-	\fill[red] (2.104758878,5.081337429) circle [radius=0.1]; 
-	\fill[red] (2.755455298e-16,4.5) circle [radius=0.1]; 
-	\fill[red] (3.367778698e-16,5.5) circle [radius=0.1]; 
-	\fill[red] (-1.722075446,4.157457896) circle [radius=0.1]; 
-	\fill[red] (-2.104758878,5.081337429) circle [radius=0.1]; 
-	\fill[red] (-3.181980515,3.181980515) circle [radius=0.1]; 
-	\fill[red] (-3.889087297,3.889087297) circle [radius=0.1]; 
-	\fill[red] (-4.157457896,1.722075446) circle [radius=0.1]; 
-	\fill[red] (-5.081337429,2.104758878) circle [radius=0.1]; 
-	\fill[red] (-4.5,5.510910596e-16) circle [radius=0.1]; 
-	\fill[red] (-5.5,6.735557395e-16) circle [radius=0.1]; 
-	\fill[red] (-4.157457896,-1.722075446) circle [radius=0.1]; 
-	\fill[red] (-5.081337429,-2.104758878) circle [radius=0.1]; 
-	\fill[red] (-3.181980515,-3.181980515) circle [radius=0.1]; 
-	\fill[red] (-3.889087297,-3.889087297) circle [radius=0.1]; 
-	\fill[red] (-1.722075446,-4.157457896) circle [radius=0.1]; 
-	\fill[red] (-2.104758878,-5.081337429) circle [radius=0.1]; 
-	\fill[red] (-8.266365894e-16,-4.5) circle [radius=0.1]; 
-	\fill[red] (-1.010333609e-15,-5.5) circle [radius=0.1]; 
-	\fill[red] (1.722075446,-4.157457896) circle [radius=0.1]; 
-	\fill[red] (2.104758878,-5.081337429) circle [radius=0.1]; 
-	\fill[red] (3.181980515,-3.181980515) circle [radius=0.1]; 
-	\fill[red] (3.889087297,-3.889087297) circle [radius=0.1]; 
-	\fill[red] (4.157457896,-1.722075446) circle [radius=0.1]; 
-	\fill[red] (5.081337429,-2.104758878) circle [radius=0.1]; 
+	\foreach \angle in {0, 22.5, 45, 67.590, 90, 112.5, 135, 157.5, 180, 202.5, 225, 247.5, 270, 292.5, 315, 337.5} 
+    		\fill[red] (\angle:4.5) circle [radius=0.1] (\angle:5.5) circle [radius=0.1]; 
 
 	\draw[very thin] (-6, -6) grid (6, 6);
 	\fill[red] (0,0) circle[radius=0.2];
