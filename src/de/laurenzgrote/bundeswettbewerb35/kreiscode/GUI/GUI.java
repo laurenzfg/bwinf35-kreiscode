@@ -1,6 +1,6 @@
 package de.laurenzgrote.bundeswettbewerb35.kreiscode.GUI;
 
-import de.laurenzgrote.bundeswettbewerb35.kreiscode.ImageDecoder;
+import de.laurenzgrote.bundeswettbewerb35.kreiscode.Kreismittelpunkte;
 import de.laurenzgrote.bundeswettbewerb35.kreiscode.ImageMagickWrapper;
 
 import javax.imageio.ImageIO;
@@ -28,7 +28,7 @@ public class GUI extends JFrame {
     private final ImagePanel imagePanel;
 
     private BufferedImage image;
-    private ImageDecoder imageDecoder;
+    private Kreismittelpunkte imageDecoder;
 
     private final InputStream bwinfDict = GUI.class.getResourceAsStream("dict.txt");
     private BufferedReader dict = new BufferedReader(new InputStreamReader(bwinfDict));
@@ -146,7 +146,7 @@ public class GUI extends JFrame {
         decodeButton.addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent actionEvent) {
-                imageDecoder = new ImageDecoder(image);
+                imageDecoder = new Kreismittelpunkte(image);
             }
         });
     }

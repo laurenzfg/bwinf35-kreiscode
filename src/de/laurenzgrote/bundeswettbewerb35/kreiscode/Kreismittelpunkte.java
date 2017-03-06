@@ -5,10 +5,10 @@ import java.awt.image.BufferedImage;
 import java.util.*;
 import java.util.List;
 
-public class ImageDecoder {
+public class Kreismittelpunkte {
 
     // Konstanten
-    // Ab wann ist Grau Schwarz?
+    // Ab wann isrt Grau Schwarz?
     private final double minAVGBlack = 0.3; // Von 0.0 (black) zu 1.0 (white)
     private final int minADJ = 4; // Wieviele Felder müssen bei der Vervollständigung Schwarz sein?
 
@@ -32,7 +32,7 @@ public class ImageDecoder {
     // Liste über die Kreismittelpunkte, indiziert nach Zusammenhangskomponentenid
     ArrayList<Coordinate> circleCenters = new ArrayList<>();
 
-    public ImageDecoder(BufferedImage rgbImage) {
+    public Kreismittelpunkte(BufferedImage rgbImage) {
         // Boilerplate-Code
         this.rgbImage = rgbImage;
         width = rgbImage.getWidth();
