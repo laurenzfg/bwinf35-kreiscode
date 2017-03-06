@@ -1,57 +1,104 @@
 \section{Lösungsidee}
-\begin{wrapfigure}{r}{0.35\textwidth}
-	\setlength\intextsep{0pt}
-	\centering
-	\input{spidergrafik.tex}
-	\caption{Geraden}
-	\label{abb:spidergrafik}
-	\vspace{-20pt}
-\end{wrapfigure}
-Zunächst habe ich den \task{} mit TikZ nachgezeichnet, um den genauen Aufbau durch Nachbau zu verstehen. Die 16 gleichgroßen Kreissegmente sind durch Strahkel getrennt, die im Abstand von \(22,5^{\circ}\) vom Pol (dem Mittelpunkt) aus gezeichnet werden.
+	\begin{wrapfigure}{r}{0.35\textwidth}
+		\setlength\intextsep{0pt}
+		\centering
+		\input{spidergrafik.tex}
+		\caption{Geraden}
+		\label{abb:spidergrafik}
+		\vspace{-20pt}
+	\end{wrapfigure}
+	Zunächst habe ich den \task{} mit TikZ nachgezeichnet, um den genauen Aufbau durch Nachbau zu verstehen. Die 16 gleichgroßen Kreissegmente sind durch Strahkel getrennt, die im Abstand von \(22,5^{\circ}\) vom Pol (dem Mittelpunkt) aus gezeichnet werden.
 
-Für die Dekodierung steht mir aus dem Kreismittelpunkterkennungsprozess die Liste der Kreismittelpunkte zur Verfügung. Die Kreisdurchmesser entsprechen der Länge der Zusammenhangskomponenten an den Mittelpunktskoordinaten. Mit diesen Informationen kann ich dank bekannter Proportionen eines \task{}s auf die Position des äußeren Ringes, der die Informationen trägt, schließen (siehe Abb. \ref{abb:dims}). Wie in der Lösungsidee zur Kreismittelpunkterkennung festgestellt gilt \(u=\frac{1}{3}d\).
+	Für die Dekodierung steht mir aus dem Kreismittelpunkterkennungsprozess die Liste der Kreismittelpunkte zur Verfügung. Die Kreisdurchmesser entsprechen der Länge der Zusammenhangskomponenten an den Mittelpunktskoordinaten. Mit diesen Informationen kann ich dank bekannter Proportionen eines \task{}s auf die Position des äußeren Ringes, der die Informationen trägt, schließen (siehe Abb. \ref{abb:dims}). Wie in der Lösungsidee zur Kreismittelpunkterkennung festgestellt gilt \(u=\frac{1}{3}d\).
 
-\begin{wrapfigure}{r}{0.25\textwidth}
-	\setlength\intextsep{0pt}
-	\centering	
-	\input{geradengleichungen.tex}
-	\caption{}
-	\label{abb:trigon}
-\end{wrapfigure}
-Daher kann ich mithilfe von polaren Koordinaten\footnote{\url{https://www.lernhelfer.de/schuelerlexikon/mathematik-abitur/artikel/polarkoordinatensystem}} die Strecken, die die Kreisringe in Segmente einteilen, bestimmen. Jede der Strecken ist Teil eines Strahls, der am Mittelpunkt in einem Vielfachen von \(22,5^{\circ}\) beginnt. Die eigentlichen Strecken, die auf dem äußeren Kreisring liegen, beginnen nach einem Abstand von \(4,5u\) und enden bei \(5,5u\). Die Anfangs- und Endpunkte aller Strecken lauten also:
-
-\begin{displaymath}
-A(k \cdot 22,5^{\circ}:4,5u) \hspace{2em} B(k \cdot 22,5^{\circ}:5,5u) \hspace{2em} k = \{\mathbb{N}_0 \hspace{0.3em}|\hspace{0.3em} 0 \le x \le 15\}
-\end{displaymath}
-
-Nun können wir aus dieser Koordinatenmenge unter Ausnutzung der Regeln im rechtwinkligen Dreieck (s. Abb \ref{abb:trigon}) die nützlicheren kartesischen Koordinaten bestimmen. Das Koordinatensystem ist in der Einheit \(u\). Bitte beachten Sie, dass sie je nach Programmiersprache oder Taschenrechner zuerst eine Umrechnung der Winkel in Bogenmaß durchführen müssen.
-
-\begin{gather}
-k = \{\mathbb{N}_0 \hspace{0.3em}|\hspace{0.3em} 0 \le x \le 15\} \\
-\begin{split}
-x &= cos(k \cdot 22,5^{\circ}) \cdot 4,5 \\
-y &= sin(k \cdot 22,5^{\circ}) \cdot 4,5
-\end{split}
-\hspace{5em}
-\begin{split}
-x &= cos(k \cdot 22,5^{\circ}) \cdot 5,5 \\
-y &= sin(k \cdot 22,5^{\circ}) \cdot 5,5
-\end{split}
-\end{gather}
-
-\begin{figure}[!ht]
-	\begin{subfigure}[b]{0.5\textwidth}
+	\begin{wrapfigure}{r}{0.25\textwidth}
+		\setlength\intextsep{0pt}
 		\centering	
-		\input{allepunkte.tex}
-		\caption{Einteilenende Punkte}
-	\end{subfigure}
-	\begin{subfigure}[b]{0.5\textwidth}
-		\centering	
-		\input{segmentgrafik.tex}
-		\caption{Trapeze}
-	\end{subfigure}
-\end{figure}
+		\input{geradengleichungen.tex}
+		\caption{}
+		\label{abb:trigon}
+	\end{wrapfigure}
+	Daher kann ich mithilfe von polaren Koordinaten\footnote{\url{https://www.lernhelfer.de/schuelerlexikon/mathematik-abitur/artikel/polarkoordinatensystem}} die Strecken, die die Kreisringe in Segmente einteilen, bestimmen. Jede der Strecken ist Teil eines Strahls, der am Mittelpunkt in einem Vielfachen von \(22,5^{\circ}\) beginnt. Die eigentlichen Strecken, die auf dem äußeren Kreisring liegen, beginnen nach einem Abstand von \(4,5u\) und enden bei \(5,5u\). Die Anfangs- und Endpunkte aller Strecken lauten also:
 
-Wenn wir nun alle benachbarten Koordinaten verbinden, erhalten wir 16 Trapeze, die fast den Kreissegmenten entsprechen. Da die Abweichung zwischen dem jeweiligen Trapez und dem jeweiligen Kreissegment sehr gering ist, kann aus den Pixeln im Trapez auf die Farbe des Ringsegmentes geschlossen werden. Da das ganze Ringsegment entweder ganz weiß oder ganz schwarz ist, entspricht die vorherrschende Farbe im Trapez der Farbe des Kreissegmentes.
+	\begin{displaymath}
+	A(k \cdot 22,5^{\circ}:4,5u) \hspace{2em} B(k \cdot 22,5^{\circ}:5,5u) \hspace{2em} k = \{\mathbb{N}_0 \hspace{0.3em}|\hspace{0.3em} 0 \le x \le 15\}
+	\end{displaymath}
+
+	Nun können wir aus dieser Koordinatenmenge unter Ausnutzung der Regeln im rechtwinkligen Dreieck (s. Abb \ref{abb:trigon}) die nützlicheren kartesischen Koordinaten bestimmen. Das Koordinatensystem ist in der Einheit \(u\). Bitte beachten Sie, dass sie je nach Programmiersprache oder Taschenrechner zuerst eine Umrechnung der Winkel in Bogenmaß durchführen müssen.
+
+	\begin{gather}
+	k = \{\mathbb{N}_0 \hspace{0.3em}|\hspace{0.3em} 0 \le x \le 15\} \\
+	\begin{split}
+	x &= cos(k \cdot 22,5^{\circ}) \cdot 4,5 \\
+	y &= sin(k \cdot 22,5^{\circ}) \cdot 4,5
+	\end{split}
+	\hspace{5em}
+	\begin{split}
+	x &= cos(k \cdot 22,5^{\circ}) \cdot 5,5 \\
+	y &= sin(k \cdot 22,5^{\circ}) \cdot 5,5
+	\end{split}
+	\end{gather}
+
+	\begin{figure}[!ht]
+		\begin{subfigure}[b]{0.5\textwidth}
+			\centering	
+			\input{allepunkte.tex}
+			\caption{Einteilende Punkte}
+		\end{subfigure}
+		\begin{subfigure}[b]{0.5\textwidth}
+			\centering	
+			\input{segmentgrafik.tex}
+			\caption{Trapeze}
+		\end{subfigure}
+	\end{figure}
+
+	Wenn wir nun alle benachbarten Koordinaten verbinden, erhalten wir 16 Trapeze, die fast den Kreissegmenten entsprechen. Da die Abweichung zwischen dem jeweiligen Trapez und dem jeweiligen Kreissegment sehr gering ist, kann aus den Pixeln im Trapez auf die Farbe des Ringsegmentes geschlossen werden. Da das ganze Ringsegment entweder ganz weiß oder ganz schwarz ist, entspricht die vorherrschende Farbe im Trapez der Farbe des Kreissegmentes.
 \section{Umsetzung}
+	Die vorherrschende Farbe kann mit einer Flood-Fill über die Trapezfläche ausgezählt werden. Hierfür benötigen wir zum einen für jedes der 16 Trapeze einen Startpunkt, zum anderen muss für die Flood-Fill Linie des Trapezes bestimmt werden, sodass die Flut die Trapezfläche nicht verlässt.
+
+	Für die Bestimmung der Startpunkte nummerieren ich die Segmente von 0 bis 15. Wenn man nun die x- und y-Koordinaten aller anliegende Punkte arithmetisch mittelt, erhält man einen Punkt innerhalb des Trapezes. Die Formel für ein \textit{n}tes-Trapez lautet:
+	\begin{gather}
+	\begin{split}
+	x_1 &= cos(n \cdot 22,5^{\circ}) \cdot 5,5 \\
+	y_1 &= sin(n \cdot 22,5^{\circ}) \cdot 5,5 \\ \vspace{2em}
+	x_2 &= cos(n \cdot 22,5^{\circ}) \cdot 4,5 \\
+	y_2 &= sin(n \cdot 22,5^{\circ}) \cdot 4,5
+	\end{split}
+	\hspace{5em}
+	\begin{split}
+	x_3 &= cos((n+1) \cdot 22,5^{\circ}) \cdot 5,5 \\
+	y_3 &= sin((n+1) \cdot 22,5^{\circ}) \cdot 5,5 \\ \vspace{2em}
+	x_4 &= cos((n+1) \cdot 22,5^{\circ}) \cdot 4,5 \\
+	y_4 &= sin((n+1) \cdot 22,5^{\circ}) \cdot 4,5
+	\end{split} \label{eq:nKoords}
+	\end{gather}
+	\begin{equation}
+	x = \frac{(x_1+x_2+x_3+x_4)}{4} \hspace{4em} y = \frac{(y_1+y_2+y_3+y_4)}{4}
+	\end{equation}
+	Abschließend müssen die x- und y-Werte noch gerundet werden, da im gerasterten Bild nur ganzzahlige Pixel adressierbar sind.
+	Zur Überprüfung habe ich ein kleines CPP-Programm geschrieben, welches die Formel für \(n = 0\hspace{2pt}..\hspace{2pt}15 \) durchrechnet und entstprechende TikZ-Anweisungen ausgibt (Quellcode: mittelpunkte.cpp). Obwohl sehr ungenau auf Vielfache von \(u\) gerundet wurde, liegen alle Punkte in ihrem jeweiligen Segment.
+	\begin{figure}[!ht]
+		\centering
+		\input{mittelpunkte.tex}
+		\caption{Mittelpunkte}
+	\end{figure}
+
+	Um die Flood-Fill durchführen zu können, müssen nun die Grenzen der Trapeze bestimmt werden. Jedes der \textit{n} Trapeze besteht aus folgenden Geraden mit den Koordinaten aus Gleichung \ref{eq:nKoords}:
+	\begin{equation}
+		\overline{P_1P_2} \hspace{3em}
+		\overline{P_2P_4} \hspace{3em}
+		\overline{P_4P_3} \hspace{3em}
+		\overline{P_3P_1} \hspace{3em}
+	\end{equation}
+
+	Wenn ich diese Linien nun in eine weiteres Array einzeichne, erhalte ich Grenzen für die Flut von den soeben berechneten Mittelpunkten aus. Arrays entsprechen einer Rastergrafik. Das Einzeichen von geometrischen Formen in Rastergrafiken wird in der Literatur \texit{rastern} genannt. Meine Anforderungen an den Rasterisierungsalgorithmus lauten:
+	\begin{itemize}
+		\item Möglichst geringe Laufzeit
+		\item Lückenlosigkeit, d.h die Linie muss ein durchgehender Pfad durch die Rastergrafik sein
+	\end{itemize}
+	Ausdrücklich nicht benötigt wird eine besonders schöne oder besonders genaue Rasterisierung, es muss nur ein möglichst großer Teil des Trapezes innerhalb der Linien liegen. Die gerasterten Linien werden dem Nutzer außerhalb von Debug-Funktionen niemals angezeigt.
+
+	Ich habe mich über Rasteralgorithmen in einer Zusammenfassung eines Proseminars an der TU Dresden\footnote{\url{https://www.inf.tu-dresden.de/content/institutes/smt/cg/teaching/seminars/ProseminarSS08/skurfuerst/latex-doc.pdf}} informiert. Das PDF habe ich der Einsendung beigefügt.
+	
+	Der auf den Seiten 3 bis 5 und in einem YouTube-Talk\footnote{\url{https://youtu.be/zytBpLlSHms}} vorgestellte Bresenham-Algorithmus trifft mein Anforderungsprofil genau: Er zeichnet in Linearzeit eine 1px breite Linie zwischen zwei Punkten. Da der Algorithmus ausschließlich mit Ganzzahlen arbeitet müssen alle Koordinaten vor Eingabe in den Algorithmus gerundet werden.
 \section{Beispiele}
