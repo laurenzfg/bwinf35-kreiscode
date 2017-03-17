@@ -29,13 +29,13 @@
 	\begin{gather}
 	k = \{\mathbb{N}_0 \hspace{0.3em}|\hspace{0.3em} 0 \le x \le 15\} \\
 	\begin{split}
-	x_{innen} &= cos(k \cdot \frac{22,5\pi}{180}) \cdot 4,5 \\
-	y_{innen} &= sin(k \cdot \frac{22,5\pi}{180}) \cdot 4,5
+	x_{innen} &= cos(k \cdot \frac{22,5\pi}{180}) \cdot 4,5u \\
+	y_{innen} &= sin(k \cdot \frac{22,5\pi}{180}) \cdot 4,5u
 	\end{split}
 	\hspace{5em}
 	\begin{split}
-	x_{aussen} &= cos(k \cdot \frac{22,5\pi}{180}) \cdot 5,5 \\
-	y_{aussen} &= sin(k \cdot \frac{22,5\pi}{180}) \cdot 5,5
+	x_{aussen} &= cos(k \cdot \frac{22,5\pi}{180}) \cdot 5,5u \\
+	y_{aussen} &= sin(k \cdot \frac{22,5\pi}{180}) \cdot 5,5u
 	\end{split}
 	\end{gather}
 
@@ -56,20 +56,20 @@
 \section{Umsetzung}
 	Die vorherrschende Farbe kann mit einer Flood-Fill über die Trapezfläche ausgezählt werden. Hierfür benötigen wir zum einen für jedes der 16 Trapeze einen Startpunkt. Zum anderen muss für die Flood-Fill die Linien des Trapezes bestimmt werden, sodass die Flut die Trapezfläche nicht verlässt.
 
-	Für die Bestimmung der Startpunkte nummerieren ich die Segmente von 0 bis 15. Wenn man nun die x- und y-Koordinaten aller anliegende Punkte arithmetisch mittelt, erhält man den Mittelpunkt des Trapezes. Die Formel für ein \textit{n}tes-Trapez lautet:
+	Für die Bestimmung der Startpunkte nummerieren ich die Segmente von 0 bis 15. Wenn man nun die x- und y-Koordinaten aller anliegende Punkte arithmetisch mittelt, erhält man den Mittelpunkt des Trapezes. Die Formel für die Koordinaten eines \textit{n}ten-Trapezes eines Kreis-Codes mit dem Mittelpunkt \(x_0 . y_0\) lautet:
 	\begin{gather}
 	\begin{split}
-		x_1 &= cos(n \cdot \frac{22,5\pi}{180}) \cdot 5,5 \\
-		y_1 &= sin(n \cdot \frac{22,5\pi}{180}) \cdot 5,5 \\ \vspace{2em}
-		x_2 &= cos(n \cdot \frac{22,5\pi}{180}) \cdot 4,5 \\
-		y_2 &= sin(n \cdot \frac{22,5\pi}{180}) \cdot 4,5
+		x_1 &= cos(n \cdot \frac{22,5\pi}{180}) \cdot 5,5u + x_0\\
+		y_1 &= sin(n \cdot \frac{22,5\pi}{180}) \cdot 5,5u + y_0\\ \vspace{2em}
+		x_2 &= cos(n \cdot \frac{22,5\pi}{180}) \cdot 4,5u + x_0\\
+		y_2 &= sin(n \cdot \frac{22,5\pi}{180}) \cdot 4,5u + y_0
 	\end{split}
 	\hspace{5em}
 	\begin{split}
-		x_3 &= cos((n+1) \cdot \frac{22,5\pi}{180}) \cdot 5,5 \\
-		y_3 &= sin((n+1) \cdot \frac{22,5\pi}{180}) \cdot 5,5 \\ \vspace{2em}
-		x_4 &= cos((n+1) \cdot \frac{22,5\pi}{180}) \cdot 4,5 \\
-		y_4 &= sin((n+1) \cdot \frac{22,5\pi}{180}) \cdot 4,5
+		x_3 &= cos((n+1) \cdot \frac{22,5\pi}{180}) \cdot 5,5u + x_0\\
+		y_3 &= sin((n+1) \cdot \frac{22,5\pi}{180}) \cdot 5,5u + y_0 \\ \vspace{2em}
+		x_4 &= cos((n+1) \cdot \frac{22,5\pi}{180}) \cdot 4,5u + x_0\\
+		y_4 &= sin((n+1) \cdot \frac{22,5\pi}{180}) \cdot 4,5u + y_0
 	\end{split} \label{eq:nKoords}
 	\end{gather}
 	\begin{equation}

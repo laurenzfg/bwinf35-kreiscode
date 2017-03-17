@@ -1,7 +1,9 @@
 package de.laurenzgrote.bundeswettbewerb35.kreiscode.GUI;
 
-import de.laurenzgrote.bundeswettbewerb35.kreiscode.Kreismittelpunkte;
+import de.laurenzgrote.bundeswettbewerb35.kreiscode.Coordinate;
+import de.laurenzgrote.bundeswettbewerb35.kreiscode.ImageDecoder;
 import de.laurenzgrote.bundeswettbewerb35.kreiscode.ImageMagickWrapper;
+import de.laurenzgrote.bundeswettbewerb35.kreiscode.Kreismittelpunkte;
 
 import javax.imageio.ImageIO;
 import javax.swing.*;
@@ -19,6 +21,7 @@ public class GUI extends JFrame {
 
     private final JMenuItem showSW;
     private final JMenuItem showCC;
+    private final JMenuItem showTrap;
     private final JButton decodeButton;
     private final JButton selectDictButton;
     private final JLabel selectedDictLabel;
@@ -28,7 +31,9 @@ public class GUI extends JFrame {
     private final ImagePanel imagePanel;
 
     private BufferedImage image;
-    private Kreismittelpunkte imageDecoder;
+
+    private Kreismittelpunkte kreismittelpunkte;
+    private ImageDecoder imageDecoder;
 
     private final InputStream bwinfDict = GUI.class.getResourceAsStream("dict.txt");
     private BufferedReader dict = new BufferedReader(new InputStreamReader(bwinfDict));
@@ -44,8 +49,10 @@ public class GUI extends JFrame {
         JMenuBar jMenuBar = new JMenuBar();
         showSW = new JMenuItem("Zeige S/W-Bild");
         showCC = new JMenuItem("Zeige Kreismittelpunkte");
+        showTrap = new JMenuItem("Zeige Trapeze");
         jMenuBar.add(showCC);
         jMenuBar.add(showSW);
+        jMenuBar.add(showTrap);
 
         // Center Panel
         imagePanel = new ImagePanel();
@@ -127,17 +134,23 @@ public class GUI extends JFrame {
         showSW.addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent actionEvent) {
-                if (imageDecoder != null) {
-                    CustomDialogs.showSWDialog(imageDecoder.getSwImage());
+                if (kreismittelpunkte != null) {
+                    CustomDialogs.showSWDialog(kreismittelpunkte.getSwImage());
                 }
             }
         });
         showCC.addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent actionEvent) {
-                if (imageDecoder != null) {
-                    CustomDialogs.showCCDialog(imageDecoder.getSwImage(), imageDecoder.getCircleCenters());
+                if (kreismittelpunkte != null) {
+                    CustomDialogs.showCCDialog(kreismittelpunkte.getSwImage(), kreismittelpunkte.getCircleCenters());
                 }
+            }
+        });
+        showTrap.addActionListener(new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent actionEvent) {
+                CustomDialogs.showTrapezialsDialog(kreismittelpunkte.getSwImage(), imageDecoder.getTrapezials());
             }
         });
     }
@@ -146,7 +159,22 @@ public class GUI extends JFrame {
         decodeButton.addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent actionEvent) {
-                imageDecoder = new Kreismittelpunkte(image);
+                kreismittelpunkte = new Kreismittelpunkte(image);
+                try {
+                    java.util.List<Coordinate> circleCenters = kreismittelpunkte.getCircleCenters();
+                    imageDecoder = new ImageDecoder(kreismittelpunkte.getSwImage(), circleCenters, kreismittelpunkte.getDiameters(), dict);
+                    java.util.List<String> meanings = imageDecoder.getMeanings();
+
+                    for (int i = 0; i < meanings.size(); i++) {
+                        Coordinate c = circleCenters.get(i);
+                        String meaning = meanings.get(i);
+
+                        imagePanel.addText(c.getX(), c.getY(), meaning);
+                        imagePanel.repaint();
+                    }
+                } catch (IOException e) {
+                    e.printStackTrace();
+                }
             }
         });
     }
@@ -194,6 +222,7 @@ public class GUI extends JFrame {
                 if (returnVal == JFileChooser.APPROVE_OPTION) {
                     File file = jFileChooser.getSelectedFile();
                     String filename = file.toString();
+
                     try {
                         dict = new BufferedReader(new FileReader(file));
                         selectedDictLabel.setText(filename);

@@ -4,7 +4,7 @@ import java.io.BufferedReader;
 import java.io.IOException;
 import java.util.ArrayList;
 
-public class Decoder {
+public class SequenceDecoder {
     class Pair {
         private int asciiNo;
         private boolean[] bool;
@@ -38,11 +38,11 @@ public class Decoder {
 
     private ArrayList<Pair> pairs;
 
-    public Decoder(ArrayList<Pair> pairs) {
+    public SequenceDecoder(ArrayList<Pair> pairs) {
         this.pairs = pairs;
     }
 
-    public Decoder(BufferedReader br) throws IOException {
+    public SequenceDecoder(BufferedReader br) throws IOException {
         pairs = new ArrayList<>();
 
         String line;

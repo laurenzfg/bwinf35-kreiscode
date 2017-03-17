@@ -31,6 +31,8 @@ public class Kreismittelpunkte {
 
     // Liste über die Kreismittelpunkte, indiziert nach Zusammenhangskomponentenid
     ArrayList<Coordinate> circleCenters = new ArrayList<>();
+    // Kreisdurchmesser, indiziert anch Zusammenhangskomponentenid
+    ArrayList<Integer> diameters = new ArrayList<>();
 
     public Kreismittelpunkte(BufferedImage rgbImage) {
         // Boilerplate-Code
@@ -249,6 +251,7 @@ public class Kreismittelpunkte {
                                 delta2 /= 4.0;
                                 if (delta2 >= 0.95)
                                     circleCenters.add(coord);
+                                    diameters.add(hStreakLength);
                             }
                         }
                     }
@@ -299,5 +302,8 @@ public class Kreismittelpunkte {
     }
     public List<Coordinate> getCircleCenters() {
         return circleCenters;
+    }
+    public List<Integer> getDiameters() {
+        return diameters;
     }
 }
