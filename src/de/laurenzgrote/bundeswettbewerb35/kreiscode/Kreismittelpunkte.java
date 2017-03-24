@@ -232,7 +232,7 @@ public class Kreismittelpunkte {
                             // Delta zwischen Fläche nach Kreisformel und gemessener Fläche bestimmen
                             double delta = Math.min(circleSize, actualSize) / Math.max(circleSize, actualSize);
                             // Ist das Delta zwischen Fläche nach Kreisformal und gemessener Fläche klein genug?
-                            if (delta >= 0.95) {
+                            if (delta >= 0.90) {
                                 // Jetzt Test auf umgebenden schwarzen Ring
                                 double third = hStreakLength / 3.0;
                                 double delta2 = 0;
@@ -247,7 +247,7 @@ public class Kreismittelpunkte {
                                         Math.max(vStreak[center][y - hStreakLength], third);
 
                                 delta2 /= 4.0;
-                                if (delta2 >= 0.95)
+                                if (delta2 >= 0.90)
                                     circleCenters.add(coord);
                             }
                         }
