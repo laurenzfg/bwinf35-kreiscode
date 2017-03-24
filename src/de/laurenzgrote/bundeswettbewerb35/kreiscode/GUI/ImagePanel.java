@@ -8,7 +8,7 @@ import java.awt.image.BufferedImage;
 import java.util.ArrayList;
 
 class ImagePanel extends JPanel implements ComponentListener{
-    // Div. Farben
+    // Div. Farben als Konstanten
     private final Color BLACK = Color.BLACK;
     private final Color WHITE = Color.WHITE;
     private final Color highlightColor = Color.MAGENTA;
@@ -34,15 +34,16 @@ class ImagePanel extends JPanel implements ComponentListener{
     private int lastWidth = Integer.MIN_VALUE;
     private double scalFactor = 0.0;
 
-    // Prozedur um eine Bitmap als Hintergrund zu wählen
+    // Prozedur um eine Bitmap als Hintrgrund zu speichern
     void setImage(BufferedImage unscaledImage) {
         this.unscaledImage = unscaledImage;
-
-        lastWidth = Integer.MIN_VALUE; // New Image --> Scaling needed
+        lastWidth = Integer.MIN_VALUE; // Neues Bild muss auf Canvas-Größe skaliert werden
+        drawingDirectives.clear(); // Overlay-Direktive sind mit neuem Bild hinfällig
         this.repaint();
     }
 
     // Prozedur um eine S/W-Bitmap als Hintergrund zu wählen
+    // --> Konversion in ein BufferedImage
     void setImage(boolean[][] feld) {
         int width = feld.length;
         // Wir nehmen an, dass alle Spalten u.Zeilen gleich lang sind,
@@ -62,9 +63,11 @@ class ImagePanel extends JPanel implements ComponentListener{
         }
 
         lastWidth = Integer.MIN_VALUE; // Neues Bild muss auf Canvas-Größe skaliert werden
+        drawingDirectives.clear(); // Overlay-Direktive sind mit neuem Bild hinfällig
         this.repaint(); // Lass ma' zeichnen
     }
 
+    // Aufnehmen einer Zeichendirektive
     private void addDirective(int type, int x, int y, Color color, String s) {
         DrawingDirective dD = new DrawingDirective();
         dD.type=type;
@@ -73,6 +76,7 @@ class ImagePanel extends JPanel implements ComponentListener{
         dD.color = color;
         dD.s =s;
         drawingDirectives.add(dD);
+        this.repaint();
     }
 
     // Highlight Pixel geht nicht über die Pipe sondern direkt in die Bitmap
@@ -100,14 +104,14 @@ class ImagePanel extends JPanel implements ComponentListener{
             if (maxWidth != lastWidth) {
                 // TODO: Bei ungewöhnlichem Seitenverhältnis height dann zu groß!
                 scaledImage = unscaledImage.getScaledInstance(maxWidth, -1, Image.SCALE_SMOOTH);
-                System.err.println("Scaled image");
                 lastWidth = maxWidth;
                 scalFactor = ((double) maxWidth) / ((double) unscaledImage.getWidth());
             }
 
+            // Bild hereinzeichnen
             graphics.drawImage(scaledImage, 0, 0, this);
 
-            // Malen der Pipeline
+            // Zeichnen der Pipeline
             for (DrawingDirective dD: drawingDirectives) {
                 int x = (int) Math.round((double) dD.x * scalFactor);
                 int y = (int) Math.round((double) dD.y * scalFactor);
@@ -123,12 +127,14 @@ class ImagePanel extends JPanel implements ComponentListener{
                         // Box
                         graphics.setColor(GREEN_BG);
                         graphics.fillRect(x-10, y-10, 20,20);
+                        // Text
                         graphics.setColor(textColor);
                         graphics.drawString(dD.s, x-(dD.s.length()*5), y+5);
                         break;
                 }
             }
         }
+        System.out.println("INFO: Painted image");
     }
 
     @Override

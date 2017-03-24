@@ -1,7 +1,6 @@
 package de.laurenzgrote.bundeswettbewerb35.kreiscode;
 
-import java.io.BufferedReader;
-import java.io.IOException;
+import java.io.*;
 import java.util.ArrayList;
 
 public class SequenceDecoder {
@@ -38,30 +37,42 @@ public class SequenceDecoder {
 
     private ArrayList<Pair> pairs;
 
-    public SequenceDecoder(ArrayList<Pair> pairs) {
-        this.pairs = pairs;
+    public SequenceDecoder(File file) {
+        BufferedReader br;
+        try {
+            br = new BufferedReader(new FileReader(file));
+        } catch (FileNotFoundException | NullPointerException e) {
+            // Kein Dict ausgewählt --> Fallback auf Default-Dict aus dem Classpath
+            System.err.println("Kein Dict ausgewählt. Fallback auf BwInf-Default");
+            InputStream is = this.getClass().getResourceAsStream("dict.txt");
+            br = new BufferedReader(new InputStreamReader(is));
+        }
+        readPairs(br);
     }
 
-    public SequenceDecoder(BufferedReader br) throws IOException {
+    private void readPairs(BufferedReader br) {
         pairs = new ArrayList<>();
-
         String line;
-        while ((line = br.readLine()) != null) {
-            String[] parts = line.split(" ");
+        try {
+            while ((line = br.readLine()) != null) {
+                String[] parts = line.split(" ");
 
-            boolean[] bool = new boolean[16];
-            for (int i = 0; i < 16; i++) {
-                char here = parts[0].charAt(i);
-                if (here != '0') {
-                    bool[i] = true;
-                } else {
-                    bool[i] = false;
+                boolean[] bool = new boolean[16];
+                for (int i = 0; i < 16; i++) {
+                    char here = parts[0].charAt(i);
+                    if (here != '0') {
+                        bool[i] = true;
+                    } else {
+                        bool[i] = false;
+                    }
                 }
-            }
-            int asciiNo = Integer.parseInt(parts[1]);
+                int asciiNo = Integer.parseInt(parts[1]);
 
-            Pair newPair = new Pair(asciiNo, bool, parts[2]);
-            pairs.add(newPair);
+                Pair newPair = new Pair(asciiNo, bool, parts[2]);
+                pairs.add(newPair);
+            }
+        } catch (IOException e) {
+            e.printStackTrace();
         }
     }
 

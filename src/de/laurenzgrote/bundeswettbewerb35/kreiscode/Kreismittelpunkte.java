@@ -29,10 +29,8 @@ public class Kreismittelpunkte {
     private int[][] structureNos; // Zusammenhangskomponente-ID nach Bildpixel
     private ArrayList<Integer> structureSizes = new ArrayList<>(); // Größen je Zusammenhangskomponten
 
-    // Liste über die Kreismittelpunkte, indiziert nach Zusammenhangskomponentenid
+    // Liste über die Kreismittelpunkte, indiziert nach ZusammenhangskomponentenID
     ArrayList<Coordinate> circleCenters = new ArrayList<>();
-    // Kreisdurchmesser, indiziert anch Zusammenhangskomponentenid
-    ArrayList<Integer> diameters = new ArrayList<>();
 
     public Kreismittelpunkte(BufferedImage rgbImage) {
         // Boilerplate-Code
@@ -225,7 +223,7 @@ public class Kreismittelpunkte {
                                 (swImage[center][first]) && swImage[center][last]){
                             // Kreiskriterium I erfüllt,
                             // --> Kandidat für Mittelpunkt also Mittelpunkt der Streak
-                            Coordinate coord = new Coordinate(center, y);
+                            Coordinate coord = new Coordinate(center, y, hStreakLength);
 
                             // Fäche nach Kreisformel
                             double circleSize = (Math.PI * hStreakLength * hStreakLength) / 4.0;
@@ -236,7 +234,7 @@ public class Kreismittelpunkte {
                             // Ist das Delta zwischen Fläche nach Kreisformal und gemessener Fläche klein genug?
                             if (delta >= 0.95) {
                                 // Jetzt Test auf umgebenden schwarzen Ring
-                                double third = hStreakLength * (1.0 / 3.0);
+                                double third = hStreakLength / 3.0;
                                 double delta2 = 0;
 
                                 delta2 += Math.min(hStreak[center + hStreakLength][y], third) /
@@ -251,7 +249,6 @@ public class Kreismittelpunkte {
                                 delta2 /= 4.0;
                                 if (delta2 >= 0.95)
                                     circleCenters.add(coord);
-                                    diameters.add(hStreakLength);
                             }
                         }
                     }
@@ -302,8 +299,5 @@ public class Kreismittelpunkte {
     }
     public List<Coordinate> getCircleCenters() {
         return circleCenters;
-    }
-    public List<Integer> getDiameters() {
-        return diameters;
     }
 }

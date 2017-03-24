@@ -16,9 +16,11 @@ import java.awt.image.BufferedImage;
 import java.io.*;
 
 public class GUI extends JFrame {
+    // FileFilter für JFilceChooser
     private final FileFilter imageFilter = new FileNameExtensionFilter("Bilddateien", "png", "jpg", "jpeg", "gif");
     private final FileFilter dictFilter = new FileNameExtensionFilter("Wörterbuchdateien", "txt");
 
+    // Buttons in der Swing-Oberfläche
     private final JMenuItem showSW;
     private final JMenuItem showCC;
     private final JMenuItem showTrap;
@@ -30,16 +32,16 @@ public class GUI extends JFrame {
     private final JCheckBox useImageMagick;
     private final ImagePanel imagePanel;
 
-    private BufferedImage image;
+    // Farbiges Bild von der Platte
+    private BufferedImage originalImage;
+    private File selectedDict;
 
     private Kreismittelpunkte kreismittelpunkte;
     private ImageDecoder imageDecoder;
 
-    private final InputStream bwinfDict = GUI.class.getResourceAsStream("dict.txt");
-    private BufferedReader dict = new BufferedReader(new InputStreamReader(bwinfDict));
-
+    // Konstruktor der die GUI erzeugt
     public GUI() {
-        super("Kreiscode: Laurenz Grote");
+        super("Kreiscode - Laurenz Grote");
         setSize(1200, 800);
         setDefaultCloseOperation(EXIT_ON_CLOSE);
 
@@ -155,30 +157,29 @@ public class GUI extends JFrame {
         });
     }
 
+    // Dekodieren des ausgewählten Bildes
     private void decodeListener() {
         decodeButton.addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent actionEvent) {
-                kreismittelpunkte = new Kreismittelpunkte(image);
-                try {
+                // Kreismittelpunkte ermitteln
+                kreismittelpunkte = new Kreismittelpunkte(originalImage);
+                    // Mit den Kreismittelpunkten die Beudeutung der Kreiscodes ermitteln
                     java.util.List<Coordinate> circleCenters = kreismittelpunkte.getCircleCenters();
-                    imageDecoder = new ImageDecoder(kreismittelpunkte.getSwImage(), circleCenters, kreismittelpunkte.getDiameters(), dict);
-                    java.util.List<String> meanings = imageDecoder.getMeanings();
-
-                    for (int i = 0; i < meanings.size(); i++) {
+                    boolean[][] swImage = kreismittelpunkte.getSwImage();
+                    // Dekodieren des Bildes
+                    imageDecoder = new ImageDecoder(swImage, circleCenters, selectedDict);
+                    circleCenters = imageDecoder.getUpdatedCircleCenters();
+                    // Einzeichnen der Ergebnisse
+                    for (int i = 0; i < circleCenters.size(); i++) {
                         Coordinate c = circleCenters.get(i);
-                        String meaning = meanings.get(i);
-
-                        imagePanel.addText(c.getX(), c.getY(), meaning);
-                        imagePanel.repaint();
+                        imagePanel.addText(c.getX(), c.getY(), c.getCircleMeaning());
                     }
-                } catch (IOException e) {
-                    e.printStackTrace();
-                }
             }
         });
     }
 
+    // Auswahl der Bilddatei
     private void selectFileListener() {
         selectFileButton.addActionListener(new ActionListener() {
             @Override
@@ -186,31 +187,31 @@ public class GUI extends JFrame {
                 final JFileChooser jFileChooser = new JFileChooser();
                 jFileChooser.setFileFilter(imageFilter);
                 int returnVal = jFileChooser.showOpenDialog(GUI.this);
-
                 if (returnVal == JFileChooser.APPROVE_OPTION) {
                     File file = jFileChooser.getSelectedFile();
-
                     try {
+                        // Muss der Imagemagick-Wrapper benutzt werden?
                         if (useImageMagick.isSelected()) {
-                            image = ImageMagickWrapper.read(file);
+                            originalImage = ImageMagickWrapper.read(file);
                         } else {
-                            image = ImageIO.read(file);
+                            originalImage = ImageIO.read(file);
                         }
-
+                        // Schreiben des Dateinamens in die GUI
                         selectedFileLabel.setText(file.getName());
-                        imagePanel.setImage(image);
-                    } catch (IOException e) {
-                        System.err.println("IOException");
-                    } catch (InterruptedException e) {
-                        e.printStackTrace(); // Krass, Ausführungsfehler ImageMagick!
+                        // Laden des Bildes
+                        imagePanel.setImage(originalImage);
+                    } catch (IOException|InterruptedException e) {
+                        System.err.println("Kritischer Fehler beim Einlesen der Bilddatei");
+                        e.printStackTrace();
                     }
                 } else {
-                    System.err.println("Abbruch");
+                    System.err.println("Bildeinlesevorgang durch Nutzer abgebrochen");
                 }
             }
         });
     }
 
+    // Auswahl der Wörterbuchdatei
     private void selectDictListener() {
         selectDictButton.addActionListener(new ActionListener() {
             @Override
@@ -218,17 +219,13 @@ public class GUI extends JFrame {
                 final JFileChooser jFileChooser = new JFileChooser();
                 jFileChooser.setFileFilter(dictFilter);
                 int returnVal = jFileChooser.showOpenDialog(GUI.this);
-
                 if (returnVal == JFileChooser.APPROVE_OPTION) {
                     File file = jFileChooser.getSelectedFile();
+                    // Abspeichern der URL des Wörterbuches in einem Feld
+                    selectedDict = file;
                     String filename = file.toString();
-
-                    try {
-                        dict = new BufferedReader(new FileReader(file));
-                        selectedDictLabel.setText(filename);
-                    } catch (IOException e) {
-                        System.err.println("IOException");
-                    }
+                    // Schreiben des Dateinamens in die GUI
+                    selectedDictLabel.setText(filename);
                 } else {
                     System.err.println("Abbruch");
                 }

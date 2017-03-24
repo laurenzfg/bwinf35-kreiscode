@@ -1,8 +1,6 @@
 package de.laurenzgrote.bundeswettbewerb35.kreiscode;
 
-import java.io.BufferedReader;
-import java.io.IOException;
-import java.util.ArrayList;
+import java.io.File;
 import java.util.List;
 
 public class ImageDecoder {
@@ -11,24 +9,18 @@ public class ImageDecoder {
 
     // S/W-Bild für Dekodiervorgang
     private boolean[][] swImage;
-    int width, height;
+    private int width, height;
 
     private boolean[][] trapezials;
     private boolean[][] visited;
     // Liste der Kreismittelpunkte u. der dazugehörigen Durchmesser
-    int circleCount;
     private List<Coordinate> circleCenters;
-    private List<Integer> diameters;
 
-    private ArrayList<String> meanings = new ArrayList<>();
-
-    public ImageDecoder(boolean[][] swImage, List<Coordinate> circleCenters, List<Integer> diameters, BufferedReader dict) throws IOException {
+    public ImageDecoder(boolean[][] swImage, List<Coordinate> circleCenters, File dict) {
         this.decoder = new SequenceDecoder(dict);
         this.swImage = swImage;
         this.circleCenters = circleCenters;
-        this.diameters = diameters;
 
-        circleCount = circleCenters.size();
         width = swImage.length;
         height = swImage[0].length;
 
@@ -38,34 +30,21 @@ public class ImageDecoder {
         decode();
     }
 
-    private Coordinate[][] calculateLines(Coordinate cC, int diameter) {
-        Coordinate[][] lines = new Coordinate[16][2];
-        final double factor = (22.5*Math.PI)/180.0;
-        final double u = diameter / 3.0;
-        int x = cC.getX(); int y = cC.getY();
-        for (int n = 0; n < 16; ++n) {
-            // Passst scho...
-            int pX = (int) Math.round(Math.cos(n*factor) * 4.5*u + x);
-            int pY = (int) Math.round(Math.sin(n*factor) * 4.5*u + y);
-            lines[n][0] = new Coordinate(pX, pY);
-
-            pX = (int) Math.round(Math.cos(n*factor) * 5.5*u + x);
-            pY = (int) Math.round(Math.sin(n*factor) * 5.5*u + y);
-            lines[n][1] = new Coordinate(pX, pY);
-        }
-        return lines;
-    }
-
+    /**
+     * Dekodiert die Bedeutungen aller in circleCenters gegebenen Kreise
+     */
     private void decode() {
-        for (int i = 0; i < circleCount; i++) {
+        // Für jeden Kreismittelpunkt
+        for (int i = 0; i < circleCenters.size(); i++) {
             Coordinate cC = circleCenters.get(i);
-            int diameter = diameters.get(i);
+            // bestimme die einteilenden Linien
+            Coordinate[][] lines = calculateLines(cC);
 
-            Coordinate[][] lines = calculateLines(cC, diameter);
-
-            // Rastern der Trapeze
+            // Und rastere aus diesen Trapeze in das visited-Array
             for (int n = 0; n < 16; n++) {
+                // Diese Linien + die rechts angrenzenden
                 Coordinate[] hereLines = lines[n];
+                // Bei n = 15 *nicht* 16, sondern 0
                 Coordinate[] nextLines = lines[(n+1)%16];
                 // Rastern wir die einteilende Linie
                 bresenham(hereLines[0], hereLines[1]);
@@ -75,12 +54,41 @@ public class ImageDecoder {
                 bresenham(hereLines[1], nextLines[1]);
             }
 
+            // Bestimmen der Überwiegenden Farbe in den jeweiligen Segmenten
             boolean[] res = decodeTrapezials(lines);
-            for (boolean b : res)
-                System.out.print(b + " ");
-            String s= decoder.decode(res);
-            meanings.add(s);
+            // Bestimmen der Bedeutung des 2byte-Arrays
+            String s = decoder.decode(res);
+            // Speichern
+            cC.setCircleMeaning(s);
+            circleCenters.set(i, cC);
         }
+    }
+
+    /**
+     * Berechnet die Punkte für die Trapeze
+     * @param cC Koordinaten des Kreismittelpunktes
+     * @return Linien, die den Ring in N=16 Segmente einteilen. Untere Koordinate in [n][0], obere in n[1]
+     */
+    private Coordinate[][] calculateLines(Coordinate cC) {
+        int diameter = cC.getStreakLength();
+        Coordinate[][] lines = new Coordinate[16][2];
+
+        // 22.5° in Bogenmaß
+        final double factor = (22.5*Math.PI)/180.0;
+        // u wie in der Doku
+        final double u = diameter / 3.0;
+        int x = cC.getX(); int y = cC.getY();
+
+        // Alle 16 Linien berechnen
+        for (int n = 0; n < 16; ++n) {
+            int pX = (int) Math.round(Math.cos(n*factor) * 4.5*u + x);
+            int pY = (int) Math.round(Math.sin(n*factor) * 4.5*u + y);
+            lines[n][0] = new Coordinate(pX, pY);
+            pX = (int) Math.round(Math.cos(n*factor) * 5.5*u + x);
+            pY = (int) Math.round(Math.sin(n*factor) * 5.5*u + y);
+            lines[n][1] = new Coordinate(pX, pY);
+        }
+        return lines;
     }
 
     private boolean[] decodeTrapezials(Coordinate[][] lines) {
@@ -101,18 +109,28 @@ public class ImageDecoder {
         return result;
     }
 
+    // Globale vars für Weiß und Schwarz.
+    // Schlechter Stil, aber sonst würde der FloodFill-Code unleserlich werden
     private int whites, blacks;
+    /**
+     * Bestimmt die Farbe eines durch Trapezstriche begrenzten Segmentes
+     * @param x x-Koordinate eines beliebigen Punktes im Segment
+     * @param y y-Koordinate eines beliebigen Punktes im Segment
+     * @return True wenn Schwarz > 50% d. Fläche, sonst False
+     */
     private boolean segmentColor(int x, int y) {
+        // Clearen der vars / flood Fill starten
         whites = 0;
         blacks = 0;
         floodFill(x, y);
-
+        // Auszählen
         if (blacks > whites)
             return true;
         return false;
     }
 
     private void floodFill(int x, int y) {
+        // FloodFill mit Auszählen von Weiß/SChwarz
         if(x > 0 && y > 0 && x < width && y < height && !trapezials[x][y] && !visited[x][y]) {
             visited[x][y] = true;
             if (swImage[x][y]) {
@@ -127,6 +145,7 @@ public class ImageDecoder {
         }
     }
 
+    // Needs some love
     void bresenham(Coordinate a, Coordinate b)
     {
         int x1 = a.getX(); int y1 = a.getY();
@@ -173,7 +192,8 @@ public class ImageDecoder {
     public boolean[][] getTrapezials() {
         return trapezials;
     }
-    public ArrayList<String> getMeanings() {
-        return meanings;
+
+    public List<Coordinate> getUpdatedCircleCenters() {
+        return circleCenters;
     }
 }
