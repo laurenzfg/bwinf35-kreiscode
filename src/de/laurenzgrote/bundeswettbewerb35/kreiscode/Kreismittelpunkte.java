@@ -6,12 +6,6 @@ import java.util.*;
 import java.util.List;
 
 public class Kreismittelpunkte {
-
-    // Konstanten
-    // Ab wann isrt Grau Schwarz?
-    private final double minAVGBlack = 0.3; // Von 0.0 (black) zu 1.0 (white)
-    private final int minADJ = 4; // Wieviele Felder müssen bei der Vervollständigung Schwarz sein?
-
     // Daten des bunten Eingabebildes
     private BufferedImage rgbImage;
     private int width;
@@ -38,7 +32,7 @@ public class Kreismittelpunkte {
         width = rgbImage.getWidth();
         height = rgbImage.getHeight();
 
-        // Arrayinitialisierung auf Bildrößte
+        // Arrayinitialisierung auf Bildröße
         swImage = new boolean[width][height];
         hStreak = new int[width][height];
         vStreak = new int[width][height];
@@ -64,51 +58,56 @@ public class Kreismittelpunkte {
     private void generateSW () {
         // Helligkeitswert für jeden Pixel berechnen
         double[][] brightness = new double[width][height];
+        double avgBrightness = 0;
         for (int x = 0; x < width; x++) {
             for (int y = 0; y < height; y++) {
                 // Durchschnitt der Helligkeit jeder Primärfarbe
                 // 0 nicht da, 255 100%
                 // --> 0,0,0 Schwarz, 255,255,255 Weiß
                 Color color = new Color(rgbImage.getRGB(x, y));
-                double percentile = (color.getRed() / 255) +
-                        (color.getGreen() / 255) +
-                        (color.getBlue()  / 255);
+                int r = color.getRed();
+                int g = color.getGreen();
+                int b = color.getBlue();
+                // https://en.wikipedia.org/wiki/Grayscale#Colorimetric_.28luminance-preserving.29_conversion_to_grayscale
+                // https://www.w3.org/Graphics/Color/sRGB
+                double percentile = r*0.2126 + g*0.7152 + b*0.0722;
+                /*double percentile = (color.getRed() / 255.0) +
+                        (color.getGreen() / 255.0) +
+                        (color.getBlue()  / 255.0);*/
                 percentile /= 3.0;
 
+                avgBrightness += percentile;
                 brightness[x][y] = percentile;
             }
         }
 
-        // 0mal glätten
-        brightness = glaette(brightness, 0);
+        brightness = glaette(brightness);
 
         // Was unterm Treshold liegt wird als Schwarz gespeichert
+        double treshhold = avgBrightness / ((double) (width * height)) * 0.75;
         for (int x = 0; x < width; x++)
             for (int y = 0; y < height; y++)
-                if (brightness[x][y] < minAVGBlack)
+                if (brightness[x][y] < treshhold)
                     swImage[x][y] = true;
 
-        // vervollstaendige();
+        vervollstaendige();
 
     }
 
-    private double[][] glaette (double[][] in, int n) {
+    private double[][] glaette(double[][] in) {
         // Glättung n mal vornehmen
-        for (int i = 0; i < 3; i++) {
-            double[][] newBrightness = new double[width][height];
-            for (int x = 1; x < width - 1; x++) {
-                for (int y = 1; y < height - 1; y++) {
-                    double average = 0;
-                    for (int x1 = x - 1; x1 <= x + 1; x1++)
-                        for (int y1 = y - 1; y1 <= y + 1; y1++)
-                            average += in[x1][y1];
-                    average /= 10;
-                    newBrightness[x][y] = average;
-                }
+        double[][] newBrightness = new double[width][height];
+        for (int x = 1; x < width - 1; x++) {
+            for (int y = 1; y < height - 1; y++) {
+                double average = 0;
+                for (int x1 = x - 1; x1 <= x + 1; x1++)
+                    for (int y1 = y - 1; y1 <= y + 1; y1++)
+                        average += in[x1][y1];
+                average /= 10.0;
+                newBrightness[x][y] = average;
             }
-            in = newBrightness;
         }
-        return in;
+        return newBrightness;
     }
 
     private void vervollstaendige() {
@@ -125,7 +124,7 @@ public class Kreismittelpunkte {
                             for (int y1 = y - 1; y1 <= y + 1; y1++)
                                 if (swImage[x1][y1])
                                     adj++;
-                        if (adj >= minADJ) {
+                        if (adj >= 4) {
                             swImage[x][y] = true;
                             cnt++;
                         }
@@ -141,14 +140,15 @@ public class Kreismittelpunkte {
     @SuppressWarnings("Duplicates")
     private void scanStreaks() {
         int streakLength = 0;
-
+        int falsesSoFar = 0;
         // Horizontal (Zeilenweise) Scannen
+        int tolerance = (int) Math.round(width * 1.0/600.0); // Toleranz ist 1/3% der Breite
         for (int y = rgbImage.getMinY(); y < height; ++y) {
             for (int x = rgbImage.getMinX(); x < width; ++x) {
                 if (swImage[x][y]) {
                     // Schwarz
                     streakLength++;
-                } else {
+                } else if (falsesSoFar == tolerance) {
                     // Weiß
                     // Ende einer Streak?
                     if (streakLength > 0) {
@@ -156,7 +156,10 @@ public class Kreismittelpunkte {
                             hStreak[i][y] = streakLength;
                         }
                         streakLength = 0;
+                        falsesSoFar = 0;
                     }
+                } else {
+                    falsesSoFar++;
                 }
             }
 
@@ -166,15 +169,17 @@ public class Kreismittelpunkte {
                     hStreak[i][y] = streakLength;
                 }
                 streakLength = 0;
+                falsesSoFar = 0;
             }
         }
         // Vertikal (Spaltenweise) Scannen
+        tolerance = (int) Math.round(height * 1.0/600.0); // Toleranz ist 2/3% der Höhe
         for (int x = rgbImage.getMinX(); x < width; ++x) {
             for (int y = rgbImage.getMinY(); y < height; ++y) {
                 if (swImage[x][y]) {
                     // Schwarz
                     streakLength++;
-                } else {
+                } else if (falsesSoFar == tolerance){
                     // Weiß
                     // Ende einer Streak?
                     if (streakLength > 0) {
@@ -182,7 +187,10 @@ public class Kreismittelpunkte {
                             vStreak[x][i] = streakLength;
                         }
                         streakLength = 0;
+                        falsesSoFar = 0;
                     }
+                } else {
+                    falsesSoFar++;
                 }
             }
 
@@ -192,6 +200,7 @@ public class Kreismittelpunkte {
                     vStreak[x][i] = streakLength;
                 }
                 streakLength = 0;
+                falsesSoFar = 0;
             }
         }
     }
@@ -200,6 +209,7 @@ public class Kreismittelpunkte {
      * Sucht Kreise
      */
     private void scanForCircles() {
+        int tolerance = (int) Math.round(Math.round((width + height) / 2.0) * 2.0/300.0);
         // Horizontal über das Bild iterieren
         for (int x = 0; x < width; ++x) {
             for (int y = 0; y < height; y++) {
@@ -219,36 +229,41 @@ public class Kreismittelpunkte {
                         int halfVLength = vStreakLength / 2;
                         int first = y - halfVLength + 1;
                         int last = y + halfVLength - 1;
-                        if (Math.abs(hStreakLength - vStreakLength) < 2 && first > 0 && last < height &&
-                                (swImage[center][first]) && swImage[center][last]){
-                            // Kreiskriterium I erfüllt,
-                            // --> Kandidat für Mittelpunkt also Mittelpunkt der Streak
-                            Coordinate coord = new Coordinate(center, y, hStreakLength);
+                        if (Math.abs(hStreakLength - vStreakLength) < tolerance && first > 0 && last > 0 && last < height && first < height) {
+                            if (swImage[center][first] && swImage[center][last]) {
+                                // Kreiskriterium I erfüllt,
+                                // --> Kandidat für Mittelpunkt also Mittelpunkt der Streak
+                                Coordinate coord = new Coordinate(center, y, hStreakLength);
 
-                            // Fäche nach Kreisformel
-                            double circleSize = (Math.PI * hStreakLength * hStreakLength) / 4.0;
-                            double actualSize = floodFill(coord); // Gemessene Größe
+                                // Fäche nach Kreisformel
+                                double circleSize = (Math.PI * hStreakLength * hStreakLength) / 4.0;
+                                double actualSize = floodFill(coord); // Gemessene Größe
 
-                            // Delta zwischen Fläche nach Kreisformel und gemessener Fläche bestimmen
-                            double delta = Math.min(circleSize, actualSize) / Math.max(circleSize, actualSize);
-                            // Ist das Delta zwischen Fläche nach Kreisformal und gemessener Fläche klein genug?
-                            if (delta >= 0.90) {
-                                // Jetzt Test auf umgebenden schwarzen Ring
-                                double third = hStreakLength / 3.0;
-                                double delta2 = 0;
+                                // Delta zwischen Fläche nach Kreisformel und gemessener Fläche bestimmen
+                                double delta = Math.min(circleSize, actualSize) / Math.max(circleSize, actualSize);
+                                // Ist das Delta zwischen Fläche nach Kreisformal und gemessener Fläche klein genug?
+                                if (delta >= 0.90) {
+                                    // Jetzt Test auf umgebenden schwarzen Ring
+                                    double third = hStreakLength / 3.0;
+                                    double delta2 = 0;
 
-                                delta2 += Math.min(hStreak[center + hStreakLength][y], third) /
-                                        Math.max(hStreak[center + hStreakLength][y], third);
-                                delta2 += Math.min(hStreak[center - hStreakLength][y], third) /
-                                        Math.max(hStreak[center - hStreakLength][y], third);
-                                delta2 += Math.min(vStreak[center][y + hStreakLength], third) /
-                                        Math.max(vStreak[center][y + hStreakLength], third);
-                                delta2 += Math.min(vStreak[center][y - hStreakLength], third) /
-                                        Math.max(vStreak[center][y - hStreakLength], third);
+                                    int left = Math.min(center + hStreakLength, width - 1);
+                                    int right = Math.max(center - hStreakLength, 0);
+                                    int below = Math.min(y + hStreakLength, height - 1);
+                                    int above = Math.max(y - hStreakLength, 0);
+                                    delta2 += Math.min(hStreak[left][y], third) /
+                                            Math.max(hStreak[left][y], third);
+                                    delta2 += Math.min(hStreak[right][y], third) /
+                                            Math.max(hStreak[right][y], third);
+                                    delta2 += Math.min(vStreak[center][above], third) /
+                                            Math.max(vStreak[center][above], third);
+                                    delta2 += Math.min(vStreak[center][below], third) /
+                                            Math.max(vStreak[center][below], third);
 
-                                delta2 /= 4.0;
-                                if (delta2 >= 0.90)
-                                    circleCenters.add(coord);
+                                    delta2 /= 4.0;
+                                    if (delta2 >= 0.80)
+                                        circleCenters.add(coord);
+                                }
                             }
                         }
                     }
