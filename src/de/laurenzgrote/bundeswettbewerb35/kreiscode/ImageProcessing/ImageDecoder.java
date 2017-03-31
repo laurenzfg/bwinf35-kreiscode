@@ -1,19 +1,22 @@
-package de.laurenzgrote.bundeswettbewerb35.kreiscode;
+package de.laurenzgrote.bundeswettbewerb35.kreiscode.ImageProcessing;
+
+import de.laurenzgrote.bundeswettbewerb35.kreiscode.Coordinate;
 
 import java.io.File;
 import java.util.List;
 
 public class ImageDecoder {
-    // Decoderklasse
-    SequenceDecoder decoder;
+    // Decoderklasse für das Bool-Array
+    private SequenceDecoder decoder;
 
     // S/W-Bild für Dekodiervorgang
     private boolean[][] swImage;
     private int width, height;
 
+    // Visted-Array für die Flood-Fills, Begrenzende Trapeze
     private boolean[][] trapezials;
     private boolean[][] visited;
-    // Liste der Kreismittelpunkte u. der dazugehörigen Durchmesser
+    // Liste der CircleCenters u. der dazugehörigen Durchmesser
     private List<Coordinate> circleCenters;
 
     public ImageDecoder(boolean[][] swImage, List<Coordinate> circleCenters, File dict) {
@@ -58,7 +61,7 @@ public class ImageDecoder {
             boolean[] res = decodeTrapezials(lines);
             // Bestimmen der Bedeutung des 2byte-Arrays
             String s = decoder.decode(res);
-            // Speichern
+            // Speichern der Bedeutung
             cC.setCircleMeaning(s);
             circleCenters.set(i, cC);
         }
@@ -81,9 +84,11 @@ public class ImageDecoder {
 
         // Alle 16 Linien berechnen
         for (int n = 0; n < 16; ++n) {
+            // Unterer Punkt
             int pX = (int) Math.round(Math.cos(n*factor) * 4.5*u + x);
             int pY = (int) Math.round(Math.sin(n*factor) * 4.5*u + y);
             lines[n][0] = new Coordinate(pX, pY);
+            // Oberer Punkt
             pX = (int) Math.round(Math.cos(n*factor) * 5.5*u + x);
             pY = (int) Math.round(Math.sin(n*factor) * 5.5*u + y);
             lines[n][1] = new Coordinate(pX, pY);
@@ -91,6 +96,11 @@ public class ImageDecoder {
         return lines;
     }
 
+    /**
+     * Bestimmen der vorherrschenden farbe in den 16 Segmenten
+     * @param lines einteilende Linien
+     * @return Vorherrschende Farebn in den 16 Segmenten
+     */
     private boolean[] decodeTrapezials(Coordinate[][] lines) {
         boolean[] result = new boolean[16];
 
@@ -98,11 +108,13 @@ public class ImageDecoder {
             Coordinate[] hereLines = lines[n];
             Coordinate[] nextLines = lines[(n+1)%16];
 
+            // Mittelpunkt in dem Segment bestimmen
             int pX = hereLines[0].getX() + hereLines[1].getX() + nextLines[0].getX() + nextLines[1].getX();
             int pY = hereLines[0].getY() + hereLines[1].getY() + nextLines[0].getY() + nextLines[1].getY();
             pX /= 4;
             pY /= 4;
 
+            // Vorherrschende Fareb bestimmen und abspeichern
             result[n] = segmentColor(pX, pY);
         }
 
@@ -113,7 +125,7 @@ public class ImageDecoder {
     // Schlechter Stil, aber sonst würde der FloodFill-Code unleserlich werden
     private int whites, blacks;
     /**
-     * Bestimmt die Farbe eines durch Trapezstriche begrenzten Segmentes
+     * Bestimmt die vorherrschende Farbe eines durch Trapezstriche begrenzten Segmentes
      * @param x x-Koordinate eines beliebigen Punktes im Segment
      * @param y y-Koordinate eines beliebigen Punktes im Segment
      * @return True wenn Schwarz > 50% d. Fläche, sonst False
@@ -129,8 +141,10 @@ public class ImageDecoder {
         return false;
     }
 
+    // Standard Flood-Fill
     private void floodFill(int x, int y) {
-        // FloodFill mit Auszählen von Weiß/SChwarz
+        // FloodFill mit Auszählen von Weiß/Schwarz
+        // Trapeze sind wie ein zweites Visited-Array, sie dürfen nicht auf dem Stack landen
         if(x > 0 && y > 0 && x < width && y < height && !trapezials[x][y] && !visited[x][y]) {
             visited[x][y] = true;
             if (swImage[x][y]) {
@@ -192,8 +206,7 @@ public class ImageDecoder {
     public boolean[][] getTrapezials() {
         return trapezials;
     }
-
-    public List<Coordinate> getUpdatedCircleCenters() {
+    public List<Coordinate> getCircleCentersWithMeanings() {
         return circleCenters;
     }
 }

@@ -1,9 +1,9 @@
 package de.laurenzgrote.bundeswettbewerb35.kreiscode.GUI;
 
-import de.laurenzgrote.bundeswettbewerb35.kreiscode.Coordinate;
-import de.laurenzgrote.bundeswettbewerb35.kreiscode.ImageDecoder;
-import de.laurenzgrote.bundeswettbewerb35.kreiscode.ImageMagickWrapper;
-import de.laurenzgrote.bundeswettbewerb35.kreiscode.Kreismittelpunkte;
+import de.laurenzgrote.bundeswettbewerb35.kreiscode.*;
+import de.laurenzgrote.bundeswettbewerb35.kreiscode.ImageProcessing.CircleCenters;
+import de.laurenzgrote.bundeswettbewerb35.kreiscode.ImageProcessing.ColorToBW;
+import de.laurenzgrote.bundeswettbewerb35.kreiscode.ImageProcessing.ImageDecoder;
 
 import javax.imageio.ImageIO;
 import javax.swing.*;
@@ -36,7 +36,9 @@ public class GUI extends JFrame {
     private BufferedImage originalImage;
     private File selectedDict;
 
-    private Kreismittelpunkte kreismittelpunkte;
+    // Versch. Zwischenstufen der Bilddekodierung
+    private boolean[][] swImage;
+    private CircleCenters circleCenters;
     private ImageDecoder imageDecoder;
 
     // Konstruktor der die GUI erzeugt
@@ -50,10 +52,10 @@ public class GUI extends JFrame {
         // JMenu
         JMenuBar jMenuBar = new JMenuBar();
         showSW = new JMenuItem("Zeige S/W-Bild");
-        showCC = new JMenuItem("Zeige Kreismittelpunkte");
+        showCC = new JMenuItem("Zeige CircleCenters");
         showTrap = new JMenuItem("Zeige Trapeze");
-        jMenuBar.add(showCC);
         jMenuBar.add(showSW);
+        jMenuBar.add(showCC);
         jMenuBar.add(showTrap);
 
         // Center Panel
@@ -118,7 +120,7 @@ public class GUI extends JFrame {
         c.gridwidth = 100;
         settingsPanel.add(decodeButton, c);
 
-        // Alles ins JFRAME
+        // Alles ins JFrame
         this.add(jMenuBar, BorderLayout.NORTH);
         this.add(settingsPanel, BorderLayout.EAST);
         this.add(imagePanel, BorderLayout.CENTER);
@@ -132,27 +134,28 @@ public class GUI extends JFrame {
         setVisible(true); // TADA!
     }
 
+    // Listener für die Menubar
     private void jMenuBarListeners() {
         showSW.addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent actionEvent) {
-                if (kreismittelpunkte != null) {
-                    CustomDialogs.showSWDialog(kreismittelpunkte.getSwImage());
+                if (circleCenters != null) {
+                    CustomDialogs.showSWDialog(swImage);
                 }
             }
         });
         showCC.addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent actionEvent) {
-                if (kreismittelpunkte != null) {
-                    CustomDialogs.showCCDialog(kreismittelpunkte.getSwImage(), kreismittelpunkte.getCircleCenters());
+                if (circleCenters != null) {
+                    CustomDialogs.showCCDialog(swImage, circleCenters.getCircleCenters());
                 }
             }
         });
         showTrap.addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent actionEvent) {
-                CustomDialogs.showTrapezialsDialog(kreismittelpunkte.getSwImage(), imageDecoder.getTrapezials());
+                CustomDialogs.showTrapezialsDialog(swImage, imageDecoder.getTrapezials());
             }
         });
     }
@@ -162,19 +165,21 @@ public class GUI extends JFrame {
         decodeButton.addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent actionEvent) {
-                // Kreismittelpunkte ermitteln
-                kreismittelpunkte = new Kreismittelpunkte(originalImage);
-                    // Mit den Kreismittelpunkten die Beudeutung der Kreiscodes ermitteln
-                    java.util.List<Coordinate> circleCenters = kreismittelpunkte.getCircleCenters();
-                    boolean[][] swImage = kreismittelpunkte.getSwImage();
-                    // Dekodieren des Bildes
-                    imageDecoder = new ImageDecoder(swImage, circleCenters, selectedDict);
-                    circleCenters = imageDecoder.getUpdatedCircleCenters();
-                    // Einzeichnen der Ergebnisse
-                    for (int i = 0; i < circleCenters.size(); i++) {
-                        Coordinate c = circleCenters.get(i);
-                        imagePanel.addText(c.getX(), c.getY(), c.getCircleMeaning());
-                    }
+                // Schwarz-Weiß-Bild ermitteln
+                swImage = ColorToBW.colorToBW(originalImage);
+                // CircleCenters ermitteln
+                circleCenters = new CircleCenters(swImage);
+                // Mit den Kreismittelpunkten die Beudeutung der Kreiscodes ermitteln
+                java.util.List<Coordinate> circleCenters = GUI.this.circleCenters.getCircleCenters();
+                // Dekodieren des Bildes
+                imageDecoder = new ImageDecoder(swImage, circleCenters, selectedDict);
+                // Der Kreismittelpunktliste die Bedeutungen hinzufügen
+                circleCenters = imageDecoder.getCircleCentersWithMeanings();
+
+                // Einzeichnen der Ergebnisse in das Bild in der GUI
+                for (Coordinate c : circleCenters) {
+                    imagePanel.addText(c.getX(), c.getY(), c.getCircleMeaning());
+                }
             }
         });
     }

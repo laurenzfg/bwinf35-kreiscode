@@ -1,18 +1,14 @@
-package de.laurenzgrote.bundeswettbewerb35.kreiscode;
+package de.laurenzgrote.bundeswettbewerb35.kreiscode.ImageProcessing;
+import de.laurenzgrote.bundeswettbewerb35.kreiscode.Coordinate;
 
-import java.awt.*;
-import java.awt.image.BufferedImage;
 import java.util.*;
 import java.util.List;
 
-public class Kreismittelpunkte {
-    // Daten des bunten Eingabebildes
-    private BufferedImage rgbImage;
-    private int width;
-    private int height;
-
+public class CircleCenters {
     // S/W-Bild für Dekodiervorgang
     private boolean[][] swImage;
+    private int width;
+    private int height;
 
     // Zähler der vertikal/horizontal durchgehend Schwarz gefärbten Stellen
     private int[][] hStreak;
@@ -23,115 +19,29 @@ public class Kreismittelpunkte {
     private int[][] structureNos; // Zusammenhangskomponente-ID nach Bildpixel
     private ArrayList<Integer> structureSizes = new ArrayList<>(); // Größen je Zusammenhangskomponten
 
-    // Liste über die Kreismittelpunkte, indiziert nach ZusammenhangskomponentenID
+    // Liste über die CircleCenters, indiziert nach ZusammenhangskomponentenID
     ArrayList<Coordinate> circleCenters = new ArrayList<>();
 
-    public Kreismittelpunkte(BufferedImage rgbImage) {
-        // Boilerplate-Code
-        this.rgbImage = rgbImage;
-        width = rgbImage.getWidth();
-        height = rgbImage.getHeight();
+    public CircleCenters(boolean[][] swImage) {
+        // Übernehmen des S/W Bildes
+        this.swImage = swImage;
+        width = swImage.length;
+        height = swImage[0].length;
 
-        // Arrayinitialisierung auf Bildröße
-        swImage = new boolean[width][height];
         hStreak = new int[width][height];
         vStreak = new int[width][height];
         structureNos = new int[width][height];
 
         // Zusammenhangskomponenten noch nicht ermittelt
-        // --> Default-Nummer -1
+        // --> Default-Nummer -1 setzen
         for (int i = 0; i < width; i++) {
             for (int j = 0; j < height; j++) {
                 structureNos[i][j] = -1;
             }
         }
 
-        // Aufrufen der Dekodierschritte
-        generateSW();
         scanStreaks();
         scanForCircles();
-    }
-
-    /**
-     * Generiert S/W-Bild aus buntem Bild
-     */
-    private void generateSW () {
-        // Helligkeitswert für jeden Pixel berechnen
-        double[][] brightness = new double[width][height];
-        double avgBrightness = 0;
-        for (int x = 0; x < width; x++) {
-            for (int y = 0; y < height; y++) {
-                // Durchschnitt der Helligkeit jeder Primärfarbe
-                // 0 nicht da, 255 100%
-                // --> 0,0,0 Schwarz, 255,255,255 Weiß
-                Color color = new Color(rgbImage.getRGB(x, y));
-                int r = color.getRed();
-                int g = color.getGreen();
-                int b = color.getBlue();
-                // https://en.wikipedia.org/wiki/Grayscale#Colorimetric_.28luminance-preserving.29_conversion_to_grayscale
-                // https://www.w3.org/Graphics/Color/sRGB
-                double percentile = r*0.2126 + g*0.7152 + b*0.0722;
-                /*double percentile = (color.getRed() / 255.0) +
-                        (color.getGreen() / 255.0) +
-                        (color.getBlue()  / 255.0);*/
-                percentile /= 3.0;
-
-                avgBrightness += percentile;
-                brightness[x][y] = percentile;
-            }
-        }
-
-        brightness = glaette(brightness);
-
-        // Was unterm Treshold liegt wird als Schwarz gespeichert
-        double treshhold = avgBrightness / ((double) (width * height)) * 0.75;
-        for (int x = 0; x < width; x++)
-            for (int y = 0; y < height; y++)
-                if (brightness[x][y] < treshhold)
-                    swImage[x][y] = true;
-
-        vervollstaendige();
-
-    }
-
-    private double[][] glaette(double[][] in) {
-        // Glättung n mal vornehmen
-        double[][] newBrightness = new double[width][height];
-        for (int x = 1; x < width - 1; x++) {
-            for (int y = 1; y < height - 1; y++) {
-                double average = 0;
-                for (int x1 = x - 1; x1 <= x + 1; x1++)
-                    for (int y1 = y - 1; y1 <= y + 1; y1++)
-                        average += in[x1][y1];
-                average /= 10.0;
-                newBrightness[x][y] = average;
-            }
-        }
-        return newBrightness;
-    }
-
-    private void vervollstaendige() {
-        // Vervollsändigung
-        int cnt;
-        do {
-            cnt = 0;
-            // TODO sobald absehbar dass das nichts wird continue
-            for (int x = 1; x < width - 1; x++) {
-                for (int y = 1; y < height - 1; y++) {
-                    if (!swImage[x][y]) {
-                        int adj = -1;
-                        for (int x1 = x - 1; x1 <= x + 1; x1++)
-                            for (int y1 = y - 1; y1 <= y + 1; y1++)
-                                if (swImage[x1][y1])
-                                    adj++;
-                        if (adj >= 4) {
-                            swImage[x][y] = true;
-                            cnt++;
-                        }
-                    }
-                }
-            }
-        } while (cnt > 0);
     }
 
     /**
@@ -143,8 +53,8 @@ public class Kreismittelpunkte {
         int falsesSoFar = 0;
         // Horizontal (Zeilenweise) Scannen
         int tolerance = (int) Math.round(width * 1.0/600.0); // Toleranz ist 1/3% der Breite
-        for (int y = rgbImage.getMinY(); y < height; ++y) {
-            for (int x = rgbImage.getMinX(); x < width; ++x) {
+        for (int y = 0; y < height; ++y) {
+            for (int x = 0; x < width; ++x) {
                 if (swImage[x][y]) {
                     // Schwarz
                     streakLength++;
@@ -174,8 +84,8 @@ public class Kreismittelpunkte {
         }
         // Vertikal (Spaltenweise) Scannen
         tolerance = (int) Math.round(height * 1.0/600.0); // Toleranz ist 2/3% der Höhe
-        for (int x = rgbImage.getMinX(); x < width; ++x) {
-            for (int y = rgbImage.getMinY(); y < height; ++y) {
+        for (int x = 0; x < width; ++x) {
+            for (int y = 0; y < height; ++y) {
                 if (swImage[x][y]) {
                     // Schwarz
                     streakLength++;
@@ -308,10 +218,6 @@ public class Kreismittelpunkte {
         return size; // Rückgabe der Größe
     }
 
-    // Getter-Methoden
-    public boolean[][] getSwImage() {
-        return swImage;
-    }
     public List<Coordinate> getCircleCenters() {
         return circleCenters;
     }

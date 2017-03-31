@@ -1,4 +1,4 @@
-package de.laurenzgrote.bundeswettbewerb35.kreiscode;
+package de.laurenzgrote.bundeswettbewerb35.kreiscode.ImageProcessing;
 
 import java.io.*;
 import java.util.ArrayList;
@@ -76,7 +76,7 @@ public class SequenceDecoder {
         }
     }
 
-    public String decode (boolean[] input) {
+    public String decode(boolean[] input) {
         int length = input.length;
 
         String result = "???";

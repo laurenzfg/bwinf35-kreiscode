@@ -24,7 +24,7 @@ public class CustomDialogs {
     }
 
     public static void showCCDialog(boolean[][] swImage, List<Coordinate> circleCenters) {
-        JFrame jFrame = get2DDisplay("Kreismittelpunkte", swImage);
+        JFrame jFrame = get2DDisplay("CircleCenters", swImage);
         ImagePanel ip = (ImagePanel) jFrame.getContentPane().getComponent(0);
         for (Coordinate c : circleCenters) {
             ip.addCrosshair(c.getX(), c.getY());
