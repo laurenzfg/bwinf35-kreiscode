@@ -16,6 +16,7 @@ public class ImageDecoder {
     // Visted-Array für die Flood-Fills, Begrenzende Trapeze
     private boolean[][] trapezials;
     private boolean[][] visited;
+
     // Liste der CircleCenters u. der dazugehörigen Durchmesser
     private List<Coordinate> circleCenters;
 

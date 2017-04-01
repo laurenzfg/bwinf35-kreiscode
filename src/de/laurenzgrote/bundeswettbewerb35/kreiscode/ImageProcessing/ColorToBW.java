@@ -24,8 +24,6 @@ public class ColorToBW {
     private boolean[][] generateSW () {
         // Helligkeitswert für jeden Pixel berechnen
         double[][] brightness = new double[width][height];
-        // +Durchschnitt mitberechnen
-        double avgBrightness = 0;
 
         // Für jedes Pixel...
         for (int x = 0; x < width; x++) {
@@ -41,23 +39,12 @@ public class ColorToBW {
 
                 // Helligkeit abspeichern + zum Durchschnitt dazuaddieren
                 // Double lässt maximal ein Bild mit 1.7977*10^308 (DOUBLE_MAX/255) Pixeln zu. Is genug.
-                avgBrightness += lineaerLuminance;
                 brightness[x][y] = lineaerLuminance;
             }
         }
 
-        // Durchschnitt berechnen
-        avgBrightness /= (double) (width*height);
-
         // Schärfen des Bildes
-        double[][] sharpenedBrightness = schaerfe(brightness);
-        // Treshold für die S/W ist dunkler als 3/4 d. Durchschnitts
-        double treshhold = avgBrightness * 0.75;
-        boolean[][] swImage = new boolean[width][height];
-        for (int x = 0; x < width; x++)
-            for (int y = 0; y < height; y++)
-                if (sharpenedBrightness[x][y] < treshhold)
-                    swImage[x][y] = true;
+        boolean[][] swImage = schaerfe(brightness);
 
         // + Bildvervollständigung
         return vervollstaendige(swImage);
@@ -69,32 +56,45 @@ public class ColorToBW {
      * @param in Ausgangsbild
      * @return geschärftes Bild
      */
-    private double[][] schaerfe(double[][] in) {
+    private boolean[][] schaerfe(double[][] in) {
         double[][] newBrightness = new double[width][height];
+        double avgBrightness = 0.0;
         // Randreihe wird nicht beachtet
         // Billiges Anti-Out-Of-Bounds
         for (int x = 1; x < width - 1; x++) {
             for (int y = 1; y < height - 1; y++) {
-                double avg = newBrightness[x][y];
+                double avg = in[x][y];
                 for (int x1 = x - 1; x1 <= x + 1; x1++)
                     for (int y1 = y - 1; y1 <= y + 1; y1++)
                         avg += in[x1][y1];
                 avg /= 10.0;
-                newBrightness[x][y] = avg;
+                newBrightness[x][y] = (in[x][y] + avg) / 2.0;
+                avgBrightness += newBrightness[x][y];
             }
         }
-        return newBrightness;
+        avgBrightness /= (double) (width*height);
+
+        // Treshold für die S/W ist dunkler als 3/4 d. Durchschnitts
+        double treshhold = avgBrightness * 0.75;
+        boolean[][] swImage = new boolean[width][height];
+        for (int x = 0; x < width; x++)
+            for (int y = 0; y < height; y++)
+                if (newBrightness[x][y] <= treshhold)
+                    swImage[x][y] = true;
+
+        return swImage;
     }
 
     /**
      * Vervollständigt das S/W-Bild
      */
     private boolean[][] vervollstaendige(boolean[][] in) {
-        // Zählen der Vervollständigten Pixel
-        int cnt;
-        // Es wird solange wiederholt, bis keine Vervollständigung mehr stattfinden kann
-        do {
-            cnt = 0;
+        int width = in.length;
+        int height = in[0].length;
+
+        boolean[][] out = new boolean[width][height];
+
+        for (int minAdj = 4; minAdj < 10; minAdj++){
             // Jedes Feld, dass mehr als 4 Schwarze Nachabrn hat ist wahrscheinlich auch Schwarz
             // --> Schwarz färben
             for (int x = 1; x < width - 1; x++) {
@@ -105,14 +105,17 @@ public class ColorToBW {
                         for (int x1 = x - 1; x1 <= x + 1; x1++)
                             for (int y1 = y - 1; y1 <= y + 1; y1++)
                                 if (in[x1][y1]) adj++;
-                        if (adj >= 4) {
-                            in[x][y] = true;
-                            cnt++;
+                        if (adj >= minAdj) {
+                            out[x][y] = true;
                         }
+                    } else {
+                        out[x][y] = true;
                     }
                 }
             }
-        } while (cnt > 0);
+            in = out;
+            out = new boolean[width][height];
+        }
 
         return in;
     }
