@@ -159,47 +159,58 @@ public class ImageDecoder {
         }
     }
 
-    // Needs some love
-    void bresenham(Coordinate a, Coordinate b)
+    // Nach:
+    // https://de.wikipedia.org/w/index.php?title=Bresenham-Algorithmus&oldid=163410869#C-Implementierung
+    private void bresenham(Coordinate a, Coordinate b)
     {
         int x1 = a.getX(); int y1 = a.getY();
         int x2 = b.getX(); int y2 = b.getY();
-        // delta of exact value and rounded value of the dependant variable
-        int d = 0;
 
-        int dy = Math.abs(y2 - y1);
-        int dx = Math.abs(x2 - x1);
+        // Delta in beide Richtungen bestimmen
+        int deltaX = x2 - x1;
+        int deltaY = y2 - y1;
 
-        int dy2 = (dy << 1); // slope scaling factors to avoid floating
-        int dx2 = (dx << 1); // point
+        // Bestimmen der Vorzeichen
+        int sigX = (int) Math.signum(deltaX);
+        int sigY = (int) Math.signum(deltaY);
 
-        int ix = x1 < x2 ? 1 : -1; // increment direction
-        int iy = y1 < y2 ? 1 : -1;
+        // Danach die Deltas Positv machen
+        deltaX = Math.abs(deltaX);
+        deltaY = Math.abs(deltaY);
 
-        if (dy <= dx) {
-            for (;;) {
-                trapezials[x1][y1] = true;
-                if (x1 == x2)
-                    break;
-                x1 += ix;
-                d += dy2;
-                if (d > dx) {
-                    y1 += iy;
-                    d -= dx2;
-                }
-            }
+        // Bewegungsvorschriften für Schritte
+        int parX, parY; // Parallelschritt
+        int diaX, diaY; // Diagonalschritt
+        int errS, errL; // Fehlerschritt S u. L
+
+        // Bestimmen der Schritte / Müssen die Achsen vertauscht werden?
+        if (deltaX > deltaY) {
+            parX = sigX; parY = 0;
+            diaX = sigX; diaY = sigY;
+            errS = deltaY; errL = deltaX;
         } else {
-            for (;;) {
-                trapezials[x1][y1] = true;
-                if (y1 == y2)
-                    break;
-                y1 += iy;
-                d += dx2;
-                if (d > dy) {
-                    x1 += ix;
-                    d -= dy2;
-                }
+            parX = 0; parY = sigY;
+            diaX = sigX; diaY = sigY;
+            errS = deltaX; errL = deltaY;
+        }
+
+        int x = x1; int y = y1;
+        int err = errL / 2;
+
+        // Leggo, let's go!
+        trapezials[x][y] = true;
+        // errL ist die Anzahl der benötigten Schritte
+        for (int t = 0; t < errL; t++) {
+            err -= errS;
+            if (err < 0) {
+                err += errL;
+                // Diagonalschritt vornehemen
+                x += diaX; y += diaY;
+            } else {
+                // Parallelschritt vornehmen
+                x+= parX; y += parY;
             }
+            trapezials[x][y] = true;
         }
     }
 
