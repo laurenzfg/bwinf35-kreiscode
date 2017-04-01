@@ -64,12 +64,10 @@ public class GUI extends JFrame {
         // Einstellungen Panel
         JPanel settingsPanel = new JPanel();
         settingsPanel.setBorder(BorderFactory.createTitledBorder("Einstellungen"));
-        settingsPanel.setPreferredSize(new Dimension(500, 800));
         settingsPanel.setLayout(new GridBagLayout());
 
         GridBagConstraints c = new GridBagConstraints();
         c.fill = GridBagConstraints.HORIZONTAL;
-        c.anchor = GridBagConstraints.NORTH;
         c.insets = new Insets(4,4,4,4);
 
         JLabel dictLabel = new JLabel("Wörterbuch:");
@@ -122,7 +120,7 @@ public class GUI extends JFrame {
 
         // Alles ins JFrame
         this.add(jMenuBar, BorderLayout.NORTH);
-        this.add(settingsPanel, BorderLayout.EAST);
+        this.add(settingsPanel, BorderLayout.PAGE_END);
         this.add(imagePanel, BorderLayout.CENTER);
 
         // Listeners drauf
