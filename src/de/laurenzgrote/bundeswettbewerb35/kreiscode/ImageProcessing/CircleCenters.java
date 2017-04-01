@@ -16,11 +16,10 @@ public class CircleCenters {
 
     // Zusammenhangskomponenten im S/W-Bild
     private int aktStructure = 0; // Anzahl d. Zusammenhangskomponenten
-    private int[][] structureNos; // Zusammenhangskomponente-ID nach Bildpixel
-    private ArrayList<Integer> structureSizes = new ArrayList<>(); // Größen je Zusammenhangskomponten
 
+    private int[][] structureNos; // Zusammenhangskomponente-ID nach Bildpixel
     // Liste über die CircleCenters, indiziert nach ZusammenhangskomponentenID
-    ArrayList<Coordinate> circleCenters = new ArrayList<>();
+    private ArrayList<Coordinate> circleCenters = new ArrayList<>();
 
     public CircleCenters(boolean[][] swImage) {
         // Übernehmen des S/W Bildes
@@ -47,71 +46,98 @@ public class CircleCenters {
     /**
      * Zählt durchgehend Schwarze Linien vertikal und horizontal
      */
-    @SuppressWarnings("Duplicates")
     private void scanStreaks() {
-        int streakLength = 0;
-        int falsesSoFar = 0;
-        // Horizontal (Zeilenweise) Scannen
-        int tolerance = (int) Math.round(width * 1.0/600.0); // Toleranz ist 1/3% der Breite
-        for (int y = 0; y < height; ++y) {
-            for (int x = 0; x < width; ++x) {
-                if (swImage[x][y]) {
-                    // Schwarz
-                    streakLength++;
-                } else if (falsesSoFar == tolerance) {
-                    // Weiß
-                    // Ende einer Streak?
-                    if (streakLength > 0) {
-                        for (int i = x - 1; i >= x - streakLength; i--) {
-                            hStreak[i][y] = streakLength;
-                        }
-                        streakLength = 0;
-                        falsesSoFar = 0;
-                    }
-                } else {
-                    falsesSoFar++;
-                }
-            }
-
-            // Neue Zeile, akt. Streak damit wenn vorhanden abgeschlossen
-            if (streakLength > 0) {
-                for (int i = width - 1; i >= width - streakLength; i--) {
-                    hStreak[i][y] = streakLength;
-                }
-                streakLength = 0;
-                falsesSoFar = 0;
-            }
-        }
-        // Vertikal (Spaltenweise) Scannen
-        tolerance = (int) Math.round(height * 1.0/600.0); // Toleranz ist 2/3% der Höhe
         for (int x = 0; x < width; ++x) {
-            for (int y = 0; y < height; ++y) {
-                if (swImage[x][y]) {
-                    // Schwarz
+            scanStreaks(x, 0, 0, 1);
+        }
+        for (int y = 0; y < height; ++y) {
+            scanStreaks(0, y, 1, 0);
+        }
+    }
+
+    /**
+     * Funktion zum Scannen nach Linien
+     * @param x Startkoordinate
+     * @param y Startkoordinate
+     * @param deltaX Bewegung in x-Richtung
+     * @param deltaY Bewegung in y-Richtung
+     */
+    private void scanStreaks(int x, int y, int deltaX, int deltaY) {
+        int streakLength  = 0;
+        int consecutiveFalses = 0;
+        // Eine Streak gilt als beendet, wenn 0.00125 Promille der Pixelzahl des Bildes an Falses aufeinander folgen
+        // Bsp.: In einem 2000x2000-Bild dürfen 5px nacheinander False sein
+        // Daraus resultiert dann BTW ein Mindest-U von: 6px --> Mindestdurchmesser Kreiscode 42px
+        int tolerance = (int) (width * height * 0.00000125); // Toleranz ist 1/3% der Breite
+
+        // Solange sich der Cursor im Bild befindet
+        while (x >= 0 && x < width && y >= 0 && y < height) {
+            // Auszählen
+            if (swImage[x][y]) {
+                if (streakLength == consecutiveFalses) {
+                    // Erstes true seit der letzten Streak
+                    streakLength = 1;
+                } else  {
                     streakLength++;
-                } else if (falsesSoFar == tolerance){
-                    // Weiß
-                    // Ende einer Streak?
-                    if (streakLength > 0) {
-                        for (int i = y - 1; i >= y - streakLength; i--) {
-                            vStreak[x][i] = streakLength;
-                        }
-                        streakLength = 0;
-                        falsesSoFar = 0;
-                    }
-                } else {
-                    falsesSoFar++;
                 }
+                consecutiveFalses = 0;
+            } else {
+                consecutiveFalses++;
+                streakLength++;
             }
 
-            // Neue Spalte, akt. Streak damit wenn vorhanden abgeschlossen
-            if (streakLength > 0) {
-                for (int i = height - 1; i >= height - streakLength; i--) {
-                    vStreak[x][i] = streakLength;
-                }
+            // Wenn die consecutiveFalses die Toleranz erreicht haben und ein True-Feld vorkam
+            if (consecutiveFalses == tolerance && streakLength != consecutiveFalses) {
+                // Streak ist hier beendet
+                markStreak(x, y, deltaX, deltaY, streakLength, consecutiveFalses);
                 streakLength = 0;
-                falsesSoFar = 0;
+                consecutiveFalses = 0;
             }
+
+            // Cursor verschieben
+            x += deltaX;
+            y += deltaY;
+        }
+
+        // Neue Zeile / Spalte, akt. Streak damit wenn vorhanden abgeschlossen
+        if (streakLength != consecutiveFalses) {
+            // Streak ist hier beendet
+            markStreak(x, y, deltaX, deltaY, streakLength, consecutiveFalses);
+        }
+    }
+
+
+    /**
+     * Hilfsfunktion zum Schreiben der Streak-Länge in alle Felder der Streak
+     * @param x Letzte Koordinate des Erkennungsprozesses
+     * @param y Letzte Koordinate des Erkennungsprozesses
+     * @param deltaX Bewegung in x-Richtung
+     * @param deltaY Bewegung in y-Richtung
+     * @param streakLength Berechnete Länge der Streak (inkl. anschließendem Toleranz-Suffix
+     * @param consecutiveFalses Länge des Toleranz-Suffixes am Ende
+     */
+    private void markStreak(int x, int y, int deltaX, int deltaY, int streakLength, int consecutiveFalses) {
+        // Besagter Toleranzsuffix gehört nicht zur eiegentlichen Streak
+        streakLength -= consecutiveFalses;
+        // Daher den Zeiger ensprechend zurückschieben
+        for (int i = 0; i < consecutiveFalses; i++) {
+            x -= deltaX;
+            y -= deltaY;
+        }
+
+        // Über die Gesamte streakLength Streaklänge schreiben
+        for (int i = 0; i < streakLength; i++) {
+            // Bestimme ob wir horizontal oder vertikal scannen
+            if (deltaX == 0) {
+                // Vertikal
+                vStreak[x][y] = streakLength;
+            } else {
+                // Horizontal
+                hStreak[x][y] = streakLength;
+            }
+            // Zeiger rückwärts verschieben
+            x -= deltaX;
+            y -= deltaY;
         }
     }
 
@@ -139,14 +165,15 @@ public class CircleCenters {
                         int halfVLength = vStreakLength / 2;
                         int first = y - halfVLength + 1;
                         int last = y + halfVLength - 1;
-                        if (Math.abs(hStreakLength - vStreakLength) < tolerance && first > 0 && last > 0 && last < height && first < height) {
+                        if (Math.abs(hStreakLength - vStreakLength) < tolerance
+                                && first > 0 && last > 0 && last < height && first < height) {
+                            // Sind die berechneten Werte innerhalb von True
                             if (swImage[center][first] && swImage[center][last]) {
                                 // Kreiskriterium I erfüllt,
                                 // --> Kandidat für Mittelpunkt also Mittelpunkt der Streak
                                 Coordinate coord = new Coordinate(center, y, hStreakLength);
 
-                                // Fäche nach Kreisformel
-                                double circleSize = (Math.PI * hStreakLength * hStreakLength) / 4.0;
+                                double circleSize = (Math.PI * hStreakLength * hStreakLength) / 4.0; // Berechnete Größe
                                 double actualSize = floodFill(coord); // Gemessene Größe
 
                                 // Delta zwischen Fläche nach Kreisformel und gemessener Fläche bestimmen
@@ -214,7 +241,6 @@ public class CircleCenters {
         }
 
         aktStructure++; // ID-Zähler erhöhen
-        structureSizes.add(size); // Speichern der Größe
         return size; // Rückgabe der Größe
     }
 
