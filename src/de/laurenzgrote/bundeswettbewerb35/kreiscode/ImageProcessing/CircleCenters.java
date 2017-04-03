@@ -7,8 +7,9 @@ import java.util.List;
 public class CircleCenters {
     // S/W-Bild für Dekodiervorgang
     private boolean[][] swImage;
-    private int width;
-    private int height;
+    private int width, height;
+    private int tolerance;
+
 
     // Zähler der vertikal/horizontal durchgehend Schwarz gefärbten Stellen
     private int[][] hStreak;
@@ -26,6 +27,11 @@ public class CircleCenters {
         this.swImage = swImage;
         width = swImage.length;
         height = swImage[0].length;
+
+        // Eine Streak gilt als beendet, wenn 0.00125 Promille der Pixelzahl des Bildes an Falses aufeinander folgen
+        // Bsp.: In einem 2000x2000-Bild dürfen 5px nacheinander False sein
+        // Daraus resultiert dann BTW ein Mindest-U von: 6px --> Mindestdurchmesser Kreiscode 42px
+        tolerance = (int) (width * height * 0.000001);
 
         hStreak = new int[width][height];
         vStreak = new int[width][height];
@@ -65,10 +71,6 @@ public class CircleCenters {
     private void scanStreaks(int x, int y, int deltaX, int deltaY) {
         int streakLength  = 0;
         int consecutiveFalses = 0;
-        // Eine Streak gilt als beendet, wenn 0.00125 Promille der Pixelzahl des Bildes an Falses aufeinander folgen
-        // Bsp.: In einem 2000x2000-Bild dürfen 5px nacheinander False sein
-        // Daraus resultiert dann BTW ein Mindest-U von: 6px --> Mindestdurchmesser Kreiscode 42px
-        int tolerance = (int) (width * height * 0.00000125); // Toleranz ist 1/3% der Breite
 
         // Solange sich der Cursor im Bild befindet
         while (x >= 0 && x < width && y >= 0 && y < height) {
@@ -128,12 +130,14 @@ public class CircleCenters {
         // Über die Gesamte streakLength Streaklänge schreiben
         for (int i = 0; i < streakLength; i++) {
             // Bestimme ob wir horizontal oder vertikal scannen
-            if (deltaX == 0) {
-                // Vertikal
-                vStreak[x][y] = streakLength;
-            } else {
-                // Horizontal
-                hStreak[x][y] = streakLength;
+            if (x > 0 && x < width && y > 0 && y < height) {
+                if (deltaX == 0) {
+                    // Vertikal
+                    vStreak[x][y] = streakLength;
+                } else {
+                    // Horizontal
+                    hStreak[x][y] = streakLength;
+                }
             }
             // Zeiger rückwärts verschieben
             x -= deltaX;
@@ -145,7 +149,6 @@ public class CircleCenters {
      * Sucht Kreise
      */
     private void scanForCircles() {
-        int tolerance = (int) Math.round(Math.round((width + height) / 2.0) * 2.0/300.0);
         // Horizontal über das Bild iterieren
         for (int x = 0; x < width; ++x) {
             for (int y = 0; y < height; y++) {

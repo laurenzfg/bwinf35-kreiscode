@@ -48,6 +48,7 @@ public class ColorToBW {
 
         // + Bildvervollständigung
         return vervollstaendige(swImage);
+        //return swImage;
     }
 
     /**
@@ -68,7 +69,7 @@ public class ColorToBW {
                     for (int y1 = y - 1; y1 <= y + 1; y1++)
                         avg += in[x1][y1];
                 avg /= 10.0;
-                newBrightness[x][y] = (in[x][y] + avg) / 2.0;
+                newBrightness[x][y] = (avg + in[x][y]) / 2.0;
                 avgBrightness += newBrightness[x][y];
             }
         }
@@ -94,9 +95,8 @@ public class ColorToBW {
 
         boolean[][] out = new boolean[width][height];
 
-        for (int minAdj = 4; minAdj < 10; minAdj++){
-            // Jedes Feld, dass mehr als 4 Schwarze Nachabrn hat ist wahrscheinlich auch Schwarz
-            // --> Schwarz färben
+        for (int i = 0; i < 100; i++){
+            int cnt = 0;
             for (int x = 1; x < width - 1; x++) {
                 for (int y = 1; y < height - 1; y++) {
                     // Für True-Felder muss keine Vervollständigung stattfinden
@@ -105,8 +105,9 @@ public class ColorToBW {
                         for (int x1 = x - 1; x1 <= x + 1; x1++)
                             for (int y1 = y - 1; y1 <= y + 1; y1++)
                                 if (in[x1][y1]) adj++;
-                        if (adj >= minAdj) {
+                        if (adj > 4) {
                             out[x][y] = true;
+                            cnt++;
                         }
                     } else {
                         out[x][y] = true;
@@ -115,6 +116,8 @@ public class ColorToBW {
             }
             in = out;
             out = new boolean[width][height];
+            if (cnt == 0)
+                break;
         }
 
         return in;
