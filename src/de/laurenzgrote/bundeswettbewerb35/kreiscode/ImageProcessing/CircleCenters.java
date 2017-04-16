@@ -1,5 +1,6 @@
 package de.laurenzgrote.bundeswettbewerb35.kreiscode.ImageProcessing;
 import de.laurenzgrote.bundeswettbewerb35.kreiscode.Coordinate;
+import de.laurenzgrote.bundeswettbewerb35.kreiscode.Main;
 
 import java.util.*;
 import java.util.List;
@@ -19,6 +20,7 @@ public class CircleCenters {
     private int aktStructure = 0; // Anzahl d. Zusammenhangskomponenten
 
     private int[][] structureNos; // Zusammenhangskomponente-ID nach Bildpixel
+    private ArrayList<Integer> structureSizes = new ArrayList<>(); // Größen der Struktur der jeweiligen ID
     // Liste über die CircleCenters, indiziert nach ZusammenhangskomponentenID
     private ArrayList<Coordinate> circleCenters = new ArrayList<>();
 
@@ -184,24 +186,11 @@ public class CircleCenters {
                                 // Ist das Delta zwischen Fläche nach Kreisformal und gemessener Fläche klein genug?
                                 if (delta >= 0.90) {
                                     // Jetzt Test auf umgebenden schwarzen Ring
-                                    double third = hStreakLength / 3.0;
-                                    double delta2 = 0;
-
-                                    int left = Math.min(center + hStreakLength, width - 1);
-                                    int right = Math.max(center - hStreakLength, 0);
-                                    int below = Math.min(y + hStreakLength, height - 1);
-                                    int above = Math.max(y - hStreakLength, 0);
-                                    delta2 += Math.min(hStreak[left][y], third) /
-                                            Math.max(hStreak[left][y], third);
-                                    delta2 += Math.min(hStreak[right][y], third) /
-                                            Math.max(hStreak[right][y], third);
-                                    delta2 += Math.min(vStreak[center][above], third) /
-                                            Math.max(vStreak[center][above], third);
-                                    delta2 += Math.min(vStreak[center][below], third) /
-                                            Math.max(vStreak[center][below], third);
-
-                                    delta2 /= 4.0;
-                                    if (delta2 >= 0.80)
+                                    double u = hStreakLength / 3.0;
+                                    circleSize = 6.0 * Math.PI * (u*u);
+                                    actualSize = floodFill(new Coordinate(center + hStreakLength, y));
+                                    delta = Math.min(circleSize, actualSize) / Math.max(circleSize, actualSize);
+                                    if (delta >= 0.90)
                                         circleCenters.add(coord);
                                 }
                             }
@@ -219,32 +208,42 @@ public class CircleCenters {
      * @return Größe der Zusammenhangskomponente
      */
     private int floodFill(Coordinate from) {
-        int size = 0;
-        Queue<Coordinate> q = new ArrayDeque<>();
-        q.add(from);
+        // Wurde die Struktur schon durchgerechnet?
+        int structNo = structureNos[from.getX()][from.getY()];
+        if (structNo == -1) {
+            // NEIN
+            int size = 0;
+            Queue<Coordinate> q = new ArrayDeque<>();
+            q.add(from);
 
-        while (!q.isEmpty()) {
-            Coordinate c = q.poll();
-            int x = c.getX();
-            int y = c.getY();
+            while (!q.isEmpty()) {
+                Coordinate c = q.poll();
+                int x = c.getX();
+                int y = c.getY();
 
-            if (structureNos[x][y] == -1) {
-                structureNos[x][y] = aktStructure;
-                size++;
-                // Anliegende Felder der Queue hinzufügen
-                if (x + 1 < width && swImage[x + 1][y])
-                    q.add(new Coordinate(x + 1, y));
-                if (x - 1 >= 0 && swImage[x - 1][y])
-                    q.add(new Coordinate(x - 1, y));
-                if (y + 1 < height && swImage[x][y+1])
-                    q.add(new Coordinate(x, y + 1));
-                if (y - 1 >= 0 && swImage[x][y-1])
-                    q.add(new Coordinate(x, y - 1));
+                if (structureNos[x][y] == -1) {
+                    structureNos[x][y] = aktStructure;
+                    size++;
+                    // Anliegende Felder der Queue hinzufügen
+                    if (x + 1 < width && swImage[x + 1][y])
+                        q.add(new Coordinate(x + 1, y));
+                    if (x - 1 >= 0 && swImage[x - 1][y])
+                        q.add(new Coordinate(x - 1, y));
+                    if (y + 1 < height && swImage[x][y+1])
+                        q.add(new Coordinate(x, y + 1));
+                    if (y - 1 >= 0 && swImage[x][y-1])
+                        q.add(new Coordinate(x, y - 1));
+                }
             }
-        }
 
-        aktStructure++; // ID-Zähler erhöhen
-        return size; // Rückgabe der Größe
+            aktStructure++; // ID-Zähler erhöhen
+
+            structureSizes.add(size); // Speichern der Größe
+            return size; // Rückgabe der Größe
+        } else {
+            // JA
+            return structureSizes.get(structNo);
+        }
     }
 
     public List<Coordinate> getCircleCenters() {
