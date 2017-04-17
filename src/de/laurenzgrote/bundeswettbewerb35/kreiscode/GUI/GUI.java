@@ -137,7 +137,7 @@ public class GUI extends JFrame {
         showSW.addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent actionEvent) {
-                if (circleCenters != null) {
+                if (swImage != null) {
                     CustomDialogs.showSWDialog(swImage);
                 }
             }
@@ -153,7 +153,9 @@ public class GUI extends JFrame {
         showTrap.addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent actionEvent) {
-                CustomDialogs.showTrapezialsDialog(swImage, imageDecoder.getTrapezials());
+                if (imageDecoder != null) {
+                    CustomDialogs.showTrapezialsDialog(swImage, imageDecoder.getTrapezials());
+                }
             }
         });
     }
