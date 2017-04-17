@@ -1,17 +1,15 @@
 package de.laurenzgrote.bundeswettbewerb35.kreiscode.ImageProcessing;
 
-import de.laurenzgrote.bundeswettbewerb35.kreiscode.Coordinate;
-
 import java.awt.*;
 import java.awt.image.BufferedImage;
 import java.util.Arrays;
-import java.util.Stack;
 
 public class ColorToBW {
     // Buntes Bild
     private BufferedImage rgbImage;
     private int width, height;
-    private double avgBrightness = 0.0;
+
+    private double avgBrightness = 0.0; // Wird später erfasst
 
     public static boolean[][] colorToBW (BufferedImage rgbImage) {
         return new ColorToBW(rgbImage).generateSW();
@@ -23,9 +21,6 @@ public class ColorToBW {
         height = rgbImage.getHeight();
     }
 
-    /**
-     * Generiert S/W-Bild aus buntem Bild
-     */
     private boolean[][] generateSW () {
         // Helligkeitswert für jeden Pixel berechnen
         double[][] brightness = new double[width][height];
@@ -44,19 +39,18 @@ public class ColorToBW {
 
                 // Helligkeit abspeichern
                 brightness[x][y] = lineaerLuminance;
-                avgBrightness += lineaerLuminance;
+                avgBrightness += lineaerLuminance; // Counter für arithm. Mittel
             }
         }
-
+        // Mittel berechnen
         avgBrightness /= width*height;
 
-        // Schärfen und Binärisieren des Bildes
+        // Entrauschen durch Median
         double[][] medianFilteredImage = medianFilter(brightness);
-        boolean[][] sobelImage = scharr(medianFilteredImage);
+        // Kantenerkennung und ausfüllen der Flächen
+        boolean[][] scharrImage = scharrFilter(medianFilteredImage);
 
-        return sobelImage;
-        // + Bildvervollständigung
-        //return hysterisis(sobelImage);
+        return scharrImage;
     }
 
     /**
@@ -65,22 +59,26 @@ public class ColorToBW {
      * @return geschärftes Bild
      */
     private double[][] medianFilter(double[][] in) {
+        // Gewichtung des Pixels und seiner Umgebung
         final double mask[] =  {1.0, 1.0, 1.0, 1.0, 1.0,
                                 1.0, 2.0, 3.0, 2.0, 1.0,
                                 1.0, 3.0, 4.0, 3.0, 1.0,
                                 1.0, 2.0, 3.0, 2.0, 1.0,
                                 1.0, 1.0, 1.0, 1.0, 1.0};
-
+        // Ausgabe der Funktion
         double[][] medianFilteredImage = new double[width][height];
 
-        // Randreihe wird nicht beachtet
-        // Billiges Anti-Out-Of-Bounds
+        // Randreihe wird nicht beachtet, damit kein OutOfBounds entsteht
         for (int x = 2; x < width - 2; x++) {
             for (int y = 2; y < height - 2; y++) {
-                double medianArray[] = new double[40]; // s. Maske in Doku
+                // Werte für Median
+                double medianArray[] = new double[40];
+                // Position in der 1D-Maske
                 int maskPos = 0;
+                // Für jedes Pixel um das Pixel (x, y):
                 for (int x1 = x - 2; x1 <= x + 2; x1++) {
                     for (int y1 = y - 2; y1 <= y + 2; y1++) {
+                        // Sooft in die Liste wie die maske bestimmt!
                         double multiplier = mask[maskPos];
                         for (int i = 0; i < multiplier; i++) {
                             medianArray[maskPos + i] = in[x][y];
@@ -88,6 +86,8 @@ public class ColorToBW {
                         maskPos++;
                     }
                 }
+
+                // Sortieren und Median in die Ausgabe schreiben
                 Arrays.sort(medianArray);
                 medianFilteredImage[x][y] = medianArray[19]; // 20 -> 19 (Nullindizierung)
             }
@@ -102,48 +102,58 @@ public class ColorToBW {
      * @param in
      * @return Ergebnis des Sobel-Operators
      */
-    private boolean[][] scharr(double[][] in) {
-        final double[] vertMask     = {-1.0, -2.0, -1.0,
-                                        0.0, 0.0 , 0.0,
-                                        1.0, 2.0 , 1.0};
-        final double[] horizMask    = {-1.0, 0.0 , 1.0,
-                                       -2.0, 0.0 , 2.0,
-                                       -1.0, 0.0 , 1.0};
+    private boolean[][] scharrFilter(double[][] in) {
+        // Scharr-Masken
+        final double[] vertMask     = {-3.0, -10.0, -3.0,
+                                        0.0, 0.0  , 0.0,
+                                        3.0, 10.0 , 3.0};
+        final double[] horizMask    = {-3.0, 0.0 , 3.0,
+                                       -10.0,0.0 ,10.0,
+                                       -3.0, 0.0 , 3.0};
 
+        // Ableitungsfunktionen des Graphens in beide Richtungen
         double[][] vertScharr = new double[width][height];
         double[][] horizScharr = new double[width][height];
 
         for (int x = 2; x < width - 2; x++) {
             for (int y = 2; y < height - 2; y++) {
-                int maskPos = 0;
-                double vert =  0.0;
+                int maskPos = 0; // Pos. in 1D-Maske
+                double vert =  0.0; // Werte der Ableitung
                 double horiz = 0.0;
+                // Umliegende Pixel um (x, y)
                 for (int x1 = x - 1; x1 <= x + 1; x1++) {
                     for (int y1 = y - 1; y1 <= y + 1; y1++) {
+                        // Laden der relevanten Multiplier
                         double vertMultiplier  = vertMask[maskPos];
                         double horizMultiplier = horizMask[maskPos];
+                        // Und enstprechen hinaufrechnen
                         vert  += in[x1][y1] * vertMultiplier;
                         horiz += in[x1][y1] * horizMultiplier;
                         maskPos++;
                     }
                 }
+                // Speichern der berechneten Werte
                 vertScharr[x][y] = vert;
                 horizScharr[x][y] = horiz;
             }
         }
 
+        // Vereinigen der beiden Ableitungen
         double[][] combScharr = new double[width][height];
         double avgScharr = 0.0;
         for (int x = 2; x < width - 2; x++) {
             for (int y = 2; y < height - 2; y++) {
+                // Laden der beiden Ableitungswerte zu (x, y)
                 double vert  = vertScharr[x][y];
                 double horiz = horizScharr[x][y];
+                // Formel
                 double val = Math.sqrt(vert * vert + horiz * horiz);
+                // Speichern in Variable und Durchschnittscounter
                 combScharr[x][y] = val;
                 avgScharr += val;
             }
         }
-        avgScharr /= width*height;
+        avgScharr /= width*height; // Mitteln
 
         boolean[][] binaryImage = new boolean[width][height];
         double treshhold = Math.max(75, 1.5*avgScharr);
@@ -189,92 +199,5 @@ public class ColorToBW {
         }*/
 
         return binaryImage;
-    }
-
-/*    private boolean[][] binary(double[][] in) {
-        boolean[][] floodFillBorder = new boolean[width][height];
-
-        // "Bande"
-        for (int x = 0; x < width; x++) {
-            floodFillBorder[x][0]           = true;
-            floodFillBorder[x][height-1]    = true;
-        }
-        for (int y = 0; y < height; y++) {
-            floodFillBorder[0][y]           = true;
-            floodFillBorder[width-1][y]     = true;
-        }
-
-        // Am Rand sind "komische" Werte
-        for (int x = 3; x < width-3; x++) {
-            for (int y = 3; y < height - 3; y++) {
-                if (in[x][y] > 150)
-                    floodFillBorder[x][y] = true;
-            }
-        }
-
-        boolean[][] swImage = new boolean[width][height];
-
-        // Mit TRUE intialisieren
-        for (int x = 0; x < width; x++) {
-            for (int y = 0; y < height; y++) {
-                swImage[x][y] = true;
-            }
-        }
-
-        Stack<Coordinate> ffStack = new Stack<>();
-        ffStack.push(new Coordinate(1, 1));
-
-*//*        while(!ffStack.empty()) {
-            Coordinate c = ffStack.pop();
-            int x = c.getX(); int y = c.getY();
-            if (!floodFillBorder[x][y]) {
-                swImage[x][y] = false;
-                floodFillBorder[x][y] = true;
-
-                ffStack.push(new Coordinate(x - 1, y));
-                ffStack.push(new Coordinate(x + 1, y));
-                ffStack.push(new Coordinate(x, y - 1));
-                ffStack.push(new Coordinate(x, y + 1));
-            }
-        }*//*
-
-        return floodFillBorder;
-    }*/
-
-    /**
-     * Vervollständigt das S/W-Bild
-     */
-    private boolean[][] hysterisis(boolean[][] in) {
-        int width = in.length;
-        int height = in[0].length;
-
-        boolean[][] out = new boolean[width][height];
-
-        for (int i = 0; i < 100; i++){
-            int cnt = 0;
-            for (int x = 1; x < width - 1; x++) {
-                for (int y = 1; y < height - 1; y++) {
-                    // Für True-Felder muss keine Vervollständigung stattfinden
-                    if (!in[x][y]) {
-                        int adj = -1; // Startfeld soll nicht mitgezählt werden
-                        for (int x1 = x - 1; x1 <= x + 1; x1++)
-                            for (int y1 = y - 1; y1 <= y + 1; y1++)
-                                if (in[x1][y1]) adj++;
-                        if (adj > 4) {
-                            out[x][y] = true;
-                            cnt++;
-                        }
-                    } else {
-                        out[x][y] = true;
-                    }
-                }
-            }
-            in = out;
-            out = new boolean[width][height];
-            if (cnt == 0)
-                break;
-        }
-
-        return in;
     }
 }

@@ -1,6 +1,5 @@
 package de.laurenzgrote.bundeswettbewerb35.kreiscode.ImageProcessing;
 import de.laurenzgrote.bundeswettbewerb35.kreiscode.Coordinate;
-import de.laurenzgrote.bundeswettbewerb35.kreiscode.Main;
 
 import java.util.*;
 import java.util.List;
