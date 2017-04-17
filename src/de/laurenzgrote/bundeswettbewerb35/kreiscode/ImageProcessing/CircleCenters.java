@@ -184,7 +184,9 @@ public class CircleCenters {
                                 // Delta zwischen Fläche nach Kreisformel und gemessener Fläche bestimmen
                                 double delta = Math.min(circleSize, actualSize) / Math.max(circleSize, actualSize);
                                 // Ist das Delta zwischen Fläche nach Kreisformal und gemessener Fläche klein genug?
-                                if (delta >= 0.90) {
+                                // Und kann da größenmäßig überhaupt ein kompletter KreisCode sein?
+                                // Radius (von Center) : 6u = 2x Durchmesser
+                                if (delta >= 0.90 && center + 2*hStreakLength < width && center - 2*hStreakLength >= 0) {
                                     // Jetzt Test auf umgebenden schwarzen Ring
                                     double u = hStreakLength / 3.0;
                                     circleSize = 6.0 * Math.PI * (u*u);

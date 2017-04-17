@@ -2,6 +2,7 @@ package de.laurenzgrote.bundeswettbewerb35.kreiscode.ImageProcessing;
 
 import java.awt.*;
 import java.awt.image.BufferedImage;
+import java.util.Arrays;
 
 public class ColorToBW {
     // Buntes Bild
@@ -37,51 +38,74 @@ public class ColorToBW {
                 // https://en.wikipedia.org/wiki/Grayscale#Colorimetric_.28luminance-preserving.29_conversion_to_grayscale
                 double lineaerLuminance = r*0.2126 + g*0.7152 + b*0.0722;
 
-                // Helligkeit abspeichern + zum Durchschnitt dazuaddieren
-                // Double lässt maximal ein Bild mit 1.7977*10^308 (DOUBLE_MAX/255) Pixeln zu. Is genug.
+                // Helligkeit abspeichern
                 brightness[x][y] = lineaerLuminance;
             }
         }
 
-        // Schärfen des Bildes
-        boolean[][] swImage = schaerfe(brightness);
+        // Schärfen und Binärisieren des Bildes
+        boolean[][] swImage = medianFilter(brightness);
 
         // + Bildvervollständigung
         return vervollstaendige(swImage);
-        //return swImage;
     }
 
     /**
-     * Schärt das Bild. Jedes Pixeln bekommt als Helligkeit den Durschnitt
-     * aus der eigenen Helligkeit und der Helligkeit der Umgebungspixel.
+     * Schärt das Bild mit einem Medianfilter. https://en.wikipedia.org/wiki/Median_filter
      * @param in Ausgangsbild
      * @return geschärftes Bild
      */
-    private boolean[][] schaerfe(double[][] in) {
+    private boolean[][] medianFilter(double[][] in) {
+        final int mask[] = {1,1,1,1,1,
+                            1,2,3,2,1,
+                            1,3,4,3,1,
+                            1,2,3,2,1,
+                            1,1,1,1,1};
+
         double[][] newBrightness = new double[width][height];
-        double avgBrightness = 0.0;
+
         // Randreihe wird nicht beachtet
         // Billiges Anti-Out-Of-Bounds
-        for (int x = 1; x < width - 1; x++) {
-            for (int y = 1; y < height - 1; y++) {
-                double avg = in[x][y];
-                for (int x1 = x - 1; x1 <= x + 1; x1++)
-                    for (int y1 = y - 1; y1 <= y + 1; y1++)
-                        avg += in[x1][y1];
-                avg /= 10.0;
-                newBrightness[x][y] = (avg + in[x][y]) / 2.0;
-                avgBrightness += newBrightness[x][y];
+        for (int x = 2; x < width - 2; x++) {
+            for (int y = 2; y < height - 2; y++) {
+                double medianArray[] = new double[40]; // s. Maske in Doku
+                int pos = 0;
+                for (int x1 = x - 2; x1 <= x + 2; x1++) {
+                    for (int y1 = y - 2; y1 <= y + 2; y1++) {
+                        int multiplier = mask[pos];
+                        for (int i = 0; i < multiplier; i++) {
+                            medianArray[pos + i] = in[x][y];
+                        }
+                        pos++;
+                    }
+                }
+                Arrays.sort(medianArray);
+                newBrightness[x][y] = medianArray[19]; // 20 -> 19 (Nullindizierung)
             }
         }
-        avgBrightness /= (double) (width*height);
 
-        // Treshold für die S/W ist dunkler als 3/4 d. Durchschnitts
-        double treshhold = avgBrightness * 0.75;
+        // https://de.wikipedia.org/wiki/Canny-Algorithmus
         boolean[][] swImage = new boolean[width][height];
-        for (int x = 0; x < width; x++)
-            for (int y = 0; y < height; y++)
-                if (newBrightness[x][y] <= treshhold)
+        for (int x = 1; x < width-1; x++) {
+            for (int y = 1; y < height - 1; y++) {
+                double fieldLuminance = newBrightness[x][y];
+                double surroundingLuminance = 0.0;
+
+                int pos = 0;
+                for (int x1 = x - 1; x1 <= x + 1; x1++) {
+                    for (int y1 = y - 1; y1 <= y + 1; y1++) {
+                        if (x1 != x || y1 != y) {
+                            surroundingLuminance += newBrightness[x1][y1];
+                            pos++;
+                        }
+                    }
+                }
+
+                surroundingLuminance /= 8.0;
+                if (Math.abs(fieldLuminance - surroundingLuminance) < 15.0)
                     swImage[x][y] = true;
+                }
+        }
 
         return swImage;
     }
