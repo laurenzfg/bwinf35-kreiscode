@@ -21,6 +21,7 @@ public class GUI extends JFrame {
     private final FileFilter dictFilter = new FileNameExtensionFilter("Wörterbuchdateien", "txt");
 
     // Buttons in der Swing-Oberfläche
+    private final JMenuItem showEdges;
     private final JMenuItem showSW;
     private final JMenuItem showCC;
     private final JMenuItem showTrap;
@@ -37,7 +38,7 @@ public class GUI extends JFrame {
     private File selectedDict;
 
     // Versch. Zwischenstufen der Bilddekodierung
-    private boolean[][] swImage;
+    private boolean[][] edgesImage, swImage;
     private CircleCenters circleCenters;
     private ImageDecoder imageDecoder;
 
@@ -51,9 +52,11 @@ public class GUI extends JFrame {
 
         // JMenu
         JMenuBar jMenuBar = new JMenuBar();
+        showEdges = new JMenuItem("Zeige erkannte Kanten");
         showSW = new JMenuItem("Zeige S/W-Bild");
         showCC = new JMenuItem("Zeige CircleCenters");
         showTrap = new JMenuItem("Zeige Trapeze");
+        jMenuBar.add(showEdges);
         jMenuBar.add(showSW);
         jMenuBar.add(showCC);
         jMenuBar.add(showTrap);
@@ -134,6 +137,14 @@ public class GUI extends JFrame {
 
     // Listener für die Menubar
     private void jMenuBarListeners() {
+        showEdges.addActionListener(new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent actionEvent) {
+                if (edgesImage != null) {
+                    CustomDialogs.showSWDialog(edgesImage);
+                }
+            }
+        });
         showSW.addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent actionEvent) {
@@ -165,8 +176,10 @@ public class GUI extends JFrame {
         decodeButton.addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent actionEvent) {
+                ColorToBW c2bw = new ColorToBW(originalImage);
                 // Schwarz-Weiß-Bild ermitteln
-                swImage = ColorToBW.colorToBW(originalImage);
+                edgesImage = c2bw.getEdgesImage();
+                swImage = c2bw.getSWImage();
                 // CircleCenters ermitteln
                 circleCenters = new CircleCenters(swImage);
                 // Mit den Kreismittelpunkten die Beudeutung der Kreiscodes ermitteln

@@ -191,7 +191,7 @@ public class CircleCenters {
                                     circleSize = 6.0 * Math.PI * (u*u);
                                     actualSize = floodFill(new Coordinate(center + hStreakLength, y));
                                     delta = Math.min(circleSize, actualSize) / Math.max(circleSize, actualSize);
-                                    if (delta >= 0.90)
+                                    if (delta >= 0.7)
                                         circleCenters.add(coord);
                                 }
                             }

@@ -6,8 +6,12 @@ import java.awt.*;
 import java.awt.image.BufferedImage;
 import java.util.Stack;
 
+// https://en.wikipedia.org/wiki/Canny_edge_detector
 public class ColorToBW {
     private int width, height;
+
+    // Canny-Ergebnis
+    private boolean[][] edgesImage;
 
     // Binärbild
     private boolean[][] swImage;
@@ -20,7 +24,7 @@ public class ColorToBW {
         return new ColorToBW(rgbImage).getSWImage();
     }
 
-    private ColorToBW(BufferedImage rgbImage) {
+    public ColorToBW(BufferedImage rgbImage) {
         width = rgbImage.getWidth();
         height = rgbImage.getHeight();
 
@@ -52,13 +56,159 @@ public class ColorToBW {
         double[][] gaussImage = gaussianFilter(brightness);
         // Kantenerkennung
         double[][] scharrImage = scharrFilter(gaussImage);
-
+        edgesImage = toBinary(scharrImage);
         // Speichern des Binärbildes
-        swImage = toBinary(scharrImage, gaussImage);
+        swImage = fill(edgesImage);
     }
 
-    private boolean[][] getSWImage() {
+    private boolean[][] fill (boolean[][] in) {
+        int[][] result = new int[width][height];
+
+        // Initialisieren mit -1
+        for (int x = 0; x < width; x++) {
+            for (int y = 0; y < height; y++) {
+                result[x][y] = -1;
+            }
+        }
+
+        int cnt = 0;
+        // 0 wird der BG in in[][] --> Flood-Fill über die Falses von [0][0]
+        Stack<Coordinate> ffStack = new Stack<>();
+        ffStack.add(new Coordinate(0, 0));
+        while (!ffStack.empty()) {
+            Coordinate c = ffStack.pop();
+            int x = c.getX();
+            int y = c.getY();
+            if (!in[x][y] && result[x][y] == -1) {
+                result[x][y] = cnt;
+
+                if (x-1 >= 0)
+                    ffStack.push(new Coordinate(x-1, y));
+                if (x+1 < width)
+                    ffStack.push(new Coordinate(x+1, y));
+                if (y-1 >= 0)
+                    ffStack.push(new Coordinate(x, y-1));
+                if (y+1 < height)
+                    ffStack.push(new Coordinate(x, y+1));
+            }
+        }
+        cnt++;
+
+        boolean flag;
+        do {
+            flag = false;
+
+            Stack<Coordinate> blackStack = new Stack<>();
+            Stack<Coordinate> whiteStack = new Stack<>();
+
+            // Scannen wir alle an den bekannten Beriech inzidenten schwarzen unbekannten Felder auf den schwarzen Stack
+            for (int x = 0; x < width - 1; x++) {
+                for (int y = 0; y < height; y++) {
+                    if (result[x][y] >= 0 && in[x+1][y] && result[x+1][y] == -1) {
+                        blackStack.add(new Coordinate(x+1, y));
+                        flag = true;
+                    }
+                }
+            }
+
+            while (!blackStack.empty()) {
+                Coordinate c = blackStack.pop();
+                int x = c.getX();
+                int y = c.getY();
+
+                result[x][y] = cnt;
+
+                if (x-1 >= 0 && result[x-1][y] == -1) {
+                    if (in[x - 1][y]) {
+                        blackStack.add(new Coordinate(x - 1, y));
+                    } else {
+                        whiteStack.add(new Coordinate(x - 1, y));
+                    }
+                }
+                if (x+1 < width && result[x+1][y] == -1) {
+                    if (in[x + 1][y]) {
+                        blackStack.add(new Coordinate(x + 1, y));
+                    } else {
+                        whiteStack.add(new Coordinate(x + 1, y));
+                    }
+                }
+                if (y - 1 >= 0 && result[x][y - 1] == -1) {
+                    if (in[x][y - 1]) {
+                        blackStack.add(new Coordinate(x, y - 1));
+                    } else {
+                        whiteStack.add(new Coordinate(x, y - 1));
+                    }
+                }
+                if (y + 1 < height && result[x][y + 1] == -1) {
+                    if (in[x][y + 1]) {
+                        blackStack.add(new Coordinate(x, y + 1));
+                    } else {
+                        whiteStack.add(new Coordinate(x, y + 1));
+                    }
+                }
+            }
+
+            while(!whiteStack.empty()) {
+                Coordinate c = whiteStack.pop();
+                int x = c.getX();
+                int y = c.getY();
+
+                result[x][y] = cnt;
+
+                if (x-1 >= 0 && result[x-1][y] == -1 && !in[x - 1][y])
+                    whiteStack.add(new Coordinate(x - 1, y));
+                if (x+1 < width && result[x+1][y] == -1 && !in[x + 1][y])
+                    whiteStack.add(new Coordinate(x + 1, y));
+                if (y-1 >= 0 && result[x][y-1] == -1 && !in[x][y-1])
+                    whiteStack.add(new Coordinate(x, y-1));
+                if (y+1 < height && result[x][y+1] == -1 && !in[x][y+1])
+                    whiteStack.add(new Coordinate(x, y+1));
+            }
+            cnt++;
+        } while (flag);
+        // Gerade Zahlen --> false; Ungerade Zahlen --> True
+        boolean[][] out = new boolean[width][height];
+        for (int x = 0; x < width; x++) {
+            for (int y = 0; y < height; y++) {
+                if (result[x][y] % 2 != 0) {
+                    out[x][y] = true;
+                } else {
+                    out[x][y] = false;
+                }
+            }
+        }
+
+        return out;
+    }
+    private boolean[][] scanline (boolean[][] in) {
+        boolean[][] out = new boolean[width][height];
+
+        for (int y = 0; y < height; y++) {
+            boolean black = false;
+            boolean inStreak = false;
+            for (int x = 0; x < width; x++) {
+                if (in[x][y]) {
+                    out[x][y] = true;
+                    if (!inStreak) {
+                        black = !black;
+                    }
+                    inStreak = true;
+                } else if (black) {
+                    out[x][y] = true;
+                    inStreak = false;
+                }
+            }
+        }
+
+        return out;
+    }
+
+    public boolean[][] getSWImage() {
         return swImage;
+    }
+
+    public boolean[][] getEdgesImage() {
+        return edgesImage;
     }
 
     /**
@@ -195,29 +345,30 @@ public class ColorToBW {
         }
         avgScharr /= (width - 2 * kernelGap) * (height - 2 * kernelGap); // Mitteln
 
-        // Auch hier gibts wieder unebachtete Randwerte
-        // Hier setze ich dann einen hohen Wert ein, damit im nächsen Schritt ein schwarzer Rand entsteht
-        for (int y = 0; y < height; y++) {
+        // Hier gibt es ebenfalls einen Randbereich,
+        // dort setze 0 ein. Damit werden dort keine Ecken erkannt
+        for (int x = 0; x < width; x++) {
             // Obere/Untere Zeilen oder nur die Bande Rechts und Links
-            if (y < kernelGap || y >= height - kernelGap) {
-                // Oben/Unten
-                for (int x = 0; x < width; x++)
-                    combScharr[x][y] = Integer.MAX_VALUE;
-            } else {
-                // Rechts + Links
-                for (int x = 0; y < kernelGap; x++)
-                    combScharr[x][y] = Integer.MAX_VALUE;
-                for (int x = width - kernelGap; x < width; x++)
-                    combScharr[x][y] = Integer.MAX_VALUE;
+            for (int y = 0; y < height; y++) {
+                if (y < 5 || y >= height - 5 || x < 5 || x >= width -5) {
+                    combScharr[x][y] = 0.0;
+                }
             }
         }
 
         return combScharr;
     }
-    private boolean[][] toBinary(double[][] scharrImage, double[][] gaussImage) {
+
+    /**
+     * Das Ergebnis des Scharr-Operators mit dem Hysterese binärisieren:
+     * http://homepages.inf.ed.ac.uk/rbf/HIPR2/canny.htm
+     * @param scharrImage
+     * @return
+     */
+    private boolean[][] toBinary(double[][] scharrImage) {
         // Binärisieren mit Schwellwert
         boolean[][] binaryImage = new boolean[width][height];
-        double treshhold = Math.max(200, 1.5*avgScharr); // Treshhold durch abschätzen ermittelt :D
+        double treshhold = Math.max(200, 1.5*avgScharr);
         Stack<Coordinate> hysteresisStack = new Stack<>();
 
         for (int x = 0; x < width; x++) {
@@ -230,8 +381,8 @@ public class ColorToBW {
             }
         }
 
-        // Hysterese mit Vervollständigung
-        treshhold = Math.max(100, avgScharr); // Treshhold durch abschätzen ermittelt :D
+        // Hysterese
+        treshhold /= 2.0; // Treshhold für Hysterese senken
         while (!hysteresisStack.empty()) {
             Coordinate c = hysteresisStack.pop();
             int x = c.getX(); int y = c.getY();
