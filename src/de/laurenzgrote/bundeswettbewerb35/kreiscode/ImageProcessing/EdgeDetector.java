@@ -1,10 +1,13 @@
 package de.laurenzgrote.bundeswettbewerb35.kreiscode.ImageProcessing;
 
 import de.laurenzgrote.bundeswettbewerb35.kreiscode.Coordinate;
+import de.laurenzgrote.bundeswettbewerb35.kreiscode.Main;
 
 import java.awt.*;
 import java.awt.image.BufferedImage;
 import java.util.Stack;
+
+import static java.lang.Math.PI;
 
 /**
  * Eckenerkennung mit dem Canny-Algorithmus und anschließenden Ausfüllung der schwarzen Bildbereiche
@@ -180,13 +183,51 @@ public class EdgeDetector {
         // Vereinigen der beiden Ableitungen
         // sqrt(vert^2+horiz^2)
         double[][] combScharr = new double[width][height];
+        int[][] angles = new int[width][height];
         for (int x = kernelGap; x < width - kernelGap; x++) {
             for (int y = kernelGap; y < height - kernelGap; y++) {
                 // Laden der beiden Ableitungswerte zu (x, y)
                 double vert = vertScharr[x][y];
                 double horiz = horizScharr[x][y];
                 // Speichern
+                angles[x][y] = getAngle(horiz, vert);
                 combScharr[x][y] = Math.sqrt(vert * vert + horiz * horiz);
+            }
+        }
+
+        // Non-Maximum-Suppression
+        double[][] nmsImage = new double[width][height];
+        for (int x = kernelGap; x < width - kernelGap; x++) {
+            for (int y = kernelGap; y < height - kernelGap; y++) {
+                int direction = angles[x][y];
+                double hereVal = combScharr[x][y];
+                double a = 0, b = 0;
+                switch(direction) {
+                    case 0:
+                        // Vertikal
+                        a = combScharr[x-1][y];
+                        b = combScharr[x+1][y];
+                        break;
+                    case 1:
+                        // lu-ro
+                        a = combScharr[x+1][y+1];
+                        b = combScharr[x-1][y-1];
+                        break;
+                    case 2:
+                        // Horizontal
+                        a = combScharr[x][y-1];
+                        b = combScharr[x][y+1];
+                        break;
+                    case 3:
+                        // ru-lo
+                        a = combScharr[x-1][y+1];
+                        b = combScharr[x+1][y-1];
+                }
+                if (hereVal > a && hereVal > b) {
+                    nmsImage[x][y] = hereVal;
+                } else {
+                    nmsImage[x][y] = 0.0;
+                }
             }
         }
 
@@ -199,12 +240,34 @@ public class EdgeDetector {
             for (int y = 0; y < height; y++) {
                 kernelGap *= 2;
                 if (y < kernelGap || y >= height - kernelGap || x < kernelGap || x >= width - kernelGap) {
-                    combScharr[x][y] = 0.0;
+                    nmsImage[x][y] = 0.0;
                 }
             }
         }
 
-        return combScharr;
+        return nmsImage;
+    }
+
+    // 0: vertikal; 1: linksunten - rechts oben; 2: horizontal; 3: rechtsunten - linksoben
+    private int getAngle (double horiz, double vert) {
+        // http://en.cppreference.com/w/cpp/numeric/math/atan2
+        double a = Math.atan2(vert, horiz);
+        if ((a > 0.375*PI && a < 0.625*PI) || ((a > -0.375*PI && a < -0.625*PI)))
+            return 0;
+        if ((a < -0.625*PI && a > -0.875*PI) || (a > 0.125*PI && a < 0.375*PI))
+            return 1;
+        if ((a < 0.125*PI && a > -0.125*PI) || a < 0.875*PI || a < -0.875 * PI)
+            return 2;
+        return 3;
+/*        if ((exactAngle >= -22.5 && exactAngle <= 22.5) || (exactAngle >= 112.5 && exactAngle <= 157.5 )) {
+            return 0;
+        } else if ((exactAngle >= 157.5 && exactAngle <= 202.5) || (exactAngle >= 22.5 && exactAngle <= 67.5)) {
+            return 1;
+        } else if ((exactAngle >= 247.5 && exactAngle < 292.5) || (exactAngle >= 67.5 && exactAngle <= 112.5)) {
+            return 2;
+        } else {
+            return 3;
+        }*/
     }
 
     /**
@@ -216,7 +279,7 @@ public class EdgeDetector {
     private boolean[][] hysteresis(double[][] scharrImage) {
         boolean[][] binaryImage = new boolean[width][height]; // Ausgabebild
         // Binärisieren mit hohem Schwellwert
-        double treshhold = 200.0;
+        double treshhold = 100.0;
         Stack<Coordinate> hysteresisStack = new Stack<>(); // Die Trues mit hohem Wert für spätere Hysterese
 
         for (int x = 0; x < width; x++) {
