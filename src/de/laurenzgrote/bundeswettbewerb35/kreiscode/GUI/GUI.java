@@ -2,7 +2,7 @@ package de.laurenzgrote.bundeswettbewerb35.kreiscode.GUI;
 
 import de.laurenzgrote.bundeswettbewerb35.kreiscode.*;
 import de.laurenzgrote.bundeswettbewerb35.kreiscode.ImageProcessing.CircleCenters;
-import de.laurenzgrote.bundeswettbewerb35.kreiscode.ImageProcessing.ColorToBW;
+import de.laurenzgrote.bundeswettbewerb35.kreiscode.ImageProcessing.EdgeDetector;
 import de.laurenzgrote.bundeswettbewerb35.kreiscode.ImageProcessing.ImageDecoder;
 
 import javax.imageio.ImageIO;
@@ -176,7 +176,7 @@ public class GUI extends JFrame {
         decodeButton.addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent actionEvent) {
-                ColorToBW c2bw = new ColorToBW(originalImage);
+                EdgeDetector c2bw = new EdgeDetector(originalImage);
                 // Schwarz-Weiß-Bild ermitteln
                 edgesImage = c2bw.getEdgesImage();
                 swImage = c2bw.getSWImage();
