@@ -1,3 +1,33 @@
 \section{Lösungsidee}
+Die in Kapitel 1 vorgestellte Einleseprozedur wird den Anforderungen eines Fotos oder eines Scans nicht gerecht. Bei schankender Ausleuchtung des Bildes lässt sich kein geeigneter Schwellwert bestimmen. Stattdessen wende ich verschieden Algorithmen des maschinellen Sehens an, um ein möglichst ideales Bild aus dem Eingabebild zu extrahieren.
+
+Ich extrahiere zunächst alle Kanten des Bildes. Kanten sind Stellen, an denen sich die Farbwerte eines Pixels schlagartig ändern. Den Kantextraktionsalgorithmus implementiere ich hierbei so, dass die Kante eine lückenlose Linie darstellt.
+
+Mit diesen Kanten habe ich das Bild segmentiert. Anschließend fülle ich jedes Segment komplett schwarz (1) oder weiß (0).
+Der Bestimmung der Farbe der Füllung lege ich folgende Annahme zu Grunde:
+
+Der Hintergrund des Bildes ist komplett weiß. Alle an den Hintergrund angrenzenden Segmente sind schwarz, schließlich fand dort eine schlagartige Farbänderung zum Hintergrund statt. Die Felder, die an diese Segmente angrenzen sind weiß, da sich die Farbe widerum schalgartig geändert hat. Dieses Muster setze ich fort, bis die Farben aller Segmente bestimmt sind.
+
+Vorteil dieser Vorhergehensweise über ein Schwellwertverfahren ist, dass jeder ähnlich gefärbte Bereich die selbe Farbe erhält. Ein zusammen gehörender Bereich enthält keinerlei Lücken. Dies ist für den Kreismittelpunkterkennungsalgorithmus essenziell, da sonst die Radiusbestimmung fehlschlägt.
+ 
 \section{Umsetzung}
+\subsection{Graustufenbild}
+In einem ersten Schritt bestimme ich aus dem farbigen Bild ein Graustufenbild, Dies erfolgt mit einer gewichteten Mittelung aus den Intensitätswerten der drei Primärfarbkanäle. Laut der Norm CIE 1931\footnote{\url{en.wikipedia.org/wiki/Grayscale}} ist der Grauwert mit folgender Formel zu bestimmen:
+
+\begin{equation}
+Y = 0,2126R+0,7152G+0,0722G
+\end{equation}
+
+\subsection{Weichzeichnung}
+Darauf filtere ich grobe Außreißer aus dem Bild heraus. Hierfür wende ich einen Gaußschen Weichzeicher an. Ein solcher Weichzeichner funktioniert, indem für jedes Pixel ein gewichteter Mittelwert aus seinem eigenen Grauwert und den Grauwerten seiner Umgebung bestimmt wird. Der Gewichtung wird die Gaußsche Normalverteilung zugrunde gelegt. Ich habe mich für ein Sigma von 3 entschieden. Mit dieser Kurve werden große Ausreißer entfernt, der Kantenverlauf bleibt jedoch erhalten. Aus dieser Kurve lässt sich folgende Matrix extrahieren\footnote{\url{http://dev.theomader.com/gaussian-kernel-calculator/}}:
+\begin{equation}
+	\begin{bmatrix}
+	0,031827&0,037541&0,039665&0,037541&0,031827 \\
+	0,037541&0,044281&0,046787&0,044281&0,037541 \\
+	0,039665&0,046787&0,049434&0,046787&0,039665 \\
+	0,037541&0,044281&0,046787&0,044281&0,037541 \\
+	0,031827&0,037541&0,039665&0,037541&0,031827 \\
+	\end{bmatrix}
+\end{equation}
+Jeder Pixel wird mit dem mittleren Wert multipliziert. Die umliegenden Pixel werden mit ihren Pendants in der Matrix multipliziert. Die Summe aus allen Produkten entspricht dem neuen Wert des Pixels.
 \section{Beispiele}

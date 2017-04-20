@@ -48,14 +48,19 @@
 	\subtitle{Aufgabe 3}
 	\author{Laurenz Friedrich Grote}
 	\date{}
-	\publishers{		
-		\centering
-		\includegraphics[width=0.8\linewidth]{frontmatter.png}
-	}
 	\maketitle
 	\tableofcontents
 	\vspace {2em}
-	Meine Umsetzung für "`\task"' erfolgte unter Ubuntu mit Java (OpenJDK 1.8). Ich habe Ihnen den Programmcode sowie eine ausführbare .jar-Datei beigelegt.
+	Meine Umsetzung für "`\task"' erfolgte unter Linux mit Java (OpenJDK 1.8). Ich habe Ihnen den Programmcode sowie eine ausführbare .jar-Datei beigelegt. Da die Aufgabenstellung in Teilaufgaben aufgeteilt ist, weiche ich in meiner Dokumentation von der üblichen Gliederung ab. Stattdessen gliedere ich die Dokumentation in je ein Kapitel für jede Teilaufgabe. 
+	
+	\vfill{}
+	\textbf{Abstract}:
+	Das Eingabebild wird in ein Binärbild umgewandelt, indem zunächst mit dem Canny-Algorithmus die Ecken des Eingabebildes bestimmt werden. In diesem Kantenbild werden daraufhin die Polygone mit Einsen ausgefüllt. So entsteht ein rauschfreies Bild für die nachfolgenden Dekodierungsschritte.
+
+Einen Kreismittelpunkt habe ich definiert als einem Punkt in einem Polygon, an dem die Abstände zum Polygonrand in alle Richtungen identisch sind. Außerdem muss der Flächeninhalt des Polygons dem eines Kreises mit dem ermittelten Radius gleichen.
+
+Die Kreisbedeutungen werden bestimmt, indem in allen informationstragenden Kreisringsegmente die vorherrschende Farbe bestimmt wird. Dieses 16bittige binäre Wort wird mit der Übersetzungstabelle verglichen. Zu beachten ist hierbei, dass aufgrund der beliebigen Ratation des \task{}s der Wortanfang nicht notwendigerweise beim ersten Bit des Wortes liegt.
+
 	\pagebreak
 	% ----------------------------------------------------------------------------
 	\chapter{Erkennung von Kreismittelpunkten}
