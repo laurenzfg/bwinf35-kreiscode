@@ -52,7 +52,7 @@ public class EdgeDetector {
         // Ableitung bestimmen
         double[][] scharrImage = scharrFilter(gaussImage);
         // Ecken mit Hysterese herausfiltern
-        edgesImage = hysteresis(scharrImage);
+        edgesImage = dilate(hysteresis(scharrImage));
         // Ausfüllen der Polygone
         swImage = fill(edgesImage);
     }
@@ -141,13 +141,13 @@ public class EdgeDetector {
         //  http://docs.opencv.org/2.4/doc/tutorials/imgproc/imgtrans/sobel_derivatives/sobel_derivatives.html#formulation
 
         // Kernel für vertikale Ableitung:
-        final double[] vertKernel = {-3.0, -10.0, -3.0,
+        final double[] vertKernel = {-1.0, -2.0, -1.0,
                                     0.0, 0.0, 0.0,
-                                    3.0, 10.0, 3.0};
+                                    1.0, 2.0, 1.0};
         // Kernel für horizontale Ableitung:
-        final double[] horizKernel = {-3.0, 0.0, 3.0,
-                                    -10.0, 0.0, 10.0,
-                                    -3.0, 0.0, 3.0};
+        final double[] horizKernel = {-1.0, 0.0, 1.0,
+                                    -2.0, 0.0, 2.0,
+                                    -1.0, 0.0, 1.0};
 
         // Abstand, der zur Seite Für die Kernel benötigt wird
         int kernelGap = (int) ((Math.sqrt(vertKernel.length) - 1) / 2); // ==1
@@ -249,9 +249,9 @@ public class EdgeDetector {
     }
 
     // 0: N-S; 1: SW-NE; 2: W-E; 3: SE-NW
-    private int getAngle (double horiz, double vert) {
+    private int getAngle (double x, double y) {
         // http://en.cppreference.com/w/cpp/numeric/math/atan2
-        double a = Math.atan2(vert, horiz);
+        double a = Math.atan2(y, x);
         if ((a > 0.375*PI && a < 0.625*PI) || ((a < -0.375*PI && a > -0.625*PI)))
             return 0;
         if ((a < -0.625*PI && a > -0.875*PI) || (a > 0.125*PI && a < 0.375*PI))
@@ -270,7 +270,7 @@ public class EdgeDetector {
     private boolean[][] hysteresis(double[][] scharrImage) {
         boolean[][] binaryImage = new boolean[width][height]; // Ausgabebild
         // Binärisieren mit hohem Schwellwert
-        double treshhold = 300.0;
+        double treshhold = 50.0;
         Stack<Coordinate> hysteresisStack = new Stack<>(); // Die Trues mit hohem Wert für spätere Hysterese
 
         for (int x = 0; x < width; x++) {
@@ -284,7 +284,7 @@ public class EdgeDetector {
         }
 
         // Bereich mit kleiner Schwelle
-        treshhold /= 2.0; // Treshhold senken
+        treshhold /= 4.0; // Treshhold senken
         while (!hysteresisStack.empty()) { // Für jedes Kantenfeld
             Coordinate c = hysteresisStack.pop();
             int x = c.getX(); int y = c.getY();
@@ -319,6 +319,32 @@ public class EdgeDetector {
         }
 
         return binaryImage;
+    }
+
+    // Füllen von kleinen Lücken mit Dilation
+    // http://homepages.inf.ed.ac.uk/rbf/HIPR2/dilate.htm
+    private boolean[][] dilate(boolean[][] in) {
+        boolean[][] out = new boolean[width][height];
+
+        for (int x = 1; x < width - 1; x++) {
+            for (int y = 1; y < height - 1; y++) {
+                if (in[x][y]) {
+                    out[x][y] = true;
+                } else {
+                    outer:
+                    for (int x1 = x - 1; x1 <= x + 1; x1++) {
+                        for (int y1 = y - 1; y1 <= y + 1; y1++) {
+                            if (in[x1][y1]) {
+                                out[x][y] = true;
+                                break outer;
+                            }
+                        }
+                    }
+                }
+            }
+        }
+
+        return out;
     }
 
     // Ausfüllen der Polygone
