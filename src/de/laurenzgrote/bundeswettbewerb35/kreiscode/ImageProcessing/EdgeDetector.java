@@ -1,7 +1,6 @@
 package de.laurenzgrote.bundeswettbewerb35.kreiscode.ImageProcessing;
 
 import de.laurenzgrote.bundeswettbewerb35.kreiscode.Coordinate;
-import de.laurenzgrote.bundeswettbewerb35.kreiscode.Main;
 
 import java.awt.*;
 import java.awt.image.BufferedImage;
@@ -67,7 +66,7 @@ public class EdgeDetector {
     private double[][] gaussianFilter(double[][] in) {
         // Gaßsche Normalverteilung, Sigma: 3
         // Berechnungstool: http://dev.theomader.com/gaussian-kernel-calculator/
-        final double kernel[] =  {0.1784,0.210431,0.222338,0.210431,0.1784};
+        final double kernel[] =  {0.063327,0.093095,0.122589,0.144599,0.152781,0.144599,0.122589,0.093095,0.063327};
         // Abstand, der zur Seite zur Berechnung benötigt wird
         final int kernelGap = (kernel.length - 1) / 2; // ==2
 
@@ -210,9 +209,9 @@ public class EdgeDetector {
                         b = combScharr[x+1][y];
                         break;
                     case 1:
-                        // lu-ro
-                        a = combScharr[x+1][y+1];
-                        b = combScharr[x-1][y-1];
+                        // SW-NE
+                        a = combScharr[x-1][y-1];
+                        b = combScharr[x+1][y+1];
                         break;
                     case 2:
                         // Horizontal
@@ -220,11 +219,11 @@ public class EdgeDetector {
                         b = combScharr[x][y+1];
                         break;
                     case 3:
-                        // ru-lo
+                        // SE-NW
                         a = combScharr[x-1][y+1];
                         b = combScharr[x+1][y-1];
                 }
-                if (hereVal > a && hereVal > b) {
+                if (hereVal >= a && hereVal >= b) {
                     nmsImage[x][y] = hereVal;
                 } else {
                     nmsImage[x][y] = 0.0;
@@ -249,26 +248,17 @@ public class EdgeDetector {
         return nmsImage;
     }
 
-    // 0: vertikal; 1: linksunten - rechts oben; 2: horizontal; 3: rechtsunten - linksoben
+    // 0: N-S; 1: SW-NE; 2: W-E; 3: SE-NW
     private int getAngle (double horiz, double vert) {
         // http://en.cppreference.com/w/cpp/numeric/math/atan2
         double a = Math.atan2(vert, horiz);
-        if ((a > 0.375*PI && a < 0.625*PI) || ((a > -0.375*PI && a < -0.625*PI)))
+        if ((a > 0.375*PI && a < 0.625*PI) || ((a < -0.375*PI && a > -0.625*PI)))
             return 0;
         if ((a < -0.625*PI && a > -0.875*PI) || (a > 0.125*PI && a < 0.375*PI))
             return 1;
-        if ((a < 0.125*PI && a > -0.125*PI) || a < 0.875*PI || a < -0.875 * PI)
+        if ((a < 0.125*PI && a > -0.125*PI) || a > 0.875*PI || a < -0.875 * PI)
             return 2;
         return 3;
-/*        if ((exactAngle >= -22.5 && exactAngle <= 22.5) || (exactAngle >= 112.5 && exactAngle <= 157.5 )) {
-            return 0;
-        } else if ((exactAngle >= 157.5 && exactAngle <= 202.5) || (exactAngle >= 22.5 && exactAngle <= 67.5)) {
-            return 1;
-        } else if ((exactAngle >= 247.5 && exactAngle < 292.5) || (exactAngle >= 67.5 && exactAngle <= 112.5)) {
-            return 2;
-        } else {
-            return 3;
-        }*/
     }
 
     /**
@@ -280,7 +270,7 @@ public class EdgeDetector {
     private boolean[][] hysteresis(double[][] scharrImage) {
         boolean[][] binaryImage = new boolean[width][height]; // Ausgabebild
         // Binärisieren mit hohem Schwellwert
-        double treshhold = 100.0;
+        double treshhold = 300.0;
         Stack<Coordinate> hysteresisStack = new Stack<>(); // Die Trues mit hohem Wert für spätere Hysterese
 
         for (int x = 0; x < width; x++) {
