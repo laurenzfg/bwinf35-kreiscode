@@ -12,6 +12,7 @@ import static java.lang.Math.PI;
 /**
  * Eckenerkennung mit dem Canny-Algorithmus und anschließenden Ausfüllung der schwarzen Bildbereiche
  * http://docs.opencv.org/3.1.0/da/d22/tutorial_py_canny.html
+ * https://en.wikipedia.org/wiki/Canny_edge_detector
  */
 public class EdgeDetector {
     private int width, height;
