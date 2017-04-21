@@ -106,20 +106,35 @@ Die 16 vorherrschenden Farben können als Wort bestehend aus 16 Bits aufgefasst 
 
 	Zu diesem Thema habe ich mich in der nächstgelegenen Universitätsbilbiliothek informiert. In meinem Fall ist dies die Ruhr-Universität-Bochum. Dort habe ich im Buch "`Grundkurs Computergrafik mit Java"' \footnote{Klawonn, Frank ISBN: 3528059192. Scan der hier relevanten Seiten 48-61 der Einsendung beigefügt.} den Bresenham-Algorithmus gefunden. Dieser trifft mein Anforderungsprofil genau: Er zeichnet in Linearzeit eine 1px breite Linie zwischen zwei Punkten. Da der Algorithmus ausschließlich mit Ganzzahlen arbeitet, müssen alle Koordinaten vor Eingabe in den Algorithmus gerundet werden.
 
-Für den Algorithmus bestimme ich zunächst den Abstand in x- und y-Richtung. Mit den Abständen ermittele ich unter Betrachtung der Vorzeichen der Abstände, in welche Richtung die Linie verlaufen muss. In y-Richtung kann sie entweder nach oben oder unten, in x-Richtung entweder nach links oder rechts verlaufen.
+Für den Algorithmus bestimme ich zunächst den Abstand in die x- und y-Richtung. Mit den Abständen ermittele ich unter Betrachtung der Vorzeichen, in welche Richtung die Linie verlaufen muss. In y-Richtung kann sie entweder nach oben oder unten, in x-Richtung entweder nach links oder rechts verlaufen.
 
-TODO
+Außerdem ermittele ich, in welche Richtung der Abstand größer ist.
+Damit eine durchgehenden Linie entsteht, müssen so viele Pixel wie der größere Abstand beträgt markiert werden. Ansonsten entstehen Lücken. Daher bestimme ich fogende Schritte.
+\begin{itemize}
+	\item Den \textbf{Parallelschritt}, der nur in die größere Richtung weist. 
+	\item Den \textbf{Diagonalschritt}, der in beide Richtungen weist.
+\end{itemize}
+
+Der eigentliche Einzeichenprozess läuft so ab, dass ich solange Diagonalschritte durchführe, bis die Ideallinie der Geraden durchgekruezt wurde. Dann führe ich bis zur nächsten Durchkreuzung der Ideallinie Parallelschritte durch. 
 
 \subsection{Wortübersetzung}
-Das Wörterbuch speichere ich in einer Liste. Beim Einlesen rechne ich die Bitfolge in eine Dezimalzahl um.
+Das Wörterbuch speichere ich in einer Liste. Beim Einlesen rechne ich die Bitfolgen in Dezimalzahlen um.
 Das eingelesene Wort aus dem Dekodierschritt wird ebenfalls in eine Dezimalzahl umgerechnet. Anschließend kann in der Liste nach dem Eintrag mit der gleichen Dezimalzahl gesucht werden.
 
-Die Rotation erfolgt indem das letzte Bit des Wortes in der ersten Stelle eines neuen Arrays angefügt. Anschließend werden die sonstigen Bits angefügt. Dieses Array wird widerum in eine Dezimalzahl umgerechnet. Dies wird solange wiederholt, bis alle Rotationen getestet wurden oder eine Übersetzung gefunden wurde.
+Gegebenenfalls nötige Rotationen erfolgen, indem das letzte Bit des Wortes in die erste Stelle eines neuen Arrays eingefügt wird. Anschließend werden die sonstigen Bits angefügt. Dieses Array wird widerum in eine Dezimalzahl umgerechnet. Dies wird solange wiederholt, bis alle Rotationen getestet wurden oder eine Übersetzung gefunden wurde.
 Sollte keine Übersetzung gefunden werden, wird die Zeichenfolge "`???"' zurückgegeben. 
 
+\pagebreak
 \section{Beispiele}
+Sowohl im eigenen als auch im gegebenen Testfall wurden alle \task{}s erfolgreich dekodiert.
 \begin{figure}[!ht]
 	\centering	
-	\includegraphics[width=0.7\textwidth]{Grafiken/sek2bsp1}
-	\caption{Beispielbild d. Aufgabenstellung}
+	\includegraphics[width=0.6\textwidth]{Grafiken/sek2bsp1}
+	\caption{Beispielbild aus d. Aufgabenstellung}
+\end{figure}
+\vfill{}
+\begin{figure}[!ht]
+	\centering	
+	\includegraphics[width=0.6\textwidth]{Grafiken/sek2bsp2}
+	\caption{Eigener Testfall}
 \end{figure}

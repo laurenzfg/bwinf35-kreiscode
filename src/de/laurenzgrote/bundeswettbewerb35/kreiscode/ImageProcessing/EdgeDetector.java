@@ -135,10 +135,7 @@ public class EdgeDetector {
      * @return Ergebnis des Scharr-Operators
      */
     private double[][] scharrFilter(double[][] in) {
-        // Scharr-Kernel
-        // (Die .ac.uk-Seite verwendet den älteren Sobel-Operator,
-        //  der Scharr-Operator ist aber bei kleinen Kerneln besser:
-        //  http://docs.opencv.org/2.4/doc/tutorials/imgproc/imgtrans/sobel_derivatives/sobel_derivatives.html#formulation
+        // Sobel-Operatoren:
 
         // Kernel für vertikale Ableitung:
         final double[] vertKernel = {-1.0, -2.0, -1.0,

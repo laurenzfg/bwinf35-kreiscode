@@ -1,25 +1,35 @@
 \section{Lösungsidee}
-Die in Kapitel 1 vorgestellte Einleseprozedur wird den Anforderungen eines Fotos oder eines Scans nicht gerecht. Bei schankender Ausleuchtung des Bildes lässt sich kein geeigneter Schwellwert bestimmen. Stattdessen wende ich verschieden Algorithmen des maschinellen Sehens an, um ein möglichst ideales Bild aus dem Eingabebild zu extrahieren.
+\begin{wrapfigure}{r}{0.45\textwidth}
+		\setlength\intextsep{0pt}
+		\centering	
+		\includegraphics[width=0.4\textwidth]{Grafiken/sek3abb1}
+		\caption{Verbesserte Bilderkennung}
+		\label{abb:transform}
+	\end{wrapfigure}
+Die in Kapitel 1 vorgestellte Einleseprozedur wird den Anforderungen für die Erkennung eines Fotos oder eines Scans nicht gerecht. Bei schankender Ausleuchtung des Bildes lässt sich kein geeigneter Schwellwert bestimmen. Stattdessen wende ich verschiedene Algorithmen des maschinellen Sehens an, um ein möglichst ideales Bild aus dem Eingabebild zu extrahieren.
 
 Ich extrahiere zunächst alle Kanten des Bildes. Kanten sind Stellen, an denen sich die Farbwerte eines Pixels schlagartig ändern. Den Kantextraktionsalgorithmus implementiere ich hierbei so, dass die Kante eine lückenlose Linie darstellt.
 
 Mit diesen Kanten habe ich das Bild segmentiert. Anschließend fülle ich jedes Segment komplett schwarz (1) oder weiß (0).
 Der Bestimmung der Farbe der Füllung lege ich folgende Annahme zu Grunde:
 
-Der Hintergrund des Bildes ist komplett weiß. Alle an den Hintergrund angrenzenden Segmente sind schwarz, schließlich fand dort eine schlagartige Farbänderung zum Hintergrund statt. Die Felder, die an diese Segmente angrenzen sind weiß, da sich die Farbe widerum schalgartig geändert hat. Dieses Muster setze ich fort, bis die Farben aller Segmente bestimmt sind.
+Der Hintergrund des Bildes ist komplett weiß. Alle an den Hintergrund angrenzenden Segmente sind schwarz, schließlich fand dort eine schlagartige Farbänderung zum Hintergrund statt. Die Felder, die an diese Segmente angrenzen sind weiß, da sich die Farbe widerum schlagartig geändert hat. Dieses Muster setze ich fort, bis die Farben aller Segmente bestimmt sind.
+
+Die drei Schritte der Bildprozessierung sind in Abbildung \ref{abb:transform} dargestellt.
 
 Vorteil dieser Vorhergehensweise über ein Schwellwertverfahren ist, dass jeder ähnlich gefärbte Bereich die selbe Farbe erhält. Ein zusammen gehörender Bereich enthält keinerlei Lücken. Dies ist für den Kreismittelpunkterkennungsalgorithmus essenziell, da sonst die Radiusbestimmung fehlschlägt.
  
 \section{Umsetzung}
 \subsection{Graustufenbild}
-In einem ersten Schritt bestimme ich aus dem farbigen Bild ein Graustufenbild, Dies erfolgt mit einer gewichteten Mittelung aus den Intensitätswerten der drei Primärfarbkanäle. Laut der Norm CIE 1931\footnote{\url{en.wikipedia.org/wiki/Grayscale}} ist der Grauwert mit folgender Formel zu bestimmen:
+In einem ersten Schritt bestimme ich aus dem farbigen Bild ein Graustufenbild. Dies erfolgt mit einer gewichteten Mittelung aus den Intensitätswerten der drei Primärfarbkanäle. Laut der Norm CIE 1931\footnote{\url{en.wikipedia.org/wiki/Grayscale}} ist der Grauwert mit folgender Formel zu bestimmen:
 
 \begin{equation}
 Y = 0,2126R+0,7152G+0,0722G
 \end{equation}
 
-\subsection{Weichzeichnung}
-Darauf filtere ich grobe Außreißer aus dem Bild heraus. Hierfür wende ich einen Gaußschen Weichzeicher an. Ein solcher Weichzeichner funktioniert, indem für jedes Pixel ein gewichteter Mittelwert aus seinem eigenen Grauwert und den Grauwerten seiner Umgebung bestimmt wird. Der Gewichtung wird die Gaußsche Normalverteilung zugrunde gelegt. Ich habe mich für ein Sigma von 3 entschieden. Mit dieser Kurve werden große Ausreißer entfernt, der Kantenverlauf bleibt jedoch erhalten. Aus dieser Kurve lässt sich folgende Matrix extrahieren\footnote{\url{http://dev.theomader.com/gaussian-kernel-calculator/}}:
+\subsection{Canny-Edge-Detector}
+\subsubsection{Weichzeichnung}
+Darauf filtere ich vor der eigentlichen Kantenerkennung grobe Außreißer aus dem Bild heraus. Hierfür wende ich einen Gaußschen Weichzeicher an. Ein solcher Weichzeichner funktioniert, indem für jedes Pixel ein gewichteter Mittelwert aus seinem eigenen Grauwert und den Grauwerten seiner Umgebung bestimmt wird. Der Gewichtung wird die Gaußsche Normalverteilung zugrunde gelegt. Ich habe mich für ein Sigma von 3 entschieden. Mit dieser Kurve werden große Ausreißer entfernt, der Kantenverlauf bleibt jedoch erhalten. Aus dieser Kurve lässt sich folgende Matrix extrahieren\footnote{\url{http://dev.theomader.com/gaussian-kernel-calculator/}}:
 \begin{equation}
 	\begin{bmatrix}
 	0,031827&0,037541&0,039665&0,037541&0,031827 \\
@@ -30,4 +40,61 @@ Darauf filtere ich grobe Außreißer aus dem Bild heraus. Hierfür wende ich ein
 	\end{bmatrix}
 \end{equation}
 Jeder Pixel wird mit dem mittleren Wert multipliziert. Die umliegenden Pixel werden mit ihren Pendants in der Matrix multipliziert. Die Summe aus allen Produkten entspricht dem neuen Wert des Pixels.
+
+Allerdings kann die Gaußsche Weichzeichnung auch in einen horizontalen und vertikalen Bestandteil aufgeteilt werden. Bei dieser Aufteilung erhält man folgende Matrix:
+\begin{equation}
+	\begin{bmatrix}
+	0,1784&0,210431&0,222338&0,210431&0,1784
+	\end{bmatrix}
+\end{equation}
+Man kann mit dieser Matrix das gleiche Ergebnis erzielen, indem man sie zunächst in horizontale und anschließend in vertikale Richtung anwendet. Diese Vorhergehensweise hat eine bessere Laufzeit, da für die Glättung eines Pixels nicht \(4^2\) sondern nur \(2\times 4\) Pixel betrachtet werden müssen.
+
+\subsubsection{Sobel-Operator}
+Anschließend wende ich auf das nun geglättete Bild den Sobel-Operator an. Dieser Operator entspricht der 1. Ableitung über die Helligkeitskurve des Bildes. Der Operator wird mithilfe von \textit{Convolution} über das gesamte Bild berechnet. Convolution ist das aus dem Gauß-Wiechzechner bekannte Prinzip, dass auf jedes Pixel eine Matrix angewandt wird. Der Sobel-Operator funktioniert mit zwei Convulution-Durchläufen mit folgenden Matrizen:
+\begin{gather}
+	\begin{split}
+		\begin{bmatrix}
+			-1,0&-2,0&-1,0\\
+			0,0&0,0&0,0\\
+			1,0&2,0&1,0\\
+		\end{bmatrix}
+	\end{split}
+	\hspace{5em}
+	\begin{split}
+		\begin{bmatrix}
+			-1,0&0,0&1,0\\
+			-2,0&0,0&2,0\\
+			-1,0&0,0&1,0\\
+		\end{bmatrix}
+	\end{split}
+\end{gather}
+
+Diese Matrizen entsprechen der Ableitung in vertikale und horizontale Richtung, da die jeweils angrenzenden Felder voneinander subtrahiert werden. Wenn die umliegenden Pixel den gleichen Intensitätstwert haben ist das Ergebnis des Sobel-Operators 0. Bei Intensitätsunterschieden verändert sich das Ergebnis des Operators entsprechend.
+Da allerdings eine Ableitung und nicht zwei Ableitungen gwünscht sind, müsse beide Ableitungswerte eines Pixels vereinigt werden. Dies gelingt mit dem Satz des Pythogoras. Die Ausschläge der Ableitungen in x- und y-Richtungen entsprechen den Kateten. Ein kombinierter Wert aus beiden Ableitungen ist daher aus der Länge der Hypothenuse gegeben.
+
+\subsubsection{Non-Maximum-Supression (Nichtmaximumsunterdrückung)}
+Allerdings sind die Bereiche mit einem Ableitungswert über 0 mehrere Pixel breit. Schlißlich sind die Kanten im Bild nicht wirklich abrupt, sondern verlaufen über mehrere Pixel. Allerdings kann mit der Tangensfunktion der Winkel der Kante ermittelt werden:
+\begin{equation}
+	tan(\alpha) = \frac{G_y}{G_x}
+\end{equation}
+
+Mit diesem Winkel können die Pixel bestimmt werden, die an der gleichen Kante liegen. Wenn der Pixel nicht das Maximum an der Kante ist kann sein Ableitungswert auf 0 gesetzt werden (Der Pixel wird in der Ausgabegrafik unterdrückt). Schließlich gibt es entlang der Kante einen größeren Ausschlag.  
+
+Wenn der Winkel beispielsweise 0 beträgt, verläuft die Katen in horizontale Richtung. Dann wird der Ableitungswert des Pixels mit seinem nördlichen und südlichen Nachbarn verglichen. Nur wenn der Ableitungswert das Maximum von diesen Pixeln darstellt, ist er Teil der 1px breiten Kante.
+
+\subsubsection{Binärisierung mit Hysterese}
+Zur Binärisierung des Ergebnisses der Sobel-Operators wende ich eine Technik namens \textit{Hysterese} an. Bei einer Hysterese wird zunächst mit einem hohen Schwellwert das Bild binärisiert. Das heißt im Kontext  meiner Implementierung, dass alle Pixel mit ein Ableitungswert höher 50 im Ausgabebild schwarz gefärbt werden.
+
+Da aber möglicherweise eine Kante auch aus weniger stark abgesetzten Pixeln besteht, akzeptiert die Hysterese für an erkannte Aktenpunkte anliegende Punkte einen niedrigeren Schwellwert.
+
+Dies ist als Stack implemementiert. Jedes im ersten ersten Erkennungsschritt erkannte Pixel wird auf diesen Stack gelegt. Nach Abschlussd es ersten Erkennungsschrittes werden alle Pixel, die an ein Pixel aus dem Stack angrenzen, noch nicht markeirt wurden und über dem verringerten Schwellwert von 12,5 liegen, schwarz markiert. Diese Pixel werden widerum auf den Stack gelegt, sodass die Kante mti dem verrignerten Schwellwert verfolgt wird. 
+
+\subsubsection{Erosion}
+Aufgrund der Non-Maximum-Supression sind kleine Lücken in der Grafik entstanden. Diese Verhindern eine sinnvolle Ausführung der nachfolgenden Flood-Fill. Daher erdodiere ich das Ergebnis der Hysterese. Erodierung bedeutet, dass jedes Pixel, dass mehr als einen schwarzen Nachbarn hat, geschwärzt wird.
+Damit verdicke ich wieder die Linie, jedoch ist sie weiterhin weitaus exakter, als sie es ohne Non-Maximum-Supression wäre. 
+
+\subsection{Einfärben des Bildes}
+Der Canny-Detektor gibt ein Bild aus den Kanten aus. Die weiteren Berechnungsschritte benötigen jedoch ein Bild, in dem der Kreis, der Kreisring und die Segmente komplett schwarz eingefärbt. Unter Ausnutzung der Annahme aus der Lösungsidee habe ich einen Algorithmus formuliert. Dieser nimmt als Eingabe das Ergebnis des Canny-Eckenerkennungsprozesses und hat als Ausgabe ein Binärbild als boolesches 2D-Array. Damit ist die Ausgabe der neuen Bidleinleseprozedur identisch zu der Ausgabe der ersten Einleseprozedur aus Kapitel 1. 
+Vom Pixel(0|0) ausgehend werden alle direkt erreichbaren weißen Pixel mithilfe einer Flood-Fill im Ausgabebild als weiß abgespeichert, da diese den Hintergrund darstellen.
+Anschließend weden alle schwarzen Pixel, die an den Hintergrund angrenzen, als schwarz markiert. Diese Pixel stellen die Kante zum Vordergrundbereich dar. Da sie nur die Kante des Vordergrundbereiches sind, werden alle an diese Pixel angrenzenden weißen Pixel im Ausgabebild als Schwarz markiert. Schließlich befinden wir uns weiterhin im Vordergrund. Diese Prozedur wird abwechselnd zur Bestimmung von Vorder- und Hintergrundbereichen eingesetzt.
 \section{Beispiele}
