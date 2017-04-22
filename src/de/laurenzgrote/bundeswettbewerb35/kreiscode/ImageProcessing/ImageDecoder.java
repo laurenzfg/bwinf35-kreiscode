@@ -13,6 +13,9 @@ public class ImageDecoder {
     private boolean[][] swImage;
     private int width, height;
 
+    // Eckenbild für die Feinjustierung der Trapeze
+    boolean[][] cannyEdges;
+
     // Visted-Array für die Flood-Fills, Begrenzende Trapeze
     private boolean[][] trapezials;
     private boolean[][] visited;
@@ -20,9 +23,10 @@ public class ImageDecoder {
     // Liste der CircleCenters u. der dazugehörigen Durchmesser
     private List<Coordinate> circleCenters;
 
-    public ImageDecoder(boolean[][] swImage, List<Coordinate> circleCenters, File dict) {
+    public ImageDecoder(boolean[][] swImage, boolean[][] cannyEdges, List<Coordinate> circleCenters, File dict) {
         this.decoder = new SequenceDecoder(dict);
         this.swImage = swImage;
+        this.cannyEdges = cannyEdges;
         this.circleCenters = circleCenters;
 
         width = swImage.length;
@@ -69,29 +73,42 @@ public class ImageDecoder {
     }
 
     /**
-     * Berechnet die Punkte für die Trapeze
+     * Berechnet die Punkte für die Trapeze.
      * @param cC Koordinaten des Kreismittelpunktes
      * @return Linien, die den Ring in N=16 Segmente einteilen. Untere Koordinate in [n][0], obere in n[1]
      */
     private Coordinate[][] calculateLines(Coordinate cC) {
-        int diameter = cC.getStreakLength();
-        Coordinate[][] lines = new Coordinate[16][2];
+        final double degToRad = Math.PI/180.0;
+        final double factor = 22.5*degToRad; // 22.5° in Bogenmaß
 
-        // 22.5° in Bogenmaß
-        final double factor = (22.5*Math.PI)/180.0;
-        // u wie in der Doku
-        final double u = diameter / 3.0;
         int x = cC.getX(); int y = cC.getY();
+        int diameter = cC.getStreakLength();
+        final double u = diameter / 3.0; // u wie in der Doku
+
+        // Offset, damit die Trapeze an einem Segment anliegen
+        double offset = 0;
+        for (int i = 0; i < 360; i++) {
+            int pX = (int) Math.round(Math.cos(i*degToRad) * 5.0 * u + x);
+            int pY = (int) Math.round(Math.sin(i*degToRad) * 5.0 * u + y);
+
+            if (cannyEdges[pX][pY]) { // Liegen wir bei dem Winkel an einem Segment?
+                offset = i*degToRad;
+                break; // Irgendeine Kante reicht...
+            }
+        }
+
+
+        Coordinate[][] lines = new Coordinate[16][2];
 
         // Alle 16 Linien berechnen
         for (int n = 0; n < 16; ++n) {
             // Unterer Punkt
-            int pX = (int) Math.round(Math.cos(n*factor) * 4.5*u + x);
-            int pY = (int) Math.round(Math.sin(n*factor) * 4.5*u + y);
+            int pX = (int) Math.round(Math.cos(n*factor+offset) * 4.5*u + x);
+            int pY = (int) Math.round(Math.sin(n*factor+offset) * 4.5*u + y);
             lines[n][0] = new Coordinate(pX, pY);
             // Oberer Punkt
-            pX = (int) Math.round(Math.cos(n*factor) * 5.5*u + x);
-            pY = (int) Math.round(Math.sin(n*factor) * 5.5*u + y);
+            pX = (int) Math.round(Math.cos(n*factor+offset) * 5.5*u + x);
+            pY = (int) Math.round(Math.sin(n*factor+offset) * 5.5*u + y);
             lines[n][1] = new Coordinate(pX, pY);
         }
         return lines;

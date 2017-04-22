@@ -185,7 +185,7 @@ public class GUI extends JFrame {
                 // Mit den Kreismittelpunkten die Beudeutung der Kreiscodes ermitteln
                 java.util.List<Coordinate> circleCenters = GUI.this.circleCenters.getCircleCenters();
                 // Dekodieren des Bildes
-                imageDecoder = new ImageDecoder(swImage, circleCenters, selectedDict);
+                imageDecoder = new ImageDecoder(swImage, edgesImage, circleCenters, selectedDict);
                 // Der Kreismittelpunktliste die Bedeutungen hinzufügen
                 circleCenters = imageDecoder.getCircleCentersWithMeanings();
 
