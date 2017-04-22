@@ -133,8 +133,8 @@ public class CircleCenters {
                 // Horizontale Streak-Länge
                 int hStreakLength = hStreak[x][y];
 
-                // Sind wir in einer Streak UND fängt sie in dieser Zeile an?
-                if (hStreakLength > 0 && (x == 0 || !swImage[x-1][y])) {
+                // Sind wir in einer ausreichen langen Streak UND fängt sie in dieser Zeile an?
+                if (hStreakLength > 10 && (x == 0 || !swImage[x-1][y])) {
                     // Bestimmen des Mittelpunktes der Streak
                     int center = x + (hStreakLength / 2);
                     // Ist der Mittelpunkt der Streak innerhalb des Bildes?

@@ -184,51 +184,62 @@ public class ImageDecoder {
         int x1 = a.getX(); int y1 = a.getY();
         int x2 = b.getX(); int y2 = b.getY();
 
-        // Delta in beide Richtungen bestimmen
-        int deltaX = x2 - x1;
-        int deltaY = y2 - y1;
+        if (x1 >= 0 && x1 < width && y1 >= 0 && y1 < height && x2 >= 0 && x2 < width && y2 >= 0 && y2 < height) {
+            // Delta in beide Richtungen bestimmen
+            int deltaX = x2 - x1;
+            int deltaY = y2 - y1;
 
-        // Bestimmen der Vorzeichen
-        int sigX = (int) Math.signum(deltaX);
-        int sigY = (int) Math.signum(deltaY);
+            // Bestimmen der Vorzeichen
+            int sigX = (int) Math.signum(deltaX);
+            int sigY = (int) Math.signum(deltaY);
 
-        // Danach die Deltas Positv machen
-        deltaX = Math.abs(deltaX);
-        deltaY = Math.abs(deltaY);
+            // Danach die Deltas Positv machen
+            deltaX = Math.abs(deltaX);
+            deltaY = Math.abs(deltaY);
 
-        // Bewegungsvorschriften für Schritte
-        int parX, parY; // Parallelschritt
-        int diaX, diaY; // Diagonalschritt
-        int errS, errL; // Fehlerschritt S u. L
+            // Bewegungsvorschriften für Schritte
+            int parX, parY; // Parallelschritt
+            int diaX, diaY; // Diagonalschritt
+            int errS, errL; // Fehlerschritt S u. L
 
-        // Bestimmen der Schritte / Müssen die Achsen vertauscht werden?
-        if (deltaX > deltaY) {
-            parX = sigX; parY = 0;
-            diaX = sigX; diaY = sigY;
-            errS = deltaY; errL = deltaX;
-        } else {
-            parX = 0; parY = sigY;
-            diaX = sigX; diaY = sigY;
-            errS = deltaX; errL = deltaY;
-        }
-
-        int x = x1; int y = y1;
-        int err = errL / 2;
-
-        // Leggo, let's go!
-        trapezials[x][y] = true;
-        // errL ist die Anzahl der benötigten Schritte
-        for (int t = 0; t < errL; t++) {
-            err -= errS;
-            if (err < 0) {
-                err += errL;
-                // Diagonalschritt vornehemen
-                x += diaX; y += diaY;
+            // Bestimmen der Schritte / Müssen die Achsen vertauscht werden?
+            if (deltaX > deltaY) {
+                parX = sigX;
+                parY = 0;
+                diaX = sigX;
+                diaY = sigY;
+                errS = deltaY;
+                errL = deltaX;
             } else {
-                // Parallelschritt vornehmen
-                x+= parX; y += parY;
+                parX = 0;
+                parY = sigY;
+                diaX = sigX;
+                diaY = sigY;
+                errS = deltaX;
+                errL = deltaY;
             }
+
+            int x = x1;
+            int y = y1;
+            int err = errL / 2;
+
+            // Leggo, let's go!
             trapezials[x][y] = true;
+            // errL ist die Anzahl der benötigten Schritte
+            for (int t = 0; t < errL; t++) {
+                err -= errS;
+                if (err < 0) {
+                    err += errL;
+                    // Diagonalschritt vornehemen
+                    x += diaX;
+                    y += diaY;
+                } else {
+                    // Parallelschritt vornehmen
+                    x += parX;
+                    y += parY;
+                }
+                trapezials[x][y] = true;
+            }
         }
     }
 
