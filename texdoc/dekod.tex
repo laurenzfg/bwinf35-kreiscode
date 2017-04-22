@@ -7,59 +7,60 @@
 		\label{abb:spidergrafik}
 		\vspace{-20pt}
 	\end{wrapfigure}
-	Zunächst habe ich einen \task{} mit TikZ nachgezeichnet, um den genauen Aufbau durch Nachbau zu verstehen. Die 16 gleichgroßen Kreissegmente sind durch Strahlen getrennt, die im Abstand von \(22,5^{\circ}\) vom Pol (dem Mittelpunkt) aus gezeichnet werden. Der Abstand zwischen den Strahlen beträgt im Bogenmaß \(\frac{22,5\pi}{180}\).
+Zunächst habe ich einen \task{} mit TikZ nachgezeichnet, um den genauen Aufbau durch Nachbau zu verstehen. Die 16 gleichgroßen Kreissegmente sind durch Strahlen getrennt, die im Abstand von \(22,5^{\circ}\) vom Pol (dem Mittelpunkt) aus gezeichnet werden. Der Abstand zwischen den Strahlen beträgt im Bogenmaß \(\frac{22,5\pi}{180}\).
 
-	Für die Dekodierung steht mir aus dem Kreismittelpunkterkennungsprozess die Liste der Kreismittelpunkte zur Verfügung. Die Kreisdurchmesser entsprechen der Länge der Streifen an den Mittelpunktskoordinaten. Mit diesen Informationen kann ich dank bekannter Proportionen eines \task{}s auf die Position des äußeren Ringes, der die Informationen trägt, schließen (siehe Abb. \ref{abb:dims}). Wie in der Lösungsidee zur Kreismittelpunkterkennung festgestellt, gilt \(u=\frac{1}{3}d\).
+Für die Dekodierung steht mir aus dem Kreismittelpunkterkennungsprozess die Liste der Kreismittelpunkte zur Verfügung. Die Kreisdurchmesser entsprechen der Länge der Streifen an den Mittelpunktskoordinaten. Mit diesen Informationen kann ich dank bekannter Proportionen eines \task{}s auf die Position des äußeren Ringes, der die Informationen trägt, schließen (siehe Abb. \ref{abb:dims}). Wie in der Lösungsidee zur Kreismittelpunkterkennung festgestellt, gilt \(u=\frac{1}{3}d\).
 
-	\begin{wrapfigure}{r}{0.25\textwidth}
-		\setlength\intextsep{0pt}
+\begin{wrapfigure}{r}{0.25\textwidth}
+	\setlength\intextsep{0pt}
+	\centering	
+	\input{Grafiken/geradengleichungen.tex}
+	\caption{}
+	\label{abb:trigon}
+\end{wrapfigure}
+Daher kann ich mithilfe von polaren Koordinaten\footnote{\url{https://www.lernhelfer.de/schuelerlexikon/mathematik-abitur/artikel/polarkoordinatensystem}} die Strecken, die die Kreisringe in Segmente einteilen, bestimmen. Jede der Strecken ist Teil eines Strahls, der am Mittelpunkt in einem Vielfachen von \(22,5^{\circ}\) beginnt. Die eigentlichen Strecken, die auf dem äußeren Kreisring liegen, beginnen nach einem Abstand von \(4,5u\) und enden bei \(5,5u\). Die Anfangs- und Endpunkte aller Strecken lauten also:
+
+\begin{equation}
+A(k \cdot 22,5^{\circ}:4,5u) \hspace{2em} B(k \cdot 22,5^{\circ}:5,5u) \hspace{2em} k = \{\mathbb{N}_0 \hspace{0.3em}|\hspace{0.3em} 0 \le x \le 15\}
+\end{equation}
+
+Da der Strahl zusammen mit der Achse, von der aus der Winkel gemessen wird, ein rechtwinkliges Dreieck bildet (s. Abb \ref{abb:trigon}), können die Punkte der Strecke in kartesischen Koordinaten umgerechnet werden. Ich habe das Koordinatensystem für die Beispielzeichnung in der Einheit \(u\) gezeichnet. Bitte stellen sie für korrekte Ergebnisse Ihren Taschenrechner auf "`rad"' ein!
+
+\begin{gather}
+k = \{\mathbb{N}_0 \hspace{0.3em}|\hspace{0.3em} 0 \le x \le 15\} \\
+\begin{split}
+x_{innen} &= cos(k \cdot \frac{22,5\pi}{180}) \cdot 4,5u \\
+y_{innen} &= sin(k \cdot \frac{22,5\pi}{180}) \cdot 4,5u
+\end{split}
+\hspace{5em}
+\begin{split}
+x_{aussen} &= cos(k \cdot \frac{22,5\pi}{180}) \cdot 5,5u \\
+y_{aussen} &= sin(k \cdot \frac{22,5\pi}{180}) \cdot 5,5u
+\end{split}
+\end{gather}
+
+\begin{figure}[!ht]
+	\begin{subfigure}[b]{0.5\textwidth}
 		\centering	
-		\input{Grafiken/geradengleichungen.tex}
-		\caption{}
-		\label{abb:trigon}
-	\end{wrapfigure}
-	Daher kann ich mithilfe von polaren Koordinaten\footnote{\url{https://www.lernhelfer.de/schuelerlexikon/mathematik-abitur/artikel/polarkoordinatensystem}} die Strecken, die die Kreisringe in Segmente einteilen, bestimmen. Jede der Strecken ist Teil eines Strahls, der am Mittelpunkt in einem Vielfachen von \(22,5^{\circ}\) beginnt. Die eigentlichen Strecken, die auf dem äußeren Kreisring liegen, beginnen nach einem Abstand von \(4,5u\) und enden bei \(5,5u\). Die Anfangs- und Endpunkte aller Strecken lauten also:
+		\input{Grafiken/allepunkte.tex}
+		\caption{Einteilende Punkte}
+	\end{subfigure}
+	\begin{subfigure}[b]{0.5\textwidth}
+		\centering	
+		\input{Grafiken/segmentgrafik.tex}
+		\caption{Trapeze}
+	\end{subfigure}
+\end{figure}
 
-	\begin{equation}
-	A(k \cdot 22,5^{\circ}:4,5u) \hspace{2em} B(k \cdot 22,5^{\circ}:5,5u) \hspace{2em} k = \{\mathbb{N}_0 \hspace{0.3em}|\hspace{0.3em} 0 \le x \le 15\}
-	\end{equation}
+Wenn nun alle benachbarten Koordinaten verbunden werden, erhalten wir 16 Trapeze, die fast den Kreissegmenten entsprechen. Da die Abweichung zwischen dem jeweiligen Trapez und dem jeweiligen Kreissegment sehr gering ist, kann aus den Pixeln im Trapez auf die Farbe des Ringsegmentes geschlossen werden. Da das ganze Ringsegment entweder ganz weiß oder ganz schwarz ist, entspricht die vorherrschende Farbe im Trapez der Farbe des Kreissegmentes.
 
-	Da der Strahl zusammen mit der Achse, von der aus der Winkel gemessen wird, ein rechtwinkliges Dreieck bildet (s. Abb \ref{abb:trigon}), können die Punkte der Strecke in kartesischen Koordinaten umgerechnet werden. Ich habe das Koordinatensystem für die Beispielzeichnung in der Einheit \(u\) gezeichnet. Bitte stellen sie für korrekte Ergebnisse Ihren Taschenrechner auf "`rad"' ein!
+Die 16 vorherrschenden Farben können als Wort bestehend aus 16 Bits aufgefasst werden. Ein Segment aus hautpsächlich schwarzen Pixeln spiegelt hierbei eine Eins wieder. Nun muss im Wörterbuch nach einer Übersetzung für dieses Wort gesucht werden. Sollte kein Ergebnis gefunden werden, muss das Wort solange rotiert werden, bis eine Übersetzung gefunden wird. Rotation bedeutet in diesem Kontext, dass das letzte Bit an die erste Stelle verschoben wird. Die folgenden Bits werden entsprechend um eine Stelle nach hinten verschoben. Dies entspricht einer Drehung des Kreis-Codes um \(22,5^{\circ}\).
 
-	\begin{gather}
-	k = \{\mathbb{N}_0 \hspace{0.3em}|\hspace{0.3em} 0 \le x \le 15\} \\
-	\begin{split}
-	x_{innen} &= cos(k \cdot \frac{22,5\pi}{180}) \cdot 4,5u \\
-	y_{innen} &= sin(k \cdot \frac{22,5\pi}{180}) \cdot 4,5u
-	\end{split}
-	\hspace{5em}
-	\begin{split}
-	x_{aussen} &= cos(k \cdot \frac{22,5\pi}{180}) \cdot 5,5u \\
-	y_{aussen} &= sin(k \cdot \frac{22,5\pi}{180}) \cdot 5,5u
-	\end{split}
-	\end{gather}
-
-	\begin{figure}[!ht]
-		\begin{subfigure}[b]{0.5\textwidth}
-			\centering	
-			\input{Grafiken/allepunkte.tex}
-			\caption{Einteilende Punkte}
-		\end{subfigure}
-		\begin{subfigure}[b]{0.5\textwidth}
-			\centering	
-			\input{Grafiken/segmentgrafik.tex}
-			\caption{Trapeze}
-		\end{subfigure}
-	\end{figure}
-
-	Wenn nun alle benachbarten Koordinaten verbunden werden, erhalten wir 16 Trapeze, die fast den Kreissegmenten entsprechen. Da die Abweichung zwischen dem jeweiligen Trapez und dem jeweiligen Kreissegment sehr gering ist, kann aus den Pixeln im Trapez auf die Farbe des Ringsegmentes geschlossen werden. Da das ganze Ringsegment entweder ganz weiß oder ganz schwarz ist, entspricht die vorherrschende Farbe im Trapez der Farbe des Kreissegmentes.
-
-Die 16 vorherrschenden Farben können als Wort bestehend aus 16 Bits aufgefasst werden. Ein Segment aus hautpsächlich schwarzen Pixeln spiegelt hierbei eine Eins wieder. Nun muss im Wörterbuch nach einer Übersetzung für dieses Wort gesucht werden. Sollte kein Ergebnis gefunden werden, muss das Wort solange rotiert werden, bis eine Übersetzung gefunden wird. Rotation bedeutet in diesem Kontext, dass das letzte Bit an die erste Stelle verschoben wird. Die folgenden Bits werden entsprechend um eine Stelle nach hinten verschoben.
 \section{Umsetzung}
-	Die vorherrschende Farbe kann mit einer Flood-Fill über die Trapezfläche bestimmt werden. Hierfür benötigen wir zum einen für jedes der 16 Trapeze einen Startpunkt. Zum anderen müssen für die Flood-Fill die Linien des Trapezes bestimmt werden, sodass die "`Flut"' die Trapezfläche nicht verlässt. Die Linien werden parallel zum Visited-Array als Grenze für die Rekursion verwendet.
+Die vorherrschende Farbe kann mit einer Flood-Fill über die Trapezfläche bestimmt werden. Hierfür benötigen wir zum einen für jedes der 16 Trapeze einen Startpunkt. Zum anderen müssen für die Flood-Fill die Linien des Trapezes bestimmt werden, sodass die "`Flut"' die Trapezfläche nicht verlässt. Die Linien werden parallel zum Visited-Array als Grenze für die Rekursion verwendet.
 
 \subsection{Ermittlung der Trapeze}
-	Für die Bestimmung der Startpunkte nummeriere ich die Segmente von 0 bis 15 durch. Wenn man nun die x- und y-Koordinaten aller anliegende Punkte arithmetisch mittelt, erhält man den Mittelpunkt des Trapezes. Die anliegenden Punkte setzen sich aus den Punkten des jeweiligen Segmentes und denen des angrenzenden Segmentes zusammen. Bei Segment 15 ist Segment 0 das angrenzende Segment. Die Formeln für die Koordinaten eines \textit{n}ten-Trapezes mit dem Mittelpunkt \((x_0|y_0)\) lauten somit:
+Für die Bestimmung der Startpunkte nummeriere ich die Segmente von 0 bis 15 durch. Wenn man nun die x- und y-Koordinaten aller anliegende Punkte arithmetisch mittelt, erhält man den Mittelpunkt des Trapezes. Die anliegenden Punkte setzen sich aus den Punkten des jeweiligen Segmentes und denen des angrenzenden Segmentes zusammen. Bei Segment 15 ist Segment 0 das angrenzende Segment. Die Formeln für die Koordinaten eines \textit{n}ten-Trapezes mit dem Mittelpunkt \((x_0|y_0)\) lauten somit:
 \begin{gather}
 	\begin{split}
 		x_1 &= cos(n \cdot \frac{22,5\pi}{180}) \cdot 5,5u + x_0\\
@@ -78,38 +79,40 @@ Die 16 vorherrschenden Farben können als Wort bestehend aus 16 Bits aufgefasst 
 \begin{equation}
 	x_0 = \frac{(x_1+x_2+x_3+x_4)}{4} \hspace{4em} y_0 = \frac{(y_1+y_2+y_3+y_4)}{4}
 \end{equation}
-	Abschließend müssen die x- und y-Werte noch gerundet werden, da im gerasterten Bild nur ganzzahlige Pixel adressierbar sind.
-	Zur Überprüfung habe ich ein kleines CPP-Programm geschrieben, welches die Formel für \(n = 0\hspace{2pt}..\hspace{2pt}15 \) durchrechnet und entstprechende TikZ-Anweisungen ausgibt (Quellcode: mittelpunkte.cpp). Obwohl in der Testimplementierung ungenau auf Vielfache von \(u\) gerundet wurde, liegen alle Punkte in ihrem jeweiligen Segment.
-	\begin{figure}[!ht]
-		\centering
-		\input{Grafiken/mittelpunkte.tex}
-		\caption{Mittelpunkte}
-	\end{figure}
 
-	Um die Flood-Fill durchführen zu können, müssen nun die Grenzen der Trapeze bestimmt werden. 
+Abschließend müssen die x- und y-Werte noch gerundet werden, da im gerasterten Bild nur ganzzahlige Pixel adressierbar sind.
+Zur Überprüfung habe ich ein kleines CPP-Programm geschrieben, welches die Formel für \(n = 0\hspace{2pt}..\hspace{2pt}15 \) durchrechnet und entstprechende TikZ-Anweisungen ausgibt (Quellcode: mittelpunkte.cpp). Obwohl in der Testimplementierung ungenau auf Vielfache von \(u\) gerundet wurde, liegen alle Punkte in ihrem jeweiligen Segment.
 
-	Alle Trapeze im Kreisring bestehen aus 16 Strecken, die den Kreisring einteilen, sowie 16 obere- wie untere Strecken. Daher muss ich im Binärbild für jedes \textit{n} folgende Punkte aus der Gleichung \eqref{eq:nKoords} verbinden.
+\begin{figure}[!ht]
+	\centering
+	\input{Grafiken/mittelpunkte.tex}
+	\caption{Mittelpunkte}
+\end{figure}
+
+Um die Flood-Fill durchführen zu können, müssen nun die Grenzen der Trapeze bestimmt werden. 
+
+Alle Trapeze im Kreisring bestehen aus 16 Strecken, die den Kreisring einteilen, sowie 16 obere- wie untere Strecken. Daher muss ich im Binärbild für jedes \textit{n} folgende Punkte aus der Gleichung \eqref{eq:nKoords} verbinden.
 	
-	\begin{equation}
-		\overline{P_1P_2} \hspace{3em}
-		\overline{P_2P_4} \hspace{3em}
-		\overline{P_1P_3} \hspace{3em}
-	\end{equation}
+\begin{equation}
+	\overline{P_1P_2} \hspace{3em}
+	\overline{P_2P_4} \hspace{3em}
+	\overline{P_1P_3} \hspace{3em}
+\end{equation}
 
 \subsection{Rasterisierung der Trapeze}
-	Für die Flood-Fill-Grenzen muss ich alle Punkte der Strecken markieren. Das Einzeichen von beliebigen geometrischen Formen in Bitmaps aus Pixeln wird in der Literatur \textit{rastern} genannt. Meine Anforderungen an den Rasterisierungsalgorithmus lauten:
-	\begin{itemize}
-		\item Möglichst geringe Laufzeit
-		\item Lückenlosigkeit, d.h die Linie muss ein durchgehender Pfad durch die Rastergrafik sein. Sonst kann die "`Flut"' durch eine Lücke das Trapez verlassen.
-	\end{itemize}
-	Ausdrücklich nicht benötigt wird eine besonders schöne oder besonders genaue Rasterisierung, es muss nur ein möglichst großer Teil des Trapezes innerhalb der Linien liegen. Schließlich werden die gerasterten Linien dem Nutzer außerhalb von Debug-Funktionen nicht angezeigt.
+Für die Flood-Fill-Grenzen muss ich alle Punkte der Strecken markieren. Das Einzeichen von beliebigen geometrischen Formen in Bitmaps aus Pixeln wird in der Literatur \textit{rastern} genannt. Meine Anforderungen an den Rasterisierungsalgorithmus lauten:
+\begin{itemize}
+	\item Möglichst geringe Laufzeit
+	\item Lückenlosigkeit, d.h die Linie muss ein durchgehender Pfad durch die Rastergrafik sein. Sonst kann die "`Flut"' durch eine Lücke das Trapez verlassen.
+\end{itemize}
+Ausdrücklich nicht benötigt wird eine besonders schöne oder besonders genaue Rasterisierung, es muss nur ein möglichst großer Teil des Trapezes innerhalb der Linien liegen. Schließlich werden die gerasterten Linien dem Nutzer außerhalb von Debug-Funktionen nicht angezeigt.
 
-	Zu diesem Thema habe ich mich in der nächstgelegenen Universitätsbilbiliothek informiert. In meinem Fall ist dies die Ruhr-Universität-Bochum. Dort habe ich im Buch "`Grundkurs Computergrafik mit Java"' \footnote{Klawonn, Frank ISBN: 3528059192. Scan der hier relevanten Seiten 48-61 der Einsendung beigefügt.} den Bresenham-Algorithmus gefunden. Dieser trifft mein Anforderungsprofil genau: Er zeichnet in Linearzeit eine 1px breite Linie zwischen zwei Punkten. Da der Algorithmus ausschließlich mit Ganzzahlen arbeitet, müssen alle Koordinaten vor Eingabe in den Algorithmus gerundet werden.
+Zu diesem Thema habe ich mich in der nächstgelegenen Universitätsbilbiliothek informiert. In meinem Fall ist dies die Ruhr-Universität-Bochum. Dort habe ich im Buch "`Grundkurs Computergrafik mit Java"' \footnote{Klawonn, Frank ISBN: 3528059192. Scan der hier relevanten Seiten 48-61 der Einsendung beigefügt.} den Bresenham-Algorithmus gefunden. Dieser trifft mein Anforderungsprofil genau: Er zeichnet in Linearzeit eine 1px breite Linie zwischen zwei Punkten. Da der Algorithmus ausschließlich mit Ganzzahlen arbeitet, müssen alle Koordinaten vor Eingabe in den Algorithmus gerundet werden.
 
 Für den Algorithmus bestimme ich zunächst den Abstand in die x- und y-Richtung. Mit den Abständen ermittele ich unter Betrachtung der Vorzeichen, in welche Richtung die Linie verlaufen muss. In y-Richtung kann sie entweder nach oben oder unten, in x-Richtung entweder nach links oder rechts verlaufen.
 
 Außerdem ermittele ich, in welche Richtung der Abstand größer ist.
-Damit eine durchgehenden Linie entsteht, müssen so viele Pixel wie der größere Abstand beträgt markiert werden. Ansonsten entstehen Lücken. Daher bestimme ich fogende Schritte.
+Damit eine durchgehenden Linie entsteht, müssen so viele Pixel wie der größere Abstand beträgt, markiert werden. Ansonsten entstehen Lücken. Daher bestimme ich fogende Schritte.
 \begin{itemize}
 	\item Den \textbf{Parallelschritt}, der nur in die größere Richtung weist. 
 	\item Den \textbf{Diagonalschritt}, der in beide Richtungen weist.
@@ -121,7 +124,8 @@ Der eigentliche Einzeichenprozess läuft so ab, dass ich solange Diagonalschritt
 Das Wörterbuch speichere ich in einer Liste. Beim Einlesen rechne ich die Bitfolgen in Dezimalzahlen um.
 Das eingelesene Wort aus dem Dekodierschritt wird ebenfalls in eine Dezimalzahl umgerechnet. Anschließend kann in der Liste nach dem Eintrag mit der gleichen Dezimalzahl gesucht werden.
 
-Gegebenenfalls nötige Rotationen erfolgen, indem das letzte Bit des Wortes in die erste Stelle eines neuen Arrays eingefügt wird. Anschließend werden die sonstigen Bits angefügt. Dieses Array wird widerum in eine Dezimalzahl umgerechnet. Dies wird solange wiederholt, bis alle Rotationen getestet wurden oder eine Übersetzung gefunden wurde.
+Gegebenenfalls nötige Rotationen erfolgen, indem das letzte Bit des Wortes an die erste Stelle eines neuen Arrays eingefügt wird. Anschließend werden die sonstigen Bits angefügt.
+Dieses Array wird widerum in eine Dezimalzahl umgerechnet. Dies wird solange wiederholt, bis alle Rotationen getestet wurden oder eine Übersetzung gefunden wurde.
 Sollte keine Übersetzung gefunden werden, wird die Zeichenfolge "`???"' zurückgegeben. 
 
 \pagebreak

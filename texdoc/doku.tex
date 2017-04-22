@@ -10,7 +10,7 @@
 \usepackage[ngerman]{babel}
 
 % Das muss fucking nochmal GEIL aussehen!
-% \usepackage{microtype} - Erst im Final actimelisieren
+\usepackage{microtype}
 
 % Mathe
 \usepackage{mathtools}
@@ -42,6 +42,8 @@
 \renewcommand{\chapterpagestyle}{scrheadings}
 \pagestyle{scrheadings}
 
+\setcounter{tocdepth}{1}
+
 \begin{document}
 	\titlehead{Teilnahme 6745 (Team 00001) \hfill Laurenz Grote}
 	\title{\task}
@@ -51,11 +53,11 @@
 	\maketitle
 	\tableofcontents
 	\vspace {2em}
-	Meine Umsetzung für "`\task"' erfolgte unter Linux mit Java (OpenJDK 1.8). Ich habe Ihnen den Programmcode sowie eine ausführbare .jar-Datei beigelegt. Da die Aufgabenstellung in Teilaufgaben aufgeteilt ist, weiche ich in meiner Dokumentation von der üblichen Gliederung ab. Stattdessen gliedere ich die Dokumentation in je ein Kapitel für jede Teilaufgabe. 
+	Meine Umsetzung für "`\task"' erfolgte unter Linux mit Java (OpenJDK 1.8). Ich habe Ihnen den Programmcode sowie eine ausführbare .jar-Datei beigelegt.
 	
 	\vfill{}
 	\textbf{Abstract}:
-	Das Eingabebild wird in ein Binärbild umgewandelt, indem zunächst mit dem Canny-Algorithmus die Ecken des Eingabebildes bestimmt werden. In diesem Kantenbild werden daraufhin die Polygone mit Einsen ausgefüllt. So entsteht ein rauschfreies Bild für die nachfolgenden Dekodierungsschritte.
+	Das Eingabebild wird in ein Binärbild umgewandelt, indem zunächst mit dem Canny-Algorithmus die Ecken des Eingabebildes bestimmt werden. In diesem Kantenbild werden daraufhin die Polygone schwarz ausgefüllt. So entsteht ein rauschfreies Bild für die nachfolgenden Dekodierungsschritte.
 
 Einen Kreismittelpunkt habe ich definiert als einem Punkt in einem Polygon, an dem die Abstände zum Polygonrand in alle Richtungen identisch sind. Außerdem muss der Flächeninhalt des Polygons dem eines Kreises mit dem ermittelten Radius gleichen.
 
