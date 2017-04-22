@@ -71,30 +71,16 @@ public class CircleCenters {
      */
     private void scanStreaks(int x, int y, int deltaX, int deltaY) {
         int streakLength  = 0;
-        int consecutiveFalses = 0;
 
         // Solange sich der Cursor im Bild befindet
         while (x >= 0 && x < width && y >= 0 && y < height) {
             // Auszählen
             if (swImage[x][y]) {
-                if (streakLength == consecutiveFalses) {
-                    // Erstes true seit der letzten Streak
-                    streakLength = 1;
-                } else  {
-                    streakLength++;
-                }
-                consecutiveFalses = 0;
-            } else {
-                consecutiveFalses++;
                 streakLength++;
-            }
-
-            // Wenn die consecutiveFalses die Toleranz erreicht haben und ein True-Feld vorkam
-            if (consecutiveFalses == tolerance && streakLength != consecutiveFalses) {
+            } else {
                 // Streak ist hier beendet
-                markStreak(x, y, deltaX, deltaY, streakLength, consecutiveFalses);
+                markStreak(x, y, deltaX, deltaY, streakLength);
                 streakLength = 0;
-                consecutiveFalses = 0;
             }
 
             // Cursor verschieben
@@ -103,9 +89,9 @@ public class CircleCenters {
         }
 
         // Neue Zeile / Spalte, akt. Streak damit wenn vorhanden abgeschlossen
-        if (streakLength != consecutiveFalses) {
+        if (streakLength > 0) {
             // Streak ist hier beendet
-            markStreak(x, y, deltaX, deltaY, streakLength, consecutiveFalses);
+            markStreak(x, y, deltaX, deltaY, streakLength);
         }
     }
 
@@ -117,19 +103,10 @@ public class CircleCenters {
      * @param deltaX Bewegung in x-Richtung
      * @param deltaY Bewegung in y-Richtung
      * @param streakLength Berechnete Länge der Streak (inkl. anschließendem Toleranz-Suffix
-     * @param consecutiveFalses Länge des Toleranz-Suffixes am Ende
      */
-    private void markStreak(int x, int y, int deltaX, int deltaY, int streakLength, int consecutiveFalses) {
-        // Besagter Toleranzsuffix gehört nicht zur eiegentlichen Streak
-        streakLength -= consecutiveFalses;
-        // Daher den Zeiger ensprechend zurückschieben
-        for (int i = 0; i < consecutiveFalses; i++) {
-            x -= deltaX;
-            y -= deltaY;
-        }
-
+    private void markStreak(int x, int y, int deltaX, int deltaY, int streakLength) {
         // Über die Gesamte streakLength Streaklänge schreiben
-        for (int i = 0; i < streakLength; i++) {
+        for (int i = 0; i <= streakLength; i++) {
             // Bestimme ob wir horizontal oder vertikal scannen
             if (x > 0 && x < width && y > 0 && y < height) {
                 if (deltaX == 0) {
