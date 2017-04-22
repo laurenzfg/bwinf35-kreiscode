@@ -98,7 +98,7 @@ public class ImageDecoder {
     }
 
     /**
-     * Bestimmen der vorherrschenden farbe in den 16 Segmenten
+     * Bestimmen der vorherrschenden Farbe in den 16 Segmenten
      * @param lines einteilende Linien
      * @return Vorherrschende Farebn in den 16 Segmenten
      */
