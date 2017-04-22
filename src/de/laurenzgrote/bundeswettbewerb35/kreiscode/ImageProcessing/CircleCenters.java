@@ -148,8 +148,8 @@ public class CircleCenters {
                         int last = y + halfVLength - 1;
                         if (Math.abs(hStreakLength - vStreakLength) < tolerance
                                 && first > 0 && last > 0 && last < height && first < height) {
-                            // Sind die berechneten Werte innerhalb von True
-                            if (swImage[center][first] && swImage[center][last]) {
+                            // Haben die vertikalen Extrema die gleiche Streaklänge     
+                            if (vStreak[center][first] == vStreakLength && vStreak[center][last] == vStreakLength) {
                                 // Kreiskriterium I erfüllt,
                                 // --> Kandidat für Mittelpunkt also Mittelpunkt der Streak
                                 Coordinate coord = new Coordinate(center, y, hStreakLength);
