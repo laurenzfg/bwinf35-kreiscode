@@ -50,9 +50,9 @@ public class EdgeDetector {
         // Entrauschen dieses Graustufenbildes durch Gauß-Filter
         double[][] gaussImage = gaussianFilter(brightness);
         // Ableitung bestimmen
-        double[][] scharrImage = scharrFilter(gaussImage);
+        double[][] sobelImage = sobelOperator(gaussImage);
         // Ecken mit Hysterese herausfiltern
-        edgesImage = dilate(hysteresis(scharrImage));
+        edgesImage = dilate(hysteresis(sobelImage));
         // Ausfüllen der Polygone
         swImage = fill(edgesImage);
     }
@@ -129,12 +129,12 @@ public class EdgeDetector {
 
 
     /**
-     * Berechnung der Ableitung über den Bildkontrast mit dem Scharr-Operator
+     * Berechnung der Ableitung über den Bildkontrast mit dem Sobel-Operator
      * http://homepages.inf.ed.ac.uk/rbf/HIPR2/sobel.htm
      * @param in
-     * @return Ergebnis des Scharr-Operators
+     * @return Ergebnis des Sobel-Operators
      */
-    private double[][] scharrFilter(double[][] in) {
+    private double[][] sobelOperator(double[][] in) {
         // Sobel-Operatoren:
 
         // Kernel für vertikale Ableitung:
@@ -150,8 +150,8 @@ public class EdgeDetector {
         int kernelGap = (int) ((Math.sqrt(vertKernel.length) - 1) / 2); // ==1
 
         // Ergebniss d. Ableitungsfunktionen des Graphens in beide Richtungen
-        double[][] vertScharr = new double[width][height];
-        double[][] horizScharr = new double[width][height];
+        double[][] vertSobel = new double[width][height];
+        double[][] horizSobel = new double[width][height];
 
         for (int x = kernelGap; x < width - kernelGap; x++) {
             for (int y = kernelGap; y < height - kernelGap; y++) {
@@ -172,23 +172,23 @@ public class EdgeDetector {
                     }
                 }
                 // Speichern der berechneten Werte
-                vertScharr[x][y] = vert;
-                horizScharr[x][y] = horiz;
+                vertSobel[x][y] = vert;
+                horizSobel[x][y] = horiz;
             }
         }
 
         // Vereinigen der beiden Ableitungen
         // sqrt(vert^2+horiz^2)
-        double[][] combScharr = new double[width][height];
+        double[][] combSobel = new double[width][height];
         int[][] angles = new int[width][height];
         for (int x = kernelGap; x < width - kernelGap; x++) {
             for (int y = kernelGap; y < height - kernelGap; y++) {
                 // Laden der beiden Ableitungswerte zu (x, y)
-                double vert = vertScharr[x][y];
-                double horiz = horizScharr[x][y];
+                double vert = vertSobel[x][y];
+                double horiz = horizSobel[x][y];
                 // Speichern
                 angles[x][y] = getAngle(horiz, vert);
-                combScharr[x][y] = Math.sqrt(vert * vert + horiz * horiz);
+                combSobel[x][y] = Math.sqrt(vert * vert + horiz * horiz);
             }
         }
 
@@ -197,28 +197,28 @@ public class EdgeDetector {
         for (int x = kernelGap; x < width - kernelGap; x++) {
             for (int y = kernelGap; y < height - kernelGap; y++) {
                 int direction = angles[x][y];
-                double hereVal = combScharr[x][y];
+                double hereVal = combSobel[x][y];
                 double a = 0, b = 0;
                 switch(direction) {
                     case 0:
                         // Vertikal
-                        a = combScharr[x-1][y];
-                        b = combScharr[x+1][y];
+                        a = combSobel[x-1][y];
+                        b = combSobel[x+1][y];
                         break;
                     case 1:
                         // SW-NE
-                        a = combScharr[x-1][y-1];
-                        b = combScharr[x+1][y+1];
+                        a = combSobel[x-1][y-1];
+                        b = combSobel[x+1][y+1];
                         break;
                     case 2:
                         // Horizontal
-                        a = combScharr[x][y-1];
-                        b = combScharr[x][y+1];
+                        a = combSobel[x][y-1];
+                        b = combSobel[x][y+1];
                         break;
                     case 3:
                         // SE-NW
-                        a = combScharr[x-1][y+1];
-                        b = combScharr[x+1][y-1];
+                        a = combSobel[x-1][y+1];
+                        b = combSobel[x+1][y-1];
                 }
                 if (hereVal >= a && hereVal >= b) {
                     nmsImage[x][y] = hereVal;
@@ -259,12 +259,12 @@ public class EdgeDetector {
     }
 
     /**
-     * Das Ergebnis des Scharr-Operators mit dem Hysterese binärisieren:
+     * Das Ergebnis des Sobel-Operators mit dem Hysterese binärisieren:
      * http://homepages.inf.ed.ac.uk/rbf/HIPR2/canny.htm
-     * @param scharrImage
+     * @param sobelImage
      * @return
      */
-    private boolean[][] hysteresis(double[][] scharrImage) {
+    private boolean[][] hysteresis(double[][] sobelImage) {
         boolean[][] binaryImage = new boolean[width][height]; // Ausgabebild
         // Binärisieren mit hohem Schwellwert
         double treshhold = 50.0;
@@ -272,7 +272,7 @@ public class EdgeDetector {
 
         for (int x = 0; x < width; x++) {
             for (int y = 0; y < height; y++) {
-                if (scharrImage[x][y] > treshhold) {
+                if (sobelImage[x][y] > treshhold) {
                     binaryImage[x][y] = true;
                     hysteresisStack.push(new Coordinate(x, y)); // Für anliegende Felder gilt ggfs. kleinere Schwelle
                 }
@@ -291,25 +291,25 @@ public class EdgeDetector {
 
             // Links
             x -= 1;
-            if (x >= 0 && !binaryImage[x][y] && scharrImage[x][y] > treshhold) {
+            if (x >= 0 && !binaryImage[x][y] && sobelImage[x][y] > treshhold) {
                 binaryImage[x][y] = true;
                 hysteresisStack.push(new Coordinate(x, y));
             }
             // Rechts
             x += 2;
-            if (x < width && !binaryImage[x][y] && scharrImage[x][y] > treshhold) {
+            if (x < width && !binaryImage[x][y] && sobelImage[x][y] > treshhold) {
                 binaryImage[x][y] = true;
                 hysteresisStack.push(new Coordinate(x, y));
             }
             // Oben
             x -= 1; y -= 1;
-            if (y >= 0 && !binaryImage[x][y] && scharrImage[x][y] > treshhold) {
+            if (y >= 0 && !binaryImage[x][y] && sobelImage[x][y] > treshhold) {
                 binaryImage[x][y] = true;
                 hysteresisStack.push(new Coordinate(x, y));
             }
             // Unten
             y += 2;
-            if (y < height && !binaryImage[x][y] && scharrImage[x][y] > treshhold) {
+            if (y < height && !binaryImage[x][y] && sobelImage[x][y] > treshhold) {
                 binaryImage[x][y] = true;
                 hysteresisStack.push(new Coordinate(x, y));
             }
