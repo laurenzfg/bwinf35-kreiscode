@@ -88,8 +88,8 @@ public class ImageDecoder {
         // Offset, damit die Trapeze an einem Segment anliegen
         double offset = 0;
         for (int i = 0; i < 360; i++) {
-            int pX = (int) Math.round(Math.cos(i*degToRad) * 5.0 * u + x);
-            int pY = (int) Math.round(Math.sin(i*degToRad) * 5.0 * u + y);
+            int pX = (int) Math.round(Math.cos(i*degToRad) * 4.7 * u + x);
+            int pY = (int) Math.round(Math.sin(i*degToRad) * 4.7 * u + y);
 
             if (cannyEdges[pX][pY]) { // Liegen wir bei dem Winkel an einem Segment?
                 offset = i*degToRad;

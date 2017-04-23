@@ -10,13 +10,13 @@ Die in Kapitel 1 vorgestellte Einleseprozedur wird den Anforderungen für die Er
 
 Ich extrahiere zunächst alle Kanten des Bildes. Kanten sind Stellen, an denen sich die Farbwerte eines Pixels schlagartig ändern. Den Kantextraktionsalgorithmus implementiere ich hierbei so, dass die Kante eine lückenlose Linie darstellt.
 
-Mit diesen Kanten habe ich das Bild segmentiert. Zu schwärzende Bildesegmente sind von einer Kante umrandet. Daher fülle ich jedes Segment komplett schwarz (1), während ich den Hintergrund weiß belasse.
+Mit diesen Kanten habe ich das Bild segmentiert. Zu schwärzende Bildsegmente sind von einer Kante umrandet. Daher fülle ich jedes Segment komplett schwarz (1), während ich den Hintergrund weiß (0) belasse.
 
-Der Hintergrund des Bildes ist komplett weiß. Alle an den Hintergrund angrenzenden Segmente sind schwarz, schließlich fand dort eine schlagartige Farbänderung zum Hintergrund statt. Die Felder, die an diese Segmente angrenzen sind weiß, da sich die Farbe widerum schlagartig zum Hintergrund zurück geändert hat. Dieses Muster setze ich fort, bis die Farben aller Segmente bestimmt sind.
+Die Färbung basiert auf die folgende Annahme: Der Hintergrund des Bildes ist monton gleichfarbig. Alle an den Hintergrund angrenzenden Segmente sind Bestandteile eines Kreisringes, schließlich fand dort eine schlagartige Farbänderung zum Hintergrund statt. Die Felder, die an diese Segmente angrenzen, sind weiß, da sich die Farbe widerum schlagartig zum Hintergrund zurück geändert hat. Dieses Muster setze ich fort, bis die Farben aller Segmente bestimmt sind.
 
 Die drei Schritte der Bildprozessierung sind in Abbildung \ref{abb:transform} dargestellt.
 
-Vorteil dieser Vorhergehensweise über ein Schwellwertverfahren ist, dass jeder ähnlich gefärbte Bereich die selbe Farbe erhält. Bei einem Schwellwertverfahren werden bei einem zu kleinen Schwellwert dunklere Bildbereiche komplett geschwärzt, während bei einem zu hohen Schwellwert einige Kreis-Codes nur lückenhaft erkannt werden.
+Vorteil dieser Vorhergehensweise gegenüber einem Schwellwertverfahren ist, dass jeder ähnlich gefärbte Bereich die selbe Farbe erhält. Bei einem Schwellwertverfahren werden bei einem zu kleinen Schwellwert dunklere Bildbereiche komplett geschwärzt, während bei einem zu hohen Schwellwert einige Kreis-Codes nur lückenhaft erkannt werden.
  
 \section{Umsetzung}
 \subsection{Graustufenbild}
@@ -50,7 +50,7 @@ Allerdings kann die Gaußsche Weichzeichnung auch in einen horizontalen und vert
 Man kann mit dieser Matrix das gleiche Ergebnis erzielen, indem man sie zunächst in horizontale und anschließend in vertikale Richtung anwendet. Diese Vorhergehensweise hat eine bessere Laufzeit, da für die Glättung eines Pixels nicht \(4^2\), sondern nur \(2\times 4\) Pixel betrachtet werden müssen.
 
 \subsubsection{Sobel-Operator (Listing \ref{lst:sobel})}
-Anschließend wende ich auf das nun geglättete Bild den Sobel-Operator an. Dieser Operator entspricht der 1. Ableitung über die Helligkeitskurve des Bildes. Der Operator wird mithilfe von \textit{Convolution} über das gesamte Bild berechnet. Convolution ist das bereits vom dem Gauß-Weichzeichner bekannte Prinzip, dass auf jedes Pixel eine Matrix angewandt wird. Der Sobel-Operator basiert zwei Convulution-Durchläufen mit folgenden Matrizen:
+Anschließend wende ich auf das nun geglättete Bild den Sobel-Operator an. Dieser Operator entspricht der 1. Ableitung über die Helligkeitskurve des Bildes. Der Operator wird mithilfe von \textit{Convolution} über das gesamte Bild berechnet. Convolution ist das bereits von dem Gauß-Weichzeichner bekannte Prinzip, dass auf jedes Pixel eine Matrix angewandt wird. Der Sobel-Operator basiert zwei Convulution-Durchläufen mit folgenden Matrizen:
 \begin{gather}
 	\begin{split}
 		\begin{bmatrix}
@@ -72,7 +72,7 @@ Anschließend wende ich auf das nun geglättete Bild den Sobel-Operator an. Dies
 Diese Matrizen entsprechen der Ableitung in vertikale und horizontale Richtung, da die jeweils an das Feld in horizontale oder vertikale Richtungen angrenzenden Felder voneinander subtrahiert werden.
 Wenn die umliegenden Pixel den gleichen Intensitätstwert haben, ist das Ergebnis des Sobel-Operators 0.
 Bei Intensitätsunterschieden verändert sich das Ergebnis des Operators entsprechend.
-Da allerdings für die weiteren Berechnungen eine Ableitung benötigt wird, müssen beide Ableitungswerte eines Pixels kombiniert werden.
+Da allerdings für die weiteren Berechnungen eine kombinierte Ableitung benötigt wird, müssen beide Ableitungswerte eines Pixels kombiniert werden.
 
 Hierfür können die beiden Ableitungswerte als ein rechtwinkliges Dreieck aufgefasst werden. Die Ausschläge der Ableitungen in x- und y-Richtung entsprechen den beiden Kateten. Ein kombinierter Wert aus beiden Ableitungen enstpricht dann der Länge der Hypothenuse. Diese lässt sich mit dem Satz des Pythagoras berechnen (\(G_{xy} = \sqrt{G_x^2 + G_y^2}\)).
 
@@ -85,10 +85,10 @@ Da die beiden Ableitungsfunktionen ein rechtwinkliges Dreieck bilden, kann mithi
 	tan(\alpha) = \frac{G_y}{G_x}
 \end{equation}
 
-Mit diesem Winkel können die Pixel bestimmt werden, die auf der gleichen Kante liegen. Wenn der Ableitungswert des Pixels nicht das Maximum seiner Nachbarn darstellt, kann sein Ableitungswert auf 0 gesetzt werden (Der Pixel wird in der Ausgabegrafik unterdrückt). Schließlich gibt es entlang der Kante einen stärken Farbintensitätsunterschied.  
+Mit diesem Winkel können die Pixel bestimmt werden, die an der gleichen Kante liegen. Wenn der Ableitungswert des Pixels nicht das Maximum seiner Nachbarn darstellt, kann sein Ableitungswert auf 0 gesetzt werden (Der Pixel wird in der Ausgabegrafik unterdrückt). Schließlich gibt es entlang der Kante einen stärken Farbintensitätsunterschied.  
 
 Wenn der Winkel beispielsweise \(0^{\circ}\) beträgt, verläuft die Kante in horizontale Richtung. Dann wird der Ableitungswert des Pixels mit seinem nördlichen und südlichen Nachbarn verglichen.
-Nur wenn der Ableitungswert das Maximum von diesen Pixeln darstellt, ist er Teil der 1px breiten Kante. Sonst ändert sich bei diesem Pixel zwar schon die Farbe, aber es folgt unmittelbar ein noch stärkerer Farbumschlag.
+Nur wenn der Ableitungswert das Maximum von diesen Pixeln darstellt, ist er Teil der 1px breiten Kante. Sonst ändert sich bei diesem Pixel zwar die Farbe, aber es folgt unmittelbar ein noch stärkerer Farbumschlag.
 
 \subsubsection{Binärisierung mit Hysterese (Listing \ref{lst:hyst})}
 Zur Binärisierung des Ergebnisses der Sobel-Operators wende ich eine Technik namens \textit{Hysterese} an. Bei einer Hysterese wird zunächst mit einem hohen Schwellwert das Bild binärisiert. 
@@ -96,7 +96,7 @@ Im Kontext meiner Implementierung bedeutet dies, dass alle Pixel mit einem Ablei
 
 Da aber möglicherweise eine Kante auch aus weniger stark abgesetzten Pixeln besteht, akzeptiert die Hysterese für an erkannte Kantenpunkte anliegende Punkte einen niedrigeren Schwellwert. Sobald ein Punkt einer Ecke gefunden wurde, wird diese "`verfolgt"'.
 
-Diese Verfolgung ist mit einem Stack implemementiert. Jeder im ersten ersten Erkennungsschritt erkannte Pixel wird auf diesen Stack gelegt. Nach Abschluss des ersten Erkennungsschrittes werden alle Pixel, die an ein Pixel aus dem Stack angrenzen, noch nicht markeirt wurden und über dem verringerten Schwellwert von 10 liegen, schwarz markiert. Diese Pixel werden widerum auf den Stack gelegt, sodass die Kante mit dem verringerten Schwellwert verfolgt wird. 
+Diese Verfolgung ist mit einem Stack implemementiert. Jeder im ersten ersten Erkennungsschritt erkannte Pixel wird auf diesen Stack gelegt. Nach Abschluss des ersten Erkennungsschrittes werden alle Pixel, die an ein Pixel aus dem Stack angrenzen, noch nicht markiert wurden und über dem verringerten Schwellwert von 10 liegen, schwarz markiert. Diese Pixel werden widerum auf den Stack gelegt, sodass die Kante mit dem verringerten Schwellwert verfolgt wird. 
 
 \subsubsection{Dilation (Listing \ref{lst:dilation})}
 Aufgrund der Non-Maximum-Supression sind kleine Lücken in der Grafik entstanden. Dies verhindert eine sinnvolle Ausführung von den in meinem Algorithmus häufg verwendeten Flood-Fills. Daher wende ich auf das Ergebnis der Hysterese Dilation an. Hierbei wird jedes Pixel, dass mehr als einen schwarzen Nachbarn hat, geschwärzt.
@@ -108,8 +108,8 @@ Dieser nimmt als Eingabe das Ergebnis des Canny-Eckenerkennungsprozesses und hat
 
 Von Pixel(0|0) ausgehend werden alle im Canny-Bild erreichbaren weißen Pixel mithilfe einer Flood-Fill im Ausgabebild als weiß abgespeichert, da diese den Hintergrund darstellen.
 
-Anschließend weden alle schwarzen Pixel, die an den Hintergrund angrenzen, als schwarz markiert. Diese Pixel stellen eine Kante zum Vordergrundbereich dar.
-Da sie die Kante zum Vordergrundbereich sind, werden alle an diese Pixel angrenzenden weißen Pixel, die im Ausgabebild noch nicht markiert wurden, als Schwarz markiert. Schließlich befindet sich dieser Bereich weiterhin im Vordergrund.
+Anschließend werden alle Kantenpixel, die an den Hintergrund angrenzen, schwarz markiert. Diese Pixel stellen eine Kante zum Vordergrundbereich dar.
+Da sie die Kante zum Vordergrundbereich sind, werden alle an diese Pixel angrenzenden Nicht-Kanten-Pixel, die im Ausgabebild noch nicht markiert wurden, als Schwarz markiert. Schließlich befindet sich dieser Bereich weiterhin im Vordergrund.
 Diese Prozedur wird abwechselnd zur Bestimmung von Vorder- und Hintergrundbereichen eingesetzt.
 
 Praktisch umgesetzt habe ich dies mit einer Entlehnung aus der Graphentheorie.\footnote{\url{https://en.wikipedia.org/wiki/Connected-component_labeling}}. Mein Algorithmus basiert auf der im Abschnitt "`One component at a time"' vorgestellten Idee.
@@ -121,9 +121,10 @@ Danach fahre ich mit der nächsten Kantengruppe fort, nur vergebe ich dort den W
 \subsection {Rotation der Kreis-Codes (Listing \ref{lst:decode})}
 In einem Foto ist nicht davon auszugehen, dass der Nutzer das erste Segment exakt an der x-Achse ausrichtet. Daher muss der Trapezkranz aus Kapitel 2 so über den Kreisring gelegt werden, dass jedes Trapez möglich exakt über einem Kreisringsegment liegt. 
 
-Dies gelingt, indem wir die Achse so verschieben, dass sie auf einer Kante zwischen zwei Kreisringsegmenten liegt. Dafür müssen wir eine beliebige Kante auf dem äußeren Kreisring finden. Bei einer solchen Kante muss in einem Abstand von \(5u\) vom Pol (vgl Abb. \ref{abb:dims}) eine Kante vom Canny-Algorithmus vorliegen.
+Dies gelingt, indem wir die Achse so verschieben, dass sie auf einer Kante zwischen zwei Kreisringsegmenten liegt. Dafür müssen wir eine beliebige Kante auf dem äußeren Kreisring finden. Bei einer solchen Kante muss in einem Abstand von \(5u\) vom Pol (vgl Abb. \ref{abb:dims}) eine Kante vom Canny-Algorithmus vorliegen. Also muss an dieser Stelle im Ausgabebild von Canny True stehen.
 
-Daher suche ich in alle Richtungen vom Pol aus eine Kante. Dann addiere ich den Winkel \(\delta\) zwischen der x-Achse und dem Strahl zur ersten Kante auf die Streckenpunktkoordinaten hinauf. Statt den Formeln \ref{eq:nKoords} nutze ich also folgende Formeln:
+So suche ich in alle Richtungen vom Pol aus eine Kante.
+Dann addiere ich den Winkel \(\delta\) zwischen der x-Achse und dem Strahl zur ersten Kante auf den Winkel zwischen x-Achse und eintelenden Strahl hinauf. Statt den Formeln \ref{eq:nKoords} nutze ich also folgende Formeln:
 
 \begin{gather}
 	\begin{split}
@@ -140,6 +141,9 @@ Daher suche ich in alle Richtungen vom Pol aus eine Kante. Dann addiere ich den 
 		y_4 &= sin(((n+1)\bmod{}16) \cdot \frac{22,5\pi}{180} + \delta) \cdot 4,5u + y_0
 	\end{split} \label{eq:nKoordsNeu}
 \end{gather}
+
+Dass dadurch mehr als \(360^{\circ}\) in den Sinus eingegeben werden ist unwsesentlich, da sich die Sinuskurve nach \(360^{\circ}\) wiederholt.
+\pagebreak
 \section{Beispiele}
 Aller Optimierungen zum Trotz erkennt mein Programm auf den weiteren Beispielen nicht alle Kreis-Codes. Ausgabebilder aller BwInf-Beispiele finden Sie in der Einsendung. Hier gebe ich tabellarisch wieder, wie vollständig das Programm die Beispieleingaben dekodiert hat. \\ 
 (\checkmark{} Vollständig, \(\varnothing\) unvollständig, \(\times\) ohne Ergebnis)
@@ -155,3 +159,20 @@ Aller Optimierungen zum Trotz erkennt mein Programm auf den weiteren Beispielen 
     \end{tabular}
     \caption {BwInf-Beispieleingaben}
 \end{table}
+
+Auch wenn es mir nicht gelungen ist, das Programm so zu optimieren, dass alle Codes dekodiert werden, habe ich alle unvollständigen Dekodierungen analysiert:
+
+\vspace{2em}
+
+\begin{minipage}{0.7\textwidth}
+\includegraphics[width=0.9\textwidth]{Grafiken/Ausgaben/cam1}
+\end{minipage}
+\begin{minipage}{0.3\textwidth}
+Hier scheitert mein Algorithmus an den zahlreichen weißen Punkten in den nicht erkannten Kreis-Codes. Eine stärkere Weichzeichnung ist nicht zielführend, da dann die Kantengrenzen verwischen.
+\end{minipage}
+\begin{minipage}{0.7\textwidth}
+\includegraphics[width=0.9\textwidth]{Grafiken/Ausgaben/cam4}
+\end{minipage}
+\begin{minipage}{0.3\textwidth}
+Hier scheitert mein Algorithmus an den zahlreichen weißen Punkten in den nicht erkannten Kreis-Codes. Eine stärkere Weichzeichnung ist nicht zielführend, da dann die Kantengrenzen verwischen.
+\end{minipage}

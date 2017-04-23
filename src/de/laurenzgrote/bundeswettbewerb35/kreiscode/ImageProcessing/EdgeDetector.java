@@ -267,12 +267,12 @@ public class EdgeDetector {
     private boolean[][] hysteresis(double[][] sobelImage) {
         boolean[][] binaryImage = new boolean[width][height]; // Ausgabebild
         // Binärisieren mit hohem Schwellwert
-        double treshhold = 40.0;
+        double treshold = 50.0;
         Stack<Coordinate> hysteresisStack = new Stack<>(); // Die Trues mit hohem Wert für spätere Hysterese
 
         for (int x = 0; x < width; x++) {
             for (int y = 0; y < height; y++) {
-                if (sobelImage[x][y] > treshhold) {
+                if (sobelImage[x][y] > treshold) {
                     binaryImage[x][y] = true;
                     hysteresisStack.push(new Coordinate(x, y)); // Für anliegende Felder gilt ggfs. kleinere Schwelle
                 }
@@ -281,37 +281,24 @@ public class EdgeDetector {
         }
 
         // Bereich mit kleiner Schwelle
-        treshhold /= 4.0; // Treshhold senken
+        treshold = 1; // Treshhold senken
         while (!hysteresisStack.empty()) { // Für jedes Kantenfeld
             Coordinate c = hysteresisStack.pop();
             int x = c.getX(); int y = c.getY();
 
             // Gucken ob es daneben False-Felder gibt, die mit dem halben Treshhold True sind
             // für die an diese Felder angrenzenden Felder gilt ebenfalls die kleine Schwelle
-
-            // Links
-            x -= 1;
-            if (x >= 0 && !binaryImage[x][y] && sobelImage[x][y] > treshhold) {
-                binaryImage[x][y] = true;
-                hysteresisStack.push(new Coordinate(x, y));
-            }
-            // Rechts
-            x += 2;
-            if (x < width && !binaryImage[x][y] && sobelImage[x][y] > treshhold) {
-                binaryImage[x][y] = true;
-                hysteresisStack.push(new Coordinate(x, y));
-            }
-            // Oben
-            x -= 1; y -= 1;
-            if (y >= 0 && !binaryImage[x][y] && sobelImage[x][y] > treshhold) {
-                binaryImage[x][y] = true;
-                hysteresisStack.push(new Coordinate(x, y));
-            }
-            // Unten
-            y += 2;
-            if (y < height && !binaryImage[x][y] && sobelImage[x][y] > treshhold) {
-                binaryImage[x][y] = true;
-                hysteresisStack.push(new Coordinate(x, y));
+            for (int x1= x - 1; x1 <= x + 1; x1++) {
+                for (int y1 = y-1; y1 <= y + 1; y1++) {
+                    // IF DES TODES
+                    // (Im Bild, nicht markiert, überm verringerten treshold
+                    if (x1 != x && y1 !=y &&
+                            x >= 0 && x < width && y >= 0 && y < height
+                            && !binaryImage[x][y] &&  sobelImage[x][y] > treshold) {
+                        binaryImage[x][y] = true;
+                        hysteresisStack.push(new Coordinate(x, y));
+                    }
+                }
             }
         }
 
