@@ -25,6 +25,37 @@
 
 \usepackage{subcaption}
 
+% Listings
+\usepackage{listings}
+\usepackage{xcolor}
+\lstset{language={Java},
+        numbers=left,
+        stepnumber=1,
+        numbersep=5pt,
+        numberstyle=\tiny,
+        breaklines=true,
+        breakautoindent=true,
+        postbreak=\space,
+        tabsize=2,
+        basicstyle=\ttfamily\footnotesize,
+        showspaces=false,
+        showstringspaces=false,
+        extendedchars=true,
+        commentstyle=\color{Gray}, % comment color
+    	keywordstyle=\color{Bittersweet}, % keyword color
+    	stringstyle=\color{OliveGreen}, % string color
+        % Sorgt dafür, dass das Paket listings auch mit den Sonderzeichen in UTF-8 zurecht kommt.
+				literate=
+					{Ö}{{\"O}}1
+					{Ä}{{\"A}}1
+					{Ü}{{\"U}}1
+					{ß}{{\ss}}2
+					{ü}{{\"u}}1
+					{ä}{{\"a}}1
+					{ö}{{\"o}}1
+					{€}{{\euro{}}}1
+        }
+
 % Coole Links im PDF
 \usepackage[hidelinks]{hyperref}
 
@@ -71,4 +102,6 @@
 		\input{dekod.tex}
 	\chapter{Verbesserungen des Algorithmus zur Fotoerkennung}
 		\input{fotos.tex}
+	\chapter{Quellcodelistings}
+		\input{listings.tex}
 \end{document}

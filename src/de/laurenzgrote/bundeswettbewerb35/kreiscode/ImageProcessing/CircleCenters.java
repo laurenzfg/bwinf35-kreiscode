@@ -199,6 +199,7 @@ public class CircleCenters {
                 int x = c.getX();
                 int y = c.getY();
 
+                // Ist das Feld noch nicht besucht worden?
                 if (structureNos[x][y] == -1) {
                     structureNos[x][y] = aktStructure;
                     size++;

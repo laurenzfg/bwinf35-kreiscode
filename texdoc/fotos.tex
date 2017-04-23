@@ -119,26 +119,39 @@ In einem Integer-Array gebe ich jedem Hintergrundpixel den Wert 0. Darauf gebe i
 Danach fahre ich mit der nächsten Kantengruppe fort, nur vergebe ich dort den Wert 2. Schlussendlich müssen dann Pixel mit einem ungeraden Wert schwarz gefärbt werden, während Pixel mit einem geraden Wert weiß belassen werden.
 
 \subsection {Rotation der Kreis-Codes}
-In einem Foto ist nich tdavon auszugehen, dass der Nutzer das erste Segment exakt an der x-Achse ausrichtet. Daher muss der Trapezkranz aus Kapitel 2 so über den Kreisring gelegt werden, dass jedes Trapez möglich exakt über einem Kreisringsegment liegt. 
+In einem Foto ist nicht davon auszugehen, dass der Nutzer das erste Segment exakt an der x-Achse ausrichtet. Daher muss der Trapezkranz aus Kapitel 2 so über den Kreisring gelegt werden, dass jedes Trapez möglich exakt über einem Kreisringsegment liegt. 
 
 Dies gelingt, indem wir die Achse so verschieben, dass sie auf einer Kante zwischen zwei Kreisringsegmenten liegt. Dafür müssen wir eine beliebige Kante auf dem äußeren Kreisring finden. Bei einer solchen Kante muss in einem Abstand von \(5u\) vom Pol (vgl Abb. \ref{abb:dims}) eine Kante vom Canny-Algorithmus vorliegen.
 
-Daher suche ich in alle Richtungen vom Pol aus eine Kante. Dann addiere ich den Winkel zwischen der x-Achse und dem Strahl zur ersten Kante auf die Streckenpunktkoordinaten hinauf. Statt den Formeln \eqref{eq:nKoords} nutze ich also folgende Formeln:
+Daher suche ich in alle Richtungen vom Pol aus eine Kante. Dann addiere ich den Winkel \(\delta\) zwischen der x-Achse und dem Strahl zur ersten Kante auf die Streckenpunktkoordinaten hinauf. Statt den Formeln \ref{eq:nKoords} nutze ich also folgende Formeln:
 
 \begin{gather}
 	\begin{split}
 		x_1 &= cos(n \cdot \frac{22,5\pi}{180} + \delta) \cdot 5,5u + x_0\\
-		y_1 &= sin(n \cdot \frac{22,5\pi}{180}) \cdot 5,5u + y_0\\ \vspace{2em}
-		x_2 &= cos(n \cdot \frac{22,5\pi}{180}) \cdot 4,5u + x_0\\
-		y_2 &= sin(n \cdot \frac{22,5\pi}{180}) \cdot 4,5u + y_0
+		y_1 &= sin(n \cdot \frac{22,5\pi}{180} + \delta) \cdot 5,5u + y_0\\ \vspace{2em}
+		x_2 &= cos(n \cdot \frac{22,5\pi}{180} + \delta) \cdot 4,5u + x_0\\
+		y_2 &= sin(n \cdot \frac{22,5\pi}{180} + \delta) \cdot 4,5u + y_0
 	\end{split}
-	\hspace{5em}
+	\hspace{1.2em}
 	\begin{split}
-		x_3 &= cos(((n+1)\bmod{}16) \cdot \frac{22,5\pi}{180}) \cdot 5,5u + x_0\\
-		y_3 &= sin(((n+1)\bmod{}16) \cdot \frac{22,5\pi}{180}) \cdot 5,5u + y_0 \\ \vspace{2em}
-		x_4 &= cos(((n+1)\bmod{}16) \cdot \frac{22,5\pi}{180}) \cdot 4,5u + x_0\\
-		y_4 &= sin(((n+1)\bmod{}16) \cdot \frac{22,5\pi}{180}) \cdot 4,5u + y_0
+		x_3 &= cos(((n+1)\bmod{}16) \cdot \frac{22,5\pi}{180} + \delta) \cdot 5,5u + x_0\\
+		y_3 &= sin(((n+1)\bmod{}16) \cdot \frac{22,5\pi}{180} + \delta) \cdot 5,5u + y_0 \\ \vspace{2em}
+		x_4 &= cos(((n+1)\bmod{}16) \cdot \frac{22,5\pi}{180} + \delta) \cdot 4,5u + x_0\\
+		y_4 &= sin(((n+1)\bmod{}16) \cdot \frac{22,5\pi}{180} + \delta) \cdot 4,5u + y_0
 	\end{split} \label{eq:nKoords}
 \end{gather}
 \section{Beispiele}
-Aller Optimierungen zum Trotz erkennt mein Programm auf den weiteren Beispielen nicht alle Kreis-Codes.
+Aller Optimierungen zum Trotz erkennt mein Programm auf den weiteren Beispielen nicht alle Kreis-Codes. Ausgabebilder aller BwInf-Beispiele finden Sie in der Einsendung. Hier gebe ich tabellarisch wieder, wie vollständig das Programm die Beispieleingaben dekodiert hat. \\ 
+(\checkmark{} Vollständig, \(\varnothing\) unvollständig, \(\times\) ohne Ergebnis)
+
+\begin{table}[!h]
+    \begin{tabular}{lllllllllll}
+    Cam 1             & Cam 2           & Cam 3           & Cam 4             & Cam 5           & Cam 6           & Cam 7           & Cam 8             & Cam 9           & Cam A           & Cam B      \\ \hline
+    \(\varnothing\) & \checkmark & \checkmark & \(\varnothing\) & \checkmark & \checkmark & \checkmark & \(\varnothing\) & \checkmark & \checkmark & \(\varnothing\)\\
+    \end{tabular} \\ \\
+    \begin{tabular}{lllllll}
+    Bitmap & Noise 25      & Noise 50      & ROT         & CMYK        & Grey (GIF)  & Grey (JPG)  \\ \hline
+    \checkmark & \(\varnothing\) & \(\times\) & \checkmark & \checkmark & \checkmark & \checkmark \\
+    \end{tabular}
+    \caption {BwInf-Beispieleingaben}
+\end{table}

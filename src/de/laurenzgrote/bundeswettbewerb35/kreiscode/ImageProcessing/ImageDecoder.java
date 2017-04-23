@@ -79,7 +79,7 @@ public class ImageDecoder {
      */
     private Coordinate[][] calculateLines(Coordinate cC) {
         final double degToRad = Math.PI/180.0;
-        final double factor = 22.5*degToRad; // 22.5° in Bogenmaß
+        final double factor = 22.5*degToRad; // 22.5 in Bogenmaß
 
         int x = cC.getX(); int y = cC.getY();
         int diameter = cC.getStreakLength();
