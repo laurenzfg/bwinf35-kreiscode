@@ -7,9 +7,9 @@
 		\label{abb:spidergrafik}
 		\vspace{-20pt}
 	\end{wrapfigure}
-Zunächst habe ich einen \task{} mit TikZ nachgezeichnet, um den genauen Aufbau durch Nachbau zu verstehen. Die 16 gleichgroßen Kreissegmente sind durch Strahlen getrennt, die im Abstand von \(22,5^{\circ}\) vom Pol (dem Mittelpunkt) aus gezeichnet werden. Der Abstand zwischen den Strahlen beträgt im Bogenmaß \(\frac{22,5\pi}{180}\).
+Zunächst habe ich einen \task{} mit TikZ nachgezeichnet, um den genauen Aufbau durch Nachbau zu verstehen. Die 16 gleichgroßen Kreissegmente sind durch Strahlen getrennt, die im Abstand von \(22,5^{\circ}\) vom Pol (dem Mittelpunkt) aus gezeichnet werden. Der Abstand zwischen den Strahlen beträgt demzufolge im Bogenmaß \(\frac{22,5\pi}{180}\).
 
-Für die Dekodierung steht mir aus dem Kreismittelpunkterkennungsprozess die Liste der Kreismittelpunkte zur Verfügung. Die Kreisdurchmesser entsprechen der Länge der Streifen an den Mittelpunktskoordinaten. Mit diesen Informationen kann ich dank bekannter Proportionen eines \task{}s auf die Position des äußeren Ringes, der die Informationen trägt, schließen (siehe Abb. \ref{abb:dims}). Wie in der Lösungsidee zur Kreismittelpunkterkennung festgestellt, gilt \(u=\frac{1}{3}d\).
+Für die Dekodierung steht mir aus dem Kreismittelpunkterkennungsprozess die Liste der Kreismittelpunkte zur Verfügung. Die Kreisdurchmesser entsprechen der Länge der Streifen an den Mittelpunktskoordinaten. Mit diesen Informationen kann ich dank bekannter Proportionen eines \task{}s auf die Position des äußeren Ringes, der die Informationen trägt, schließen (siehe Abb. \ref{abb:dims}). Wie in der Lösungsidee zur Kreismittelpunkterkennung festgestellt, gilt: \(u=\frac{1}{3}d\).
 
 \begin{wrapfigure}{r}{0.25\textwidth}
 	\setlength\intextsep{0pt}
@@ -18,13 +18,14 @@ Für die Dekodierung steht mir aus dem Kreismittelpunkterkennungsprozess die Lis
 	\caption{}
 	\label{abb:trigon}
 \end{wrapfigure}
-Daher kann ich mithilfe von polaren Koordinaten\footnote{\url{https://www.lernhelfer.de/schuelerlexikon/mathematik-abitur/artikel/polarkoordinatensystem}} die Strecken, die die Kreisringe in Segmente einteilen, bestimmen. Jede der Strecken ist Teil eines Strahls, der am Mittelpunkt in einem Vielfachen von \(22,5^{\circ}\) beginnt. Die eigentlichen Strecken, die auf dem äußeren Kreisring liegen, beginnen nach einem Abstand von \(4,5u\) und enden bei \(5,5u\). Die Anfangs- und Endpunkte aller Strecken lauten also:
+Daher kann ich mithilfe von polaren Koordinaten\footnote{\url{https://www.lernhelfer.de/schuelerlexikon/mathematik-abitur/artikel/polarkoordinatensystem}} die Strecken, die den äußeren Kreisring in Segmente einteilen, bestimmen. Jede der Strecken ist Teil eines Strahls, der am Mittelpunkt in einem Vielfachen von \(22,5^{\circ}\) beginnt. Die eigentlichen Strecken, die auf dem äußeren Kreisring liegen, beginnen nach einem Abstand von \(4,5u\) und enden bei \(5,5u\). Die Anfangs- und Endpunkte aller Strecken lauten also:
 
 \begin{equation}
+\label{eq:streckek}
 A(k \cdot 22,5^{\circ}:4,5u) \hspace{2em} B(k \cdot 22,5^{\circ}:5,5u) \hspace{2em} k = \{\mathbb{N}_0 \hspace{0.3em}|\hspace{0.3em} 0 \le x \le 15\}
 \end{equation}
 
-Da der Strahl zusammen mit der Achse, von der aus der Winkel gemessen wird, ein rechtwinkliges Dreieck bildet (s. Abb \ref{abb:trigon}), können die Punkte der Strecke in kartesischen Koordinaten umgerechnet werden. Ich habe das Koordinatensystem für die Beispielzeichnung in der Einheit \(u\) gezeichnet. Bitte stellen sie für korrekte Ergebnisse Ihren Taschenrechner auf "`rad"' ein!
+Da der Strahl zusammen mit der Achse, von der aus der Winkel gemessen wird, ein rechtwinkliges Dreieck bildet (s. Abb \ref{abb:trigon}), können die Punkte der Strecke in kartesische Koordinaten umgerechnet werden. Ich habe das Koordinatensystem für die Beispielzeichnung in der Einheit \(u\) gezeichnet. Bitte stellen sie für korrekte Ergebnisse Ihren Taschenrechner auf "`rad"' ein!
 
 \begin{gather}
 k = \{\mathbb{N}_0 \hspace{0.3em}|\hspace{0.3em} 0 \le x \le 15\} \\
@@ -54,13 +55,20 @@ y_{aussen} &= sin(k \cdot \frac{22,5\pi}{180}) \cdot 5,5u
 
 Wenn nun alle benachbarten Koordinaten verbunden werden, erhalten wir 16 Trapeze, die fast den Kreissegmenten entsprechen. Da die Abweichung zwischen dem jeweiligen Trapez und dem jeweiligen Kreissegment sehr gering ist, kann aus den Pixeln im Trapez auf die Farbe des Ringsegmentes geschlossen werden. Da das ganze Ringsegment entweder ganz weiß oder ganz schwarz ist, entspricht die vorherrschende Farbe im Trapez der Farbe des Kreissegmentes.
 
-Die 16 vorherrschenden Farben können als Wort bestehend aus 16 Bits aufgefasst werden. Ein Segment aus hautpsächlich schwarzen Pixeln spiegelt hierbei eine Eins wieder. Nun muss im Wörterbuch nach einer Übersetzung für dieses Wort gesucht werden. Sollte kein Ergebnis gefunden werden, muss das Wort solange rotiert werden, bis eine Übersetzung gefunden wird. Rotation bedeutet in diesem Kontext, dass das letzte Bit an die erste Stelle verschoben wird. Die folgenden Bits werden entsprechend um eine Stelle nach hinten verschoben. Dies entspricht einer Drehung des Kreis-Codes um \(22,5^{\circ}\).
+Die 16 vorherrschenden Farben können als Wort bestehend aus 16 Bits aufgefasst werden. Ein Segment aus hautpsächlich schwarzen Pixeln spiegelt hierbei eine Eins wieder. Nun muss im Wörterbuch nach einer Übersetzung für dieses Wort gesucht werden. Sollte kein Ergebnis gefunden werden, muss das Wort solange rotiert werden, bis eine Übersetzung gefunden wird.
 
+Rotation bedeutet in diesem Kontext, dass das letzte Bit an die erste Stelle verschoben wird. Die folgenden Bits werden entsprechend um eine Stelle nach hinten verschoben. Dies entspricht einer Drehung des Kreis-Codes um \(22,5^{\circ}\).
+
+Diese Drehung ist die einzige für die Erkennung von Grafiken relevante Rotation, da davon auszugehen ist, dass das Kreis-Code-Erzeugungsprogramm das erste Segment bei 0 Grad beginnen lässt. Drehungen des Kreis-Codes um einen beliebigen Winkel werden bei der Fotoerkennung behandelt.
 \section{Umsetzung}
-Die vorherrschende Farbe kann mit einer Flood-Fill über die Trapezfläche bestimmt werden. Hierfür benötigen wir zum einen für jedes der 16 Trapeze einen Startpunkt. Zum anderen müssen für die Flood-Fill die Linien des Trapezes bestimmt werden, sodass die "`Flut"' die Trapezfläche nicht verlässt. Die Linien werden parallel zum Visited-Array als Grenze für die Rekursion verwendet.
+Die vorherrschende Farbe in einem Kreisringsegment kann mit einer Flood-Fill über die Trapezfläche bestimmt werden. Hierfür benötigen wir zum einen für jedes der 16 Trapeze einen Startpunkt.
+Zum anderen müssen für die Flood-Fill die Linien des Trapezes bestimmt werden, sodass die "`Flut"' die Trapezfläche nicht verlässt. Die Linien werden parallel zum Visited-Array als Grenze für die Rekursion verwendet.
 
 \subsection{Ermittlung der Trapeze}
-Für die Bestimmung der Startpunkte nummeriere ich die Segmente von 0 bis 15 durch. Wenn man nun die x- und y-Koordinaten aller anliegende Punkte arithmetisch mittelt, erhält man den Mittelpunkt des Trapezes. Die anliegenden Punkte setzen sich aus den Punkten des jeweiligen Segmentes und denen des angrenzenden Segmentes zusammen. Bei Segment 15 ist Segment 0 das angrenzende Segment. Die Formeln für die Koordinaten eines \textit{n}ten-Trapezes mit dem Mittelpunkt \((x_0|y_0)\) lauten somit:
+Für die Bestimmung der Startpunkte für die Flood-Fill nummeriere ich die Strecken von 0 bis 15 durch. Anschließend bestimme ich für jede Strecke \(k\) Anfangs- und Endpunkt mit der Formel \eqref{eq:streckek}.
+
+Wenn nun die x- und y-Koordinaten aller an ein Segment anliegenden Punkte arithmetisch mittelt, erhält man den Mittelpunkt des Trapezes. Die an ein Segment \(n\) anliegenden Punkte setzen sich aus den Punkten der Strecken \(n\) und \(n+1\) zusammen. An Segment 15 grenzen allerdings die Strecken 0 und 15 an. 
+Die Koordinaten der an das \textit{n}te-Trapez mit dem Mittelpunkt \((x_0|y_0)\) angrenzend Koordinaten lauten also:
 \begin{gather}
 	\begin{split}
 		x_1 &= cos(n \cdot \frac{22,5\pi}{180}) \cdot 5,5u + x_0\\
@@ -70,10 +78,10 @@ Für die Bestimmung der Startpunkte nummeriere ich die Segmente von 0 bis 15 dur
 	\end{split}
 	\hspace{5em}
 	\begin{split}
-		x_3 &= cos((n+1) \cdot \frac{22,5\pi}{180}) \cdot 5,5u + x_0\\
-		y_3 &= sin((n+1) \cdot \frac{22,5\pi}{180}) \cdot 5,5u + y_0 \\ \vspace{2em}
-		x_4 &= cos((n+1) \cdot \frac{22,5\pi}{180}) \cdot 4,5u + x_0\\
-		y_4 &= sin((n+1) \cdot \frac{22,5\pi}{180}) \cdot 4,5u + y_0
+		x_3 &= cos(((n+1)\bmod{}16) \cdot \frac{22,5\pi}{180}) \cdot 5,5u + x_0\\
+		y_3 &= sin(((n+1)\bmod{}16) \cdot \frac{22,5\pi}{180}) \cdot 5,5u + y_0 \\ \vspace{2em}
+		x_4 &= cos(((n+1)\bmod{}16) \cdot \frac{22,5\pi}{180}) \cdot 4,5u + x_0\\
+		y_4 &= sin(((n+1)\bmod{}16) \cdot \frac{22,5\pi}{180}) \cdot 4,5u + y_0
 	\end{split} \label{eq:nKoords}
 \end{gather}
 \begin{equation}
@@ -91,7 +99,7 @@ Zur Überprüfung habe ich ein kleines CPP-Programm geschrieben, welches die For
 
 Um die Flood-Fill durchführen zu können, müssen nun die Grenzen der Trapeze bestimmt werden. 
 
-Alle Trapeze im Kreisring bestehen aus 16 Strecken, die den Kreisring einteilen, sowie 16 obere- wie untere Strecken. Daher muss ich im Binärbild für jedes \textit{n} folgende Punkte aus der Gleichung \eqref{eq:nKoords} verbinden.
+Alle Trapeze im Kreisring bestehen aus 16 Strecken, die den Kreisring einteilen, sowie 16 obere- wie untere Strecken. Daher muss ich im Binärbild für jedes Segment \textit{n} folgende Punkte aus den in \eqref{eq:nKoords} bestimmten Punkten verbinden.
 	
 \begin{equation}
 	\overline{P_1P_2} \hspace{3em}
@@ -118,10 +126,10 @@ Damit eine durchgehenden Linie entsteht, müssen so viele Pixel wie der größer
 	\item Den \textbf{Diagonalschritt}, der in beide Richtungen weist.
 \end{itemize}
 
-Der eigentliche Einzeichenprozess läuft so ab, dass ich solange Diagonalschritte durchführe, bis die Ideallinie der Geraden durchgekruezt wurde. Dann führe ich bis zur nächsten Durchkreuzung der Ideallinie Parallelschritte durch. 
+Der eigentliche Einzeichenprozess läuft so ab, dass ich solange Diagonalschritte durchführe, bis die Ideallinie der Geraden durchkreuzt wurde. Dann führe ich bis zur nächsten Durchkreuzung der Ideallinie Parallelschritte durch, um dann bis zur nächsten Durchkreuzung der Ideallinie mit Diagonalschritten fortzufahren.
 
 \subsection{Wortübersetzung}
-Das Wörterbuch speichere ich in einer Liste. Beim Einlesen rechne ich die Bitfolgen in Dezimalzahlen um.
+Das Wörterbuch speichere ich in einer Liste. Während des Einlesevorganges rechne ich die Bitfolgen in Dezimalzahlen um, den die Bitfolgen entsprechen Binärzahlen.
 Das eingelesene Wort aus dem Dekodierschritt wird ebenfalls in eine Dezimalzahl umgerechnet. Anschließend kann in der Liste nach dem Eintrag mit der gleichen Dezimalzahl gesucht werden.
 
 Gegebenenfalls nötige Rotationen erfolgen, indem das letzte Bit des Wortes an die erste Stelle eines neuen Arrays eingefügt wird. Anschließend werden die sonstigen Bits angefügt.

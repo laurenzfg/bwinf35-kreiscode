@@ -1,35 +1,35 @@
 \section{Lösungsidee}
 \begin{wrapfigure}{r}{0.45\textwidth}
-		\setlength\intextsep{0pt}
-		\centering	
-		\includegraphics[width=0.4\textwidth]{Grafiken/sek3abb1}
-		\caption{Verbesserte Bilderkennung}
-		\label{abb:transform}
-	\end{wrapfigure}
+	\setlength\intextsep{0pt}
+	\centering	
+	\includegraphics[width=0.4\textwidth]{Grafiken/sek3abb1}
+	\caption{Verbesserte Bilderkennung}
+	\label{abb:transform}
+\end{wrapfigure}
 Die in Kapitel 1 vorgestellte Einleseprozedur wird den Anforderungen für die Erkennung eines Fotos oder eines Scans nicht gerecht. Bei schwankender Ausleuchtung des Bildes lässt sich kein geeigneter Schwellwert bestimmen. Stattdessen wende ich verschiedene Algorithmen des maschinellen Sehens an, um ein möglichst ideales Bild aus dem Eingabebild zu extrahieren.
 
 Ich extrahiere zunächst alle Kanten des Bildes. Kanten sind Stellen, an denen sich die Farbwerte eines Pixels schlagartig ändern. Den Kantextraktionsalgorithmus implementiere ich hierbei so, dass die Kante eine lückenlose Linie darstellt.
 
-Mit diesen Kanten habe ich das Bild segmentiert. Anschließend fülle ich jedes Segment komplett schwarz (1) oder weiß (0).
-Der Bestimmung der Farbe der Füllung lege ich folgende Annahme zu Grunde:
+Mit diesen Kanten habe ich das Bild segmentiert. Zu schwärzende Bildesegmente sind von einer Kante umrandet. Daher fülle ich jedes Segment komplett schwarz (1), während ich den Hintergrund weiß belasse.
 
-Der Hintergrund des Bildes ist komplett weiß. Alle an den Hintergrund angrenzenden Segmente sind schwarz, schließlich fand dort eine schlagartige Farbänderung zum Hintergrund statt. Die Felder, die an diese Segmente angrenzen sind weiß, da sich die Farbe widerum schlagartig geändert hat. Dieses Muster setze ich fort, bis die Farben aller Segmente bestimmt sind.
+Der Hintergrund des Bildes ist komplett weiß. Alle an den Hintergrund angrenzenden Segmente sind schwarz, schließlich fand dort eine schlagartige Farbänderung zum Hintergrund statt. Die Felder, die an diese Segmente angrenzen sind weiß, da sich die Farbe widerum schlagartig zum Hintergrund zurück geändert hat. Dieses Muster setze ich fort, bis die Farben aller Segmente bestimmt sind.
 
 Die drei Schritte der Bildprozessierung sind in Abbildung \ref{abb:transform} dargestellt.
 
-Vorteil dieser Vorhergehensweise über ein Schwellwertverfahren ist, dass jeder ähnlich gefärbte Bereich die selbe Farbe erhält. Ein zusammen gehörender Bereich enthält keinerlei Lücken. Dies ist für den Kreismittelpunkterkennungsalgorithmus essenziell, da sonst die Radiusbestimmung fehlschlägt.
+Vorteil dieser Vorhergehensweise über ein Schwellwertverfahren ist, dass jeder ähnlich gefärbte Bereich die selbe Farbe erhält. Bei einem Schwellwertverfahren werden bei einem zu kleinen Schwellwert dunklere Bildbereiche komplett geschwärzt, während bei einem zu hohen Schwellwert einige Kreis-Codes nur lückenhaft erkannt werden.
  
 \section{Umsetzung}
 \subsection{Graustufenbild}
-In einem ersten Schritt bestimme ich aus dem farbigen Bild ein Graustufenbild. Dies erfolgt mit einer gewichteten Mittelung aus den Intensitätswerten der drei Primärfarbkanäle. Laut der Norm CIE 1931\footnote{\url{en.wikipedia.org/wiki/Grayscale}} ist der Grauwert mit folgender Formel zu bestimmen:
+In einem ersten Schritt ermittle ich aus dem farbigen Bild ein Graustufenbild. Dies erfolgt mit einer gewichteten Mittelung aus den Intensitätswerten der drei Primärfarbkanäle. Laut der Norm CIE 1931\footnote{\url{en.wikipedia.org/wiki/Grayscale}} ist der Grauwert mit folgender Formel zu bestimmen:
 
 \begin{equation}
 Y = 0,2126R+0,7152G+0,0722G
 \end{equation}
 
 \subsection{Canny-Edge-Detector}
+Um in diesem Graustufenbild die Kanten zu Bestimmen, nutze ich den 1986 von John Canny vorgestellten Canny Edge Detector. Zu diesem habe ich mich auf einer Homepage der Universität von Edinburgh informiert: \url{http://homepages.inf.ed.ac.uk/rbf/HIPR2/canny.htm}
 \subsubsection{Weichzeichnung}
-Darauf filtere ich vor der eigentlichen Kantenerkennung grobe Außreißer aus dem Bild heraus. Hierfür wende ich einen Gaußschen Weichzeicher an. Ein solcher Weichzeichner funktioniert, indem für jedes Pixel ein gewichteter Mittelwert aus seinem eigenen Grauwert und den Grauwerten seiner Umgebung bestimmt wird. Der Gewichtung wird die Gaußsche Normalverteilung zugrunde gelegt. Ich habe mich für ein Sigma von 3 entschieden. So werden grobe Ausreißer entfernt, der Kantenverlauf bleibt jedoch erhalten. Aus dieser Kurve lässt sich folgende Matrix extrahieren\footnote{\url{http://dev.theomader.com/gaussian-kernel-calculator/}}:
+In einem ersten Schritt filtere ich vor der eigentlichen Kantenerkennung grobe Außreißer aus dem Bild heraus. Hierfür wende ich einen Gaußschen Weichzeicher an. Ein solcher Weichzeichner funktioniert, indem für jedes Pixel ein gewichteter Mittelwert aus seinem eigenen Grauwert und den Grauwerten seiner Umgebung bestimmt wird. Der Gewichtung wird die Gaußsche Normalverteilung zugrunde gelegt. Ich habe mich für ein Sigma von 3 entschieden. So werden grobe Ausreißer entfernt, der Kantenverlauf bleibt jedoch erhalten. Aus dieser Kurve lässt sich folgende Matrix extrahieren\footnote{\url{http://dev.theomader.com/gaussian-kernel-calculator/}}:
 \begin{equation}
 	\begin{bmatrix}
 	0,031827&0,037541&0,039665&0,037541&0,031827 \\
@@ -74,41 +74,48 @@ Wenn die umliegenden Pixel den gleichen Intensitätstwert haben, ist das Ergebni
 Bei Intensitätsunterschieden verändert sich das Ergebnis des Operators entsprechend.
 Da allerdings für die weiteren Berechnungen eine Ableitung benötigt wird, müssen beide Ableitungswerte eines Pixels kombiniert werden.
 
-Hierfür können die beiden Ableitungswerte als ein rechtwinkliges Dreieck aufgefasst werden. Die Ausschläge der Ableitungen in x- und y-Richtung entsprechen den beiden Kateten. Ein kombinierter Wert aus beiden Ableitungen enstpricht dann der Länge der Hypothenuse. Diese lässt sich mit dem Satz des Pythagoras berechnen.
+Hierfür können die beiden Ableitungswerte als ein rechtwinkliges Dreieck aufgefasst werden. Die Ausschläge der Ableitungen in x- und y-Richtung entsprechen den beiden Kateten. Ein kombinierter Wert aus beiden Ableitungen enstpricht dann der Länge der Hypothenuse. Diese lässt sich mit dem Satz des Pythagoras berechnen (\(G_{xy} = \sqrt{G_x^2 + G_y^2}\)).
 
 \subsubsection{Non-Maximum-Supression (Nichtmaximumsunterdrückung)}
 Leider liefert der Sobel-Operator Kanten, die mehrere Pixel breit sind. Schließlich verlaufen die Kanten in einem Foto nicht vollkommen abrupt, sondern verlaufen über mehrere Pixel. 
 Ein Lösungsansatz zur Berechnung von möglichst dünnen Kanten ist die Nichtmaximumsunterdrückung (NMS). 
 
-Da die beiden Ableitungsfunktionen ein rechtwinkliges Dreieck bilden, kann mit der Tangensfunktion der Winkel der Kante ermittelt werden:
+Da die beiden Ableitungsfunktionen ein rechtwinkliges Dreieck bilden, kann mithilfe der Tangensfunktion der Winkel der Kante ermittelt werden:
 \begin{equation}
 	tan(\alpha) = \frac{G_y}{G_x}
 \end{equation}
 
 Mit diesem Winkel können die Pixel bestimmt werden, die auf der gleichen Kante liegen. Wenn der Ableitungswert des Pixels nicht das Maximum seiner Nachbarn darstellt, kann sein Ableitungswert auf 0 gesetzt werden (Der Pixel wird in der Ausgabegrafik unterdrückt). Schließlich gibt es entlang der Kante einen stärken Farbintensitätsunterschied.  
 
-Wenn der Winkel beispielsweise \(0^{\circ}\) beträgt, verläuft die Kante in horizontale Richtung. Dann wird der Ableitungswert des Pixels mit seinem nördlichen und südlichen Nachbarn verglichen. Nur wenn der Ableitungswert das Maximum von diesen Pixeln darstellt, ist er Teil der 1px breiten Kante.
+Wenn der Winkel beispielsweise \(0^{\circ}\) beträgt, verläuft die Kante in horizontale Richtung. Dann wird der Ableitungswert des Pixels mit seinem nördlichen und südlichen Nachbarn verglichen.
+Nur wenn der Ableitungswert das Maximum von diesen Pixeln darstellt, ist er Teil der 1px breiten Kante. Sonst ändert sich bei diesem Pixel zwar schon die Farbe, aber es folgt unmittelbar ein noch stärkerer Farbumschlag.
 
 \subsubsection{Binärisierung mit Hysterese}
 Zur Binärisierung des Ergebnisses der Sobel-Operators wende ich eine Technik namens \textit{Hysterese} an. Bei einer Hysterese wird zunächst mit einem hohen Schwellwert das Bild binärisiert. 
-Im Kontext meiner Implementierung bedeutet dies, dass alle Pixel mit einem Ableitungswert höher aks 50 im Ausgabebild der Canny-Eckenerkennung schwarz gefärbt werden.
+Im Kontext meiner Implementierung bedeutet dies, dass alle Pixel mit einem Ableitungswert höher als 40 im Ausgabebild der Canny-Eckenerkennung schwarz gefärbt werden.
 
 Da aber möglicherweise eine Kante auch aus weniger stark abgesetzten Pixeln besteht, akzeptiert die Hysterese für an erkannte Kantenpunkte anliegende Punkte einen niedrigeren Schwellwert. Sobald ein Punkt einer Ecke gefunden wurde, wird diese "`verfolgt"'.
 
-Diese Verfolgung ist mit einem Stack implemementiert. Jeder im ersten ersten Erkennungsschritt erkannte Pixel wird auf diesen Stack gelegt. Nach Abschluss des ersten Erkennungsschrittes werden alle Pixel, die an ein Pixel aus dem Stack angrenzen, noch nicht markeirt wurden und über dem verringerten Schwellwert von 12,5 liegen, schwarz markiert. Diese Pixel werden widerum auf den Stack gelegt, sodass die Kante mti dem verrignerten Schwellwert verfolgt wird. 
+Diese Verfolgung ist mit einem Stack implemementiert. Jeder im ersten ersten Erkennungsschritt erkannte Pixel wird auf diesen Stack gelegt. Nach Abschluss des ersten Erkennungsschrittes werden alle Pixel, die an ein Pixel aus dem Stack angrenzen, noch nicht markeirt wurden und über dem verringerten Schwellwert von 10 liegen, schwarz markiert. Diese Pixel werden widerum auf den Stack gelegt, sodass die Kante mit dem verringerten Schwellwert verfolgt wird. 
 
 \subsubsection{Dilation}
-Aufgrund der Non-Maximum-Supression sind kleine Lücken in der Grafik entstanden. Diese Verhindern eine sinnvolle Ausführung der nachfolgenden Flood-Fill. Daher wende ich auf das Ergebnis der Hysterese Dilation an. Hierbei wird jedes Pixel, dass mehr als einen schwarzen Nachbarn hat, geschwärzt.
-Damit verdicke ich die Linie, jedoch ist sie weiterhin weitaus exakter, als sie es ohne Non-Maximum-Supression wäre.
+Aufgrund der Non-Maximum-Supression sind kleine Lücken in der Grafik entstanden. Dies verhindert eine sinnvolle Ausführung von den in meinem Algorithmus häufg verwendeten Flood-Fills. Daher wende ich auf das Ergebnis der Hysterese Dilation an. Hierbei wird jedes Pixel, dass mehr als einen schwarzen Nachbarn hat, geschwärzt.
+Damit verdicke ich die Linie. Allerdings ist sie weiterhin weitaus exakter, als sie es ohne Non-Maximum-Supression wäre.
 
 \subsection{Einfärben des Bildes}
-Der Canny-Detektor gibt ein Bild aus Kanten aus (Mittlere Grafik in Abb. \ref{abb:transform}. Die weiteren Berechnungsschritte benötigen jedoch ein Bild, in dem der Kreis, der Kreisring und die Segmente komplett schwarz eingefärbt sind. Unter Ausnutzung der Annahme aus der Lösungsidee habe ich einen Algorithmus formuliert.
-Dieser nimmt als Eingabe das Ergebnis des Canny-Eckenerkennungsprozesses und hat als Ausgabe ein Binärbild als boolesches 2D-Array. Damit ist die Ausgabe der neuen Bidleinleseprozedur identisch zu der Ausgabe der ersten Einleseprozedur aus Kapitel 1.
+Der Canny-Detektor gibt ein Bild aus Kanten aus (Mittlere Grafik in Abb. \ref{abb:transform}). Die weiteren Berechnungsschritte benötigen jedoch ein Bild, in dem der Kreis, der Kreisring und die Segmente komplett schwarz eingefärbt sind. Unter Ausnutzung der Annahme aus der Lösungsidee habe ich einen Algorithmus formuliert.
+Dieser nimmt als Eingabe das Ergebnis des Canny-Eckenerkennungsprozesses und hat als Ausgabe ein Binärbild als boolesches 2D-Array. Damit ist die Ausgabe der neuen Bidleinleseprozedur identisch zu der Ausgabe der simplen Einleseprozedur aus Kapitel 1.
 
-VomnPixel(0|0) ausgehend werden alle direkt erreichbaren weißen Pixel mithilfe einer Flood-Fill im Ausgabebild als weiß abgespeichert, da diese den Hintergrund darstellen.
+Von Pixel(0|0) ausgehend werden alle im Canny-Bild erreichbaren weißen Pixel mithilfe einer Flood-Fill im Ausgabebild als weiß abgespeichert, da diese den Hintergrund darstellen.
 
-Anschließend weden alle schwarzen Pixel, die an den Hintergrund angrenzen, als schwarz markiert. Diese Pixel stellen die Kante zum Vordergrundbereich dar. Da sie nur die Kante des Vordergrundbereiches sind, werden alle an diese Pixel angrenzenden weißen Pixel im Ausgabebild als Schwarz markiert. Schließlich befindet sich dieser Bereich weiterhin im Vordergrund.
+Anschließend weden alle schwarzen Pixel, die an den Hintergrund angrenzen, als schwarz markiert. Diese Pixel stellen eine Kante zum Vordergrundbereich dar.
+Da sie die Kante zum Vordergrundbereich sind, werden alle an diese Pixel angrenzenden weißen Pixel, die im Ausgabebild noch nicht markiert wurden, als Schwarz markiert. Schließlich befindet sich dieser Bereich weiterhin im Vordergrund.
 Diese Prozedur wird abwechselnd zur Bestimmung von Vorder- und Hintergrundbereichen eingesetzt.
 
+Praktisch umgesetzt habe ich dies mit einer Entlehnung aus der Graphentheorie.\footnote{\url{https://en.wikipedia.org/wiki/Connected-component_labeling}}. Mein Algorithmus basiert auf der im Abschnitt "`One component at a time"' vorgestellten Idee.
+
+In einem Integer-Array gebe ich jedem Hintergrundpixel den Wert 0. Darauf gebe ich den anliegenden True-Pixeln den Wert 1. Die an diese Kante anliegenden False-Pixel erhalten ebenfalls den Wert 1, da sie wie oben geschildert zu der Kante gehören.
+
+Danach fahre ich mit der nächsten Kantengruppe fort, nur vergebe ich dort den Wert 2. Schlussendlich müssen dann Pixel mit einem ungeraden Wert schwarz gefärbt werden, während Pixel mit einem geraden Wert weiß belassen werden.
 \section{Beispiele}
 Aller Optimierungen zum Trotz erkennt mein Programm auf den weiteren Beispielen nicht alle Kreis-Codes.

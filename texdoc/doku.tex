@@ -59,9 +59,9 @@
 	\textbf{Abstract}:
 	Das Eingabebild wird in ein Binärbild umgewandelt, indem zunächst mit dem Canny-Algorithmus die Ecken des Eingabebildes bestimmt werden. In diesem Kantenbild werden daraufhin die Polygone schwarz ausgefüllt. So entsteht ein rauschfreies Bild für die nachfolgenden Dekodierungsschritte.
 
-Einen Kreismittelpunkt habe ich definiert als einem Punkt in einem Polygon, an dem die Abstände zum Polygonrand in alle Richtungen identisch sind. Außerdem muss der Flächeninhalt des Polygons dem eines Kreises mit dem ermittelten Radius gleichen.
+	Einen Kreismittelpunkt habe ich definiert als einen Punkt in einem Polygon, an dem die Abstände zum Polygonrand in alle Richtungen identisch sind. Außerdem muss der Flächeninhalt des Polygons dem eines Kreises mit dem ermittelten Radius gleichen.
 
-Die Kreisbedeutungen werden bestimmt, indem in allen informationstragenden Kreisringsegmente die vorherrschende Farbe bestimmt wird. Dieses 16bittige binäre Wort wird mit der Übersetzungstabelle verglichen. Zu beachten ist hierbei, dass aufgrund der beliebigen Ratation des \task{}s der Wortanfang nicht notwendigerweise beim ersten Bit des Wortes liegt.
+	Die Kreisbedeutungen werden bestimmt, indem in allen informationstragenden Kreisringsegmente die vorherrschende Farbe bestimmt wird. Dieses 16bittige binäre Wort wird mit der Übersetzungstabelle verglichen. Zu beachten ist hierbei, dass aufgrund der beliebigen Ratation des \task{}s der Wortanfang nicht notwendigerweise beim ersten Bit des Wortes liegt.
 
 	\pagebreak
 	% ----------------------------------------------------------------------------
