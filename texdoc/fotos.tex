@@ -117,5 +117,28 @@ Praktisch umgesetzt habe ich dies mit einer Entlehnung aus der Graphentheorie.\f
 In einem Integer-Array gebe ich jedem Hintergrundpixel den Wert 0. Darauf gebe ich den anliegenden True-Pixeln den Wert 1. Die an diese Kante anliegenden False-Pixel erhalten ebenfalls den Wert 1, da sie wie oben geschildert zu der Kante gehören.
 
 Danach fahre ich mit der nächsten Kantengruppe fort, nur vergebe ich dort den Wert 2. Schlussendlich müssen dann Pixel mit einem ungeraden Wert schwarz gefärbt werden, während Pixel mit einem geraden Wert weiß belassen werden.
+
+\subsection {Rotation der Kreis-Codes}
+In einem Foto ist nich tdavon auszugehen, dass der Nutzer das erste Segment exakt an der x-Achse ausrichtet. Daher muss der Trapezkranz aus Kapitel 2 so über den Kreisring gelegt werden, dass jedes Trapez möglich exakt über einem Kreisringsegment liegt. 
+
+Dies gelingt, indem wir die Achse so verschieben, dass sie auf einer Kante zwischen zwei Kreisringsegmenten liegt. Dafür müssen wir eine beliebige Kante auf dem äußeren Kreisring finden. Bei einer solchen Kante muss in einem Abstand von \(5u\) vom Pol (vgl Abb. \ref{abb:dims}) eine Kante vom Canny-Algorithmus vorliegen.
+
+Daher suche ich in alle Richtungen vom Pol aus eine Kante. Dann addiere ich den Winkel zwischen der x-Achse und dem Strahl zur ersten Kante auf die Streckenpunktkoordinaten hinauf. Statt den Formeln \eqref{eq:nKoords} nutze ich also folgende Formeln:
+
+\begin{gather}
+	\begin{split}
+		x_1 &= cos(n \cdot \frac{22,5\pi}{180} + \delta) \cdot 5,5u + x_0\\
+		y_1 &= sin(n \cdot \frac{22,5\pi}{180}) \cdot 5,5u + y_0\\ \vspace{2em}
+		x_2 &= cos(n \cdot \frac{22,5\pi}{180}) \cdot 4,5u + x_0\\
+		y_2 &= sin(n \cdot \frac{22,5\pi}{180}) \cdot 4,5u + y_0
+	\end{split}
+	\hspace{5em}
+	\begin{split}
+		x_3 &= cos(((n+1)\bmod{}16) \cdot \frac{22,5\pi}{180}) \cdot 5,5u + x_0\\
+		y_3 &= sin(((n+1)\bmod{}16) \cdot \frac{22,5\pi}{180}) \cdot 5,5u + y_0 \\ \vspace{2em}
+		x_4 &= cos(((n+1)\bmod{}16) \cdot \frac{22,5\pi}{180}) \cdot 4,5u + x_0\\
+		y_4 &= sin(((n+1)\bmod{}16) \cdot \frac{22,5\pi}{180}) \cdot 4,5u + y_0
+	\end{split} \label{eq:nKoords}
+\end{gather}
 \section{Beispiele}
 Aller Optimierungen zum Trotz erkennt mein Programm auf den weiteren Beispielen nicht alle Kreis-Codes.
