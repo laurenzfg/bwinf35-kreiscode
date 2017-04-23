@@ -53,13 +53,14 @@ Darauf überlegte ich mir eine möglichst effiziente Datenstruktur für Grafiken
 In der in Teilaufgabe 1 gegebenen Schwarz-Weiß-Grafik ist die Bestimmung schwarzer Bildbunkte noch simpel: Schwarze Bildpunkte sind im Array True, sonstige sind False. Weitere Fälle, wie zum Beispiel graue Felder, müssen noch nicht beachtet werden.
 Nach der Einleseprozedur ist ein Binärbild gegeben.
 
-\subsection{Kreismittelpunkterkennung}
+\subsection{Streifenerkennung (Listing \ref{lst:streifen})}
 Um in diesem Binärbild die Punkte zu bestimmen, deren Abstand zum äußeren Rand eines True-Segmentes sich in alle vier Richtungen gleichen, bestimme ich zunächst die Länge von aufeinanderfolgenden als True markierten Feldern. Solche Folgen nenne ich von nun an "`Streifen"'. In seperaten Arrays für horizontale und vertikale Streifen speichere ich für jeden Pixel seine gesamte Streifenlänge.
 Alle Felder, die vorher als False markiert wurden, haben logischerweise eine Streifenlänge von 0. 
 
 Die erste Eigenschaft aus der Aufgabenstellung lässt sich mit der soeben vorberechneten Information nun so umsetzen, dass nach aufeinander liegenden Mittelpunkten gleich langer vertikaler und horizontaler Streifen gesucht wird.
 An solchen Stellen ist die erste Eigenschaft gegeben, da in alle Richtungen der Abstand zum Rand des True-Segmentes identisch ist. Wie in der Lösungsidee dargestellt, entspricht dann eine Streifenlänge dem Kreisdurchmesser.
 
+\subsection{Kreismittelpunkterkennung (Listing \ref{lst:kreise})}
 Für diese Suche bestimme ich zunächst alle Mittelpunkte horizontaler Streifen. Dies geschieht, indem ich mit einer Suche über das ganze Bild alle Koordinaten bestimme, deren horizontale Streifenlänge größer null ist und denen ein False-Pixel vorrausgeht.
 Hiermit finde ich Anfangsstellen horizontaler Streifen. Ich habe definiert, dass Streifen sich nicht über mehrere Zeilen erstrecken können, sodass es für jeden Streifen in einer Zeile einen Anfangspunkt gibt.
 Wenn auf die x-Koordinate dieser Anfangsstelle die Hälfte der Länge des Streifens hinzuaddiert wird, erhalte ich den Mittelpunktes des Streifens.
@@ -77,7 +78,6 @@ Diese ID wird fortlaufend für jeden Flood-Fill-Durchlauf vergeben. Im Code der 
 
 Da aufgrund der oftmals verlustbehafteten Kompression und Ungenauigkeiten bei der Abbildung eines Kreises mit quadratischen Pixeln der tatsächliche Flächeninhalt  niemals exakt dem Soll entspricht, akzeptiert das Programm eine Abweichung von bis zu 10\%. 
 
-\subsection{Kreisringerkennung}
 Schließlich muss noch das Vorhandensein des Kreisringes wie in der Lösungsidee beschrieben verifiziert werden. Die Implementierung erfolgte wie auch beim Flächenvergleich über eine Flood-Fill, allerdings wurde entsprechend die andere Formel für das Soll verwendet. Außerdem wird bei diesem Vergleich eine Abweichung von bis zu 30\% akzeptiert, da aufgrund der kleineren Fläche des Ringes kleine absolute Abweichungen einem größeren Prozentsatz entsprechen.
 
 \pagebreak

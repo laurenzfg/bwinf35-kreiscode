@@ -64,7 +64,7 @@ Diese Drehung ist die einzige für die Erkennung von Grafiken relevante Rotation
 Die vorherrschende Farbe in einem Kreisringsegment kann mit einer Flood-Fill über die Trapezfläche bestimmt werden. Hierfür benötigen wir zum einen für jedes der 16 Trapeze einen Startpunkt.
 Zum anderen müssen für die Flood-Fill die Linien des Trapezes bestimmt werden, sodass die "`Flut"' die Trapezfläche nicht verlässt. Die Linien werden parallel zum Visited-Array als Grenze für die Rekursion verwendet.
 
-\subsection{Ermittlung der Trapeze}
+\subsection{Ermittlung der Trapeze (Listing \ref{lst:decode})}
 Für die Bestimmung der Startpunkte für die Flood-Fill nummeriere ich die Strecken von 0 bis 15 durch. Anschließend bestimme ich für jede Strecke \(k\) Anfangs- und Endpunkt mit der Formel \eqref{eq:streckek}.
 
 Wenn nun die x- und y-Koordinaten aller an ein Segment anliegenden Punkte arithmetisch mittelt, erhält man den Mittelpunkt des Trapezes. Die an ein Segment \(n\) anliegenden Punkte setzen sich aus den Punkten der Strecken \(n\) und \(n+1\) zusammen. An Segment 15 grenzen allerdings die Strecken 0 und 15 an. 
@@ -107,7 +107,7 @@ Alle Trapeze im Kreisring bestehen aus 16 Strecken, die den Kreisring einteilen,
 	\overline{P_1P_3} \hspace{3em}
 \end{equation}
 
-\subsection{Rasterisierung der Trapeze}
+\subsection{Rasterisierung der Trapeze (Listing \ref{lst:bresenham})}
 Für die Flood-Fill-Grenzen muss ich alle Punkte der Strecken markieren. Das Einzeichen von beliebigen geometrischen Formen in Bitmaps aus Pixeln wird in der Literatur \textit{rastern} genannt. Meine Anforderungen an den Rasterisierungsalgorithmus lauten:
 \begin{itemize}
 	\item Möglichst geringe Laufzeit
@@ -128,7 +128,7 @@ Damit eine durchgehenden Linie entsteht, müssen so viele Pixel wie der größer
 
 Der eigentliche Einzeichenprozess läuft so ab, dass ich solange Diagonalschritte durchführe, bis die Ideallinie der Geraden durchkreuzt wurde. Dann führe ich bis zur nächsten Durchkreuzung der Ideallinie Parallelschritte durch, um dann bis zur nächsten Durchkreuzung der Ideallinie mit Diagonalschritten fortzufahren.
 
-\subsection{Wortübersetzung}
+\subsection{Wortübersetzung (Listing \ref{lst:seqdec})}
 Das Wörterbuch speichere ich in einer Liste. Während des Einlesevorganges rechne ich die Bitfolgen in Dezimalzahlen um, den die Bitfolgen entsprechen Binärzahlen.
 Das eingelesene Wort aus dem Dekodierschritt wird ebenfalls in eine Dezimalzahl umgerechnet. Anschließend kann in der Liste nach dem Eintrag mit der gleichen Dezimalzahl gesucht werden.
 

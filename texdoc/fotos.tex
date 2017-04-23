@@ -28,7 +28,7 @@ Y = 0,2126R+0,7152G+0,0722G
 
 \subsection{Canny-Edge-Detector}
 Um in diesem Graustufenbild die Kanten zu Bestimmen, nutze ich den 1986 von John Canny vorgestellten Canny Edge Detector. Zu diesem habe ich mich auf einer Homepage der Universität von Edinburgh informiert: \url{http://homepages.inf.ed.ac.uk/rbf/HIPR2/canny.htm}
-\subsubsection{Weichzeichnung}
+\subsubsection{Weichzeichnung (Listing \ref{lst:gauss})}
 In einem ersten Schritt filtere ich vor der eigentlichen Kantenerkennung grobe Außreißer aus dem Bild heraus. Hierfür wende ich einen Gaußschen Weichzeicher an. Ein solcher Weichzeichner funktioniert, indem für jedes Pixel ein gewichteter Mittelwert aus seinem eigenen Grauwert und den Grauwerten seiner Umgebung bestimmt wird. Der Gewichtung wird die Gaußsche Normalverteilung zugrunde gelegt. Ich habe mich für ein Sigma von 3 entschieden. So werden grobe Ausreißer entfernt, der Kantenverlauf bleibt jedoch erhalten. Aus dieser Kurve lässt sich folgende Matrix extrahieren\footnote{\url{http://dev.theomader.com/gaussian-kernel-calculator/}}:
 \begin{equation}
 	\begin{bmatrix}
@@ -49,7 +49,7 @@ Allerdings kann die Gaußsche Weichzeichnung auch in einen horizontalen und vert
 \end{equation}
 Man kann mit dieser Matrix das gleiche Ergebnis erzielen, indem man sie zunächst in horizontale und anschließend in vertikale Richtung anwendet. Diese Vorhergehensweise hat eine bessere Laufzeit, da für die Glättung eines Pixels nicht \(4^2\), sondern nur \(2\times 4\) Pixel betrachtet werden müssen.
 
-\subsubsection{Sobel-Operator}
+\subsubsection{Sobel-Operator (Listing \ref{lst:sobel})}
 Anschließend wende ich auf das nun geglättete Bild den Sobel-Operator an. Dieser Operator entspricht der 1. Ableitung über die Helligkeitskurve des Bildes. Der Operator wird mithilfe von \textit{Convolution} über das gesamte Bild berechnet. Convolution ist das bereits vom dem Gauß-Weichzeichner bekannte Prinzip, dass auf jedes Pixel eine Matrix angewandt wird. Der Sobel-Operator basiert zwei Convulution-Durchläufen mit folgenden Matrizen:
 \begin{gather}
 	\begin{split}
@@ -76,7 +76,7 @@ Da allerdings für die weiteren Berechnungen eine Ableitung benötigt wird, müs
 
 Hierfür können die beiden Ableitungswerte als ein rechtwinkliges Dreieck aufgefasst werden. Die Ausschläge der Ableitungen in x- und y-Richtung entsprechen den beiden Kateten. Ein kombinierter Wert aus beiden Ableitungen enstpricht dann der Länge der Hypothenuse. Diese lässt sich mit dem Satz des Pythagoras berechnen (\(G_{xy} = \sqrt{G_x^2 + G_y^2}\)).
 
-\subsubsection{Non-Maximum-Supression (Nichtmaximumsunterdrückung)}
+\subsubsection{Non-Maximum-Supression (Nichtmaximumsunterdrückung) (Ebenfalls Listing \ref{lst:sobel})}
 Leider liefert der Sobel-Operator Kanten, die mehrere Pixel breit sind. Schließlich verlaufen die Kanten in einem Foto nicht vollkommen abrupt, sondern verlaufen über mehrere Pixel. 
 Ein Lösungsansatz zur Berechnung von möglichst dünnen Kanten ist die Nichtmaximumsunterdrückung (NMS). 
 
@@ -90,7 +90,7 @@ Mit diesem Winkel können die Pixel bestimmt werden, die auf der gleichen Kante 
 Wenn der Winkel beispielsweise \(0^{\circ}\) beträgt, verläuft die Kante in horizontale Richtung. Dann wird der Ableitungswert des Pixels mit seinem nördlichen und südlichen Nachbarn verglichen.
 Nur wenn der Ableitungswert das Maximum von diesen Pixeln darstellt, ist er Teil der 1px breiten Kante. Sonst ändert sich bei diesem Pixel zwar schon die Farbe, aber es folgt unmittelbar ein noch stärkerer Farbumschlag.
 
-\subsubsection{Binärisierung mit Hysterese}
+\subsubsection{Binärisierung mit Hysterese (Listing \ref{lst:hyst})}
 Zur Binärisierung des Ergebnisses der Sobel-Operators wende ich eine Technik namens \textit{Hysterese} an. Bei einer Hysterese wird zunächst mit einem hohen Schwellwert das Bild binärisiert. 
 Im Kontext meiner Implementierung bedeutet dies, dass alle Pixel mit einem Ableitungswert höher als 40 im Ausgabebild der Canny-Eckenerkennung schwarz gefärbt werden.
 
@@ -98,11 +98,11 @@ Da aber möglicherweise eine Kante auch aus weniger stark abgesetzten Pixeln bes
 
 Diese Verfolgung ist mit einem Stack implemementiert. Jeder im ersten ersten Erkennungsschritt erkannte Pixel wird auf diesen Stack gelegt. Nach Abschluss des ersten Erkennungsschrittes werden alle Pixel, die an ein Pixel aus dem Stack angrenzen, noch nicht markeirt wurden und über dem verringerten Schwellwert von 10 liegen, schwarz markiert. Diese Pixel werden widerum auf den Stack gelegt, sodass die Kante mit dem verringerten Schwellwert verfolgt wird. 
 
-\subsubsection{Dilation}
+\subsubsection{Dilation (Listing \ref{lst:dilation})}
 Aufgrund der Non-Maximum-Supression sind kleine Lücken in der Grafik entstanden. Dies verhindert eine sinnvolle Ausführung von den in meinem Algorithmus häufg verwendeten Flood-Fills. Daher wende ich auf das Ergebnis der Hysterese Dilation an. Hierbei wird jedes Pixel, dass mehr als einen schwarzen Nachbarn hat, geschwärzt.
 Damit verdicke ich die Linie. Allerdings ist sie weiterhin weitaus exakter, als sie es ohne Non-Maximum-Supression wäre.
 
-\subsection{Einfärben des Bildes}
+\subsection{Einfärben des Bildes (Listing \ref{lst:ausf})}
 Der Canny-Detektor gibt ein Bild aus Kanten aus (Mittlere Grafik in Abb. \ref{abb:transform}). Die weiteren Berechnungsschritte benötigen jedoch ein Bild, in dem der Kreis, der Kreisring und die Segmente komplett schwarz eingefärbt sind. Unter Ausnutzung der Annahme aus der Lösungsidee habe ich einen Algorithmus formuliert.
 Dieser nimmt als Eingabe das Ergebnis des Canny-Eckenerkennungsprozesses und hat als Ausgabe ein Binärbild als boolesches 2D-Array. Damit ist die Ausgabe der neuen Bidleinleseprozedur identisch zu der Ausgabe der simplen Einleseprozedur aus Kapitel 1.
 
@@ -118,7 +118,7 @@ In einem Integer-Array gebe ich jedem Hintergrundpixel den Wert 0. Darauf gebe i
 
 Danach fahre ich mit der nächsten Kantengruppe fort, nur vergebe ich dort den Wert 2. Schlussendlich müssen dann Pixel mit einem ungeraden Wert schwarz gefärbt werden, während Pixel mit einem geraden Wert weiß belassen werden.
 
-\subsection {Rotation der Kreis-Codes}
+\subsection {Rotation der Kreis-Codes (Listing \ref{lst:decode})}
 In einem Foto ist nicht davon auszugehen, dass der Nutzer das erste Segment exakt an der x-Achse ausrichtet. Daher muss der Trapezkranz aus Kapitel 2 so über den Kreisring gelegt werden, dass jedes Trapez möglich exakt über einem Kreisringsegment liegt. 
 
 Dies gelingt, indem wir die Achse so verschieben, dass sie auf einer Kante zwischen zwei Kreisringsegmenten liegt. Dafür müssen wir eine beliebige Kante auf dem äußeren Kreisring finden. Bei einer solchen Kante muss in einem Abstand von \(5u\) vom Pol (vgl Abb. \ref{abb:dims}) eine Kante vom Canny-Algorithmus vorliegen.
@@ -138,7 +138,7 @@ Daher suche ich in alle Richtungen vom Pol aus eine Kante. Dann addiere ich den 
 		y_3 &= sin(((n+1)\bmod{}16) \cdot \frac{22,5\pi}{180} + \delta) \cdot 5,5u + y_0 \\ \vspace{2em}
 		x_4 &= cos(((n+1)\bmod{}16) \cdot \frac{22,5\pi}{180} + \delta) \cdot 4,5u + x_0\\
 		y_4 &= sin(((n+1)\bmod{}16) \cdot \frac{22,5\pi}{180} + \delta) \cdot 4,5u + y_0
-	\end{split} \label{eq:nKoords}
+	\end{split} \label{eq:nKoordsNeu}
 \end{gather}
 \section{Beispiele}
 Aller Optimierungen zum Trotz erkennt mein Programm auf den weiteren Beispielen nicht alle Kreis-Codes. Ausgabebilder aller BwInf-Beispiele finden Sie in der Einsendung. Hier gebe ich tabellarisch wieder, wie vollständig das Programm die Beispieleingaben dekodiert hat. \\ 
