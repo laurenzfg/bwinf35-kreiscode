@@ -134,7 +134,6 @@ class ImagePanel extends JPanel implements ComponentListener{
                 }
             }
         }
-        System.out.println("INFO: Painted image");
     }
 
     @Override
