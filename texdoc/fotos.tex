@@ -97,9 +97,9 @@ Da aber möglicherweise eine Kante auch aus weniger stark abgesetzten Pixeln bes
 
 Diese Verfolgung ist mit einem Stack implemementiert. Jeder im ersten ersten Erkennungsschritt erkannte Pixel wird auf diesen Stack gelegt. Nach Abschluss des ersten Erkennungsschrittes werden alle Pixel, die an ein Pixel aus dem Stack angrenzen, noch nicht markeirt wurden und über dem verringerten Schwellwert von 12,5 liegen, schwarz markiert. Diese Pixel werden widerum auf den Stack gelegt, sodass die Kante mti dem verrignerten Schwellwert verfolgt wird. 
 
-\subsubsection{Erosion}
-Aufgrund der Non-Maximum-Supression sind kleine Lücken in der Grafik entstanden. Diese Verhindern eine sinnvolle Ausführung der nachfolgenden Flood-Fill. Daher erodiere ich das Ergebnis der Hysterese. Erodierung bedeutet, dass jedes Pixel, dass mehr als einen schwarzen Nachbarn hat, geschwärzt wird.
-Damit verdicke ich wieder die Linie, jedoch ist sie weiterhin weitaus exakter, als sie es ohne Non-Maximum-Supression wäre. 
+\subsubsection{Dilation}
+Aufgrund der Non-Maximum-Supression sind kleine Lücken in der Grafik entstanden. Diese Verhindern eine sinnvolle Ausführung der nachfolgenden Flood-Fill. Daher wende ich auf das Ergebnis der Hysterese Dilation an. Hierbei wird jedes Pixel, dass mehr als einen schwarzen Nachbarn hat, geschwärzt.
+Damit verdicke ich die Linie, jedoch ist sie weiterhin weitaus exakter, als sie es ohne Non-Maximum-Supression wäre.
 
 \subsection{Einfärben des Bildes}
 Der Canny-Detektor gibt ein Bild aus Kanten aus (Mittlere Grafik in Abb. \ref{abb:transform}. Die weiteren Berechnungsschritte benötigen jedoch ein Bild, in dem der Kreis, der Kreisring und die Segmente komplett schwarz eingefärbt sind. Unter Ausnutzung der Annahme aus der Lösungsidee habe ich einen Algorithmus formuliert.
