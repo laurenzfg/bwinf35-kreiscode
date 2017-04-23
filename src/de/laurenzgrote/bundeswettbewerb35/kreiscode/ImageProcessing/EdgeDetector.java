@@ -267,7 +267,7 @@ public class EdgeDetector {
     private boolean[][] hysteresis(double[][] sobelImage) {
         boolean[][] binaryImage = new boolean[width][height]; // Ausgabebild
         // Binärisieren mit hohem Schwellwert
-        double treshold = 50.0;
+        double treshold = 40.0;
         Stack<Coordinate> hysteresisStack = new Stack<>(); // Die Trues mit hohem Wert für spätere Hysterese
 
         for (int x = 0; x < width; x++) {
