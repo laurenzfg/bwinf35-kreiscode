@@ -55,7 +55,7 @@ y_{aussen} &= sin(k \cdot \frac{22,5\pi}{180}) \cdot 5,5u
 
 Wenn ich nun alle benachbarten Koordinaten verbinde, erhalte ich 16 Trapeze, die fast den Kreissegmenten entsprechen. Da die Abweichung zwischen dem jeweiligen Trapez und dem jeweiligen Kreissegment sehr gering ist, kann aus den Pixeln im Trapez auf die Farbe des Ringsegmentes geschlossen werden. Da das ganze Ringsegment entweder ganz weiß oder ganz schwarz ist, entspricht die vorherrschende Farbe im Trapez der Farbe des Kreissegmentes.
 
-Die 16 vorherrschenden Farben können als Wort bestehend aus 16 Bits aufgefasst werden. Ein Segment aus hautpsächlich schwarzen Pixeln spiegelt hierbei eine Eins wieder. Nun muss im Wörterbuch nach einer Übersetzung für dieses Wort gesucht werden. Sollte kein Ergebnis gefunden werden, muss das Wort solange rotiert werden, bis eine Übersetzung gefunden wird.
+Die 16 vorherrschenden Farben können als Wort bestehend aus 16 Bits aufgefasst werden. Ein Segment aus hauptsächlich schwarzen Pixeln spiegelt hierbei eine Eins wieder. Nun muss im Wörterbuch nach einer Übersetzung für dieses Wort gesucht werden. Sollte kein Ergebnis gefunden werden, muss das Wort solange rotiert werden, bis eine Übersetzung gefunden wird.
 
 Rotation bedeutet in diesem Kontext, dass das letzte Bit an die erste Stelle verschoben wird. Die folgenden Bits werden entsprechend um eine Stelle nach hinten verschoben. Dies entspricht einer Drehung des Kreis-Codes um \(22,5^{\circ}\).
 
@@ -89,7 +89,7 @@ Die Koordinaten der an das \textit{n}te-Trapez mit dem Mittelpunkt \((x_0|y_0)\)
 \end{equation}
 
 Abschließend müssen die x- und y-Werte noch gerundet werden, da im gerasterten Bild nur ganzzahlige Pixel adressierbar sind.
-Zur Überprüfung habe ich ein kleines CPP-Programm geschrieben, welches die Formel für \(n = 0\hspace{2pt}..\hspace{2pt}15 \) durchrechnet und entstprechende TikZ-Anweisungen ausgibt (Quellcode: mittelpunkte.cpp). Obwohl in der Testimplementierung ungenau auf Vielfache von \(u\) gerundet wurde, liegen alle Punkte in ihrem jeweiligen Segment.
+Zur Überprüfung habe ich ein kleines CPP-Programm geschrieben, welches die Formel für \(n = 0\hspace{2pt}..\hspace{2pt}15 \) durchrechnet und entsprechende TikZ-Anweisungen ausgibt (Quellcode: mittelpunkte.cpp). Obwohl in der Testimplementierung ungenau auf Vielfache von \(u\) gerundet wurde, liegen alle Punkte in ihrem jeweiligen Segment.
 
 \begin{figure}[!ht]
 	\centering
@@ -120,7 +120,7 @@ Zu diesem Thema habe ich mich in der nächstgelegenen Universitätsbilbiliothek 
 Für den Algorithmus bestimme ich zunächst den Abstand in die x- und y-Richtung. Mit den Abständen ermittele ich unter Betrachtung der Vorzeichen, in welche Richtung die Linie verlaufen muss. In y-Richtung kann sie entweder nach oben oder unten, in x-Richtung entweder nach links oder rechts verlaufen.
 
 Außerdem ermittele ich, in welche Richtung der Abstand größer ist.
-Damit eine durchgehende Linie entsteht, müssen mindestens so viele Pixel markiert werden, die dem grßten Abstand entsprechen. Ansonsten entstehen Lücken. Daher bestimme ich folgende Schritte.
+Damit eine durchgehende Linie entsteht, müssen mindestens so viele Pixel markiert werden, die dem größten Abstand entsprechen. Ansonsten entstehen Lücken. Daher bestimme ich folgende Schritte.
 \begin{itemize}
 	\item Den \textbf{Parallelschritt}, der nur in die größere Richtung weist. 
 	\item Den \textbf{Diagonalschritt}, der in beide Richtungen weist.
@@ -133,7 +133,7 @@ Das Wörterbuch speichere ich in einer Liste. Während des Einlesevorganges rech
 Das eingelesene Wort aus dem Dekodierschritt wird ebenfalls in eine Dezimalzahl umgerechnet. Anschließend kann in der Liste nach dem Eintrag mit der gleichen Dezimalzahl gesucht werden.
 
 Gegebenenfalls nötige Rotationen erfolgen, indem das letzte Bit des Wortes an die erste Stelle eines neuen Arrays eingefügt wird. Anschließend werden die sonstigen Bits angefügt.
-Dieses Array wird widerum in eine Dezimalzahl umgerechnet. Dies wird solange wiederholt, bis alle Rotationen getestet wurden oder eine Übersetzung gefunden wurde.
+Dieses Array wird wiederum in eine Dezimalzahl umgerechnet. Dies wird solange wiederholt, bis alle Rotationen getestet wurden oder eine Übersetzung gefunden wurde.
 Sollte keine Übersetzung gefunden werden, wird die Zeichenfolge "`???"' zurückgegeben. 
 
 \pagebreak

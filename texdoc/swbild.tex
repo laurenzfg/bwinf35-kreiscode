@@ -49,12 +49,12 @@ Zunächst implementierte ich mithilfe von ImageIO, einer Klasse der Java-Standar
 Wenn dieser über die entsprechende Checkbox in der GUI zugeschaltet wird, können alle gängigen Bildformate gelesen werden. 
 Nachteil ist eine deutlich längere Einlesezeit. Darüber hinaus muss ImageMagick lokal installiert sein und der Befehl \texttt{convert} im PATH enthalten sein.\footnote{Getestet unter Ubuntu und Fedora.} 
 
-Darauf überlegte ich mir eine möglichst effiziente Datenstruktur für Grafiken, dennd die Interaktion über ImageIO mit Bitmaps istn nicht sonderlich effizient. Da für die Erkennung von Kreisen in einer Grafik genaue Informationen über die Farbe eines Bildpunktes nicht relevant sind, kann das Bild beim Einlesevorgang in ein boolesches 2D-Array überführt werden: In diesem Array, das die gleiche Größe wie das eingelesene Bild besitzt, sind schwarze Bildpunkte als True gespeichert.
-In der in Teilaufgabe 1 gegebenen Schwarz-Weiß-Grafik ist die Bestimmung schwarzer Bildbunkte noch simpel: Schwarze Bildpunkte sind im Array True, sonstige sind False. Weitere Fälle, wie zum Beispiel graue Felder, müssen noch nicht beachtet werden.
+Darauf überlegte ich mir eine möglichst effiziente Datenstruktur für Grafiken, denn die Interaktion über ImageIO mit Bitmaps istn nicht sonderlich effizient. Da für die Erkennung von Kreisen in einer Grafik genaue Informationen über die Farbe eines Bildpunktes nicht relevant sind, kann das Bild beim Einlesevorgang in ein boolesches 2D-Array überführt werden: In diesem Array, das die gleiche Größe wie das eingelesene Bild besitzt, sind schwarze Bildpunkte als True gespeichert.
+In der in Teilaufgabe 1 gegebenen Schwarz-Weiß-Grafik ist die Bestimmung schwarzer Bildpunkte noch simpel: Schwarze Bildpunkte sind im Array True, sonstige sind False. Weitere Fälle, wie zum Beispiel graue Felder, müssen noch nicht beachtet werden.
 Nach der Einleseprozedur ist ein Binärbild gegeben.
 
 \subsection{Streifenerkennung (Listing \ref{lst:streifen})}
-Um in diesem Binärbild die Punkte zu bestimmen, deren Abstand zum äußeren Rand eines True-Segmentes sich in alle vier Richtungen gleichen, bestimme ich zunächst die Länge von aufeinanderfolgenden als True markierten Feldern. Solche Folgen nenne ich von nun an "`Streifen"'. In seperaten Arrays für horizontale und vertikale Streifen speichere ich für jeden Pixel seine gesamte Streifenlänge.
+Um in diesem Binärbild die Punkte zu bestimmen, deren Abstand zum äußeren Rand eines True-Segmentes sich in alle vier Richtungen gleichen, bestimme ich zunächst die Länge von aufeinanderfolgenden als True markierten Feldern. Solche Folgen nenne ich von nun an "`Streifen"'. In separaten Arrays für horizontale und vertikale Streifen speichere ich für jeden Pixel seine gesamte Streifenlänge.
 Alle Felder, die vorher als False markiert wurden, haben logischerweise eine Streifenlänge von 0. 
 
 Die erste Eigenschaft aus der Aufgabenstellung lässt sich mit der soeben vorberechneten Information nun so umsetzen, dass nach aufeinander liegenden Mittelpunkten gleich langer vertikaler und horizontaler Streifen gesucht wird.
