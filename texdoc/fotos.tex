@@ -12,11 +12,11 @@ Ich extrahiere zunächst alle Kanten des Bildes. Kanten sind Stellen, an denen s
 
 Mit diesen Kanten habe ich das Bild segmentiert. Zu schwärzende Bildsegmente sind von einer Kante umrandet. Daher fülle ich jedes Segment komplett schwarz (1), während ich den Hintergrund weiß (0) belasse.
 
-Die Färbung basiert auf die folgende Annahme: Der Hintergrund des Bildes ist monton gleichfarbig. Alle an den Hintergrund angrenzenden Segmente sind Bestandteile eines Kreisringes, schließlich fand dort eine schlagartige Farbänderung zum Hintergrund statt. Die Felder, die an diese Segmente angrenzen, sind weiß, da sich die Farbe widerum schlagartig zum Hintergrund zurück geändert hat. Dieses Muster setze ich fort, bis die Farben aller Segmente bestimmt sind.
+Die Färbung basiert auf die folgende Annahme: Der Hintergrund des Bildes ist monton gleichfarbig. Alle an den Hintergrund angrenzenden Segmente sind Bestandteile eines Kreisringes. Schließlich fand dort eine schlagartige Farbänderung zum Hintergrund statt. Die Felder, die an diese Segmente angrenzen, sind weiß, da sich die Farbe wiederum schlagartig zum Hintergrund zurück geändert hat. Dieses Muster setze ich fort, bis die Farben aller Segmente bestimmt sind.
 
 Die drei Schritte der Bildprozessierung sind in Abbildung \ref{abb:transform} dargestellt.
 
-Vorteil dieser Vorhergehensweise gegenüber einem Schwellwertverfahren ist, dass jeder ähnlich gefärbte Bereich die selbe Farbe erhält. Bei einem Schwellwertverfahren werden bei einem zu kleinen Schwellwert dunklere Bildbereiche komplett geschwärzt, während bei einem zu hohen Schwellwert einige Kreis-Codes nur lückenhaft erkannt werden.
+Vorteil dieser Vorhgehensweise gegenüber einem Schwellwertverfahren ist, dass jeder ähnlich gefärbte Bereich durchgehend gleich gefärbt wird. Bei einem Schwellwertverfahren werden bei einem zu kleinen Schwellwert dunklere Bildbereiche komplett geschwärzt, während bei einem zu hohen Schwellwert einige Kreis-Codes nur lückenhaft erkannt werden.
  
 \section{Umsetzung}
 \subsection{Graustufenbild}
@@ -27,7 +27,8 @@ Y = 0,2126R+0,7152G+0,0722G
 \end{equation}
 
 \subsection{Canny-Edge-Detector}
-Um in diesem Graustufenbild die Kanten zu Bestimmen, nutze ich den 1986 von John Canny vorgestellten Canny Edge Detector. Zu diesem habe ich mich auf einer Homepage der Universität von Edinburgh informiert: \url{http://homepages.inf.ed.ac.uk/rbf/HIPR2/canny.htm}
+Um in diesem Graustufenbild die Kanten zu bestimmen, nutze ich den 1986 von John Canny vorgestellten Canny Edge Detector. Zu diesem habe ich mich auf einer Online-Veröffentlichung der Universität von Edinburgh informiert: \url{http://homepages.inf.ed.ac.uk/rbf/HIPR2/canny.htm} Dort finden Sie weitere Erläuterungen zu dem Canny-Edge-Detector, den ich im folgenden kurz darstelle.
+
 \subsubsection{Weichzeichnung (Listing \ref{lst:gauss})}
 In einem ersten Schritt filtere ich vor der eigentlichen Kantenerkennung grobe Außreißer aus dem Bild heraus. Hierfür wende ich einen Gaußschen Weichzeicher an. Ein solcher Weichzeichner funktioniert, indem für jedes Pixel ein gewichteter Mittelwert aus seinem eigenen Grauwert und den Grauwerten seiner Umgebung bestimmt wird. Der Gewichtung wird die Gaußsche Normalverteilung zugrunde gelegt. Ich habe mich für ein Sigma von 3 entschieden. So werden grobe Ausreißer entfernt, der Kantenverlauf bleibt jedoch erhalten. Aus dieser Kurve lässt sich folgende Matrix extrahieren\footnote{\url{http://dev.theomader.com/gaussian-kernel-calculator/}}:
 \begin{equation}
@@ -50,7 +51,7 @@ Allerdings kann die Gaußsche Weichzeichnung auch in einen horizontalen und vert
 Man kann mit dieser Matrix das gleiche Ergebnis erzielen, indem man sie zunächst in horizontale und anschließend in vertikale Richtung anwendet. Diese Vorhergehensweise hat eine bessere Laufzeit, da für die Glättung eines Pixels nicht \(4^2\), sondern nur \(2\times 4\) Pixel betrachtet werden müssen.
 
 \subsubsection{Sobel-Operator (Listing \ref{lst:sobel})}
-Anschließend wende ich auf das nun geglättete Bild den Sobel-Operator an. Dieser Operator entspricht der 1. Ableitung über die Helligkeitskurve des Bildes. Der Operator wird mithilfe von \textit{Convolution} über das gesamte Bild berechnet. Convolution ist das bereits von dem Gauß-Weichzeichner bekannte Prinzip, dass auf jedes Pixel eine Matrix angewandt wird. Der Sobel-Operator basiert zwei Convulution-Durchläufen mit folgenden Matrizen:
+Anschließend wende ich auf das nun geglättete Bild den Sobel-Operator an. Dieser Operator entspricht der 1. Ableitung über die Helligkeitskurve des Bildes. Der Operator wird mithilfe von \textit{Convolution} über das gesamte Bild berechnet. Convolution ist das bereits von dem Gauß-Weichzeichner bekannte Prinzip, das auf jedes Pixel eine Matrix angewandt wird. Der Sobel-Operator basiert auf zwei Convulution-Durchläufen mit folgenden Matrizen:
 \begin{gather}
 	\begin{split}
 		\begin{bmatrix}
@@ -74,7 +75,7 @@ Wenn die umliegenden Pixel den gleichen Intensitätstwert haben, ist das Ergebni
 Bei Intensitätsunterschieden verändert sich das Ergebnis des Operators entsprechend.
 Da allerdings für die weiteren Berechnungen eine kombinierte Ableitung benötigt wird, müssen beide Ableitungswerte eines Pixels kombiniert werden.
 
-Hierfür können die beiden Ableitungswerte als ein rechtwinkliges Dreieck aufgefasst werden. Die Ausschläge der Ableitungen in x- und y-Richtung entsprechen den beiden Kateten. Ein kombinierter Wert aus beiden Ableitungen enstpricht dann der Länge der Hypothenuse. Diese lässt sich mit dem Satz des Pythagoras berechnen (\(G_{xy} = \sqrt{G_x^2 + G_y^2}\)).
+Hierfür können die beiden Ableitungswerte als ein rechtwinkliges Dreieck aufgefasst werden. Die Ausschläge der Ableitungen in x- und y-Richtung entsprechen den beiden Katheten. Ein kombinierter Wert aus beiden Ableitungen enstpricht dann der Länge der Hypothenuse. Diese lässt sich mit dem Satz des Pythagoras berechnen (\(G_{xy} = \sqrt{G_x^2 + G_y^2}\)).
 
 \subsubsection{Non-Maximum-Supression (Nichtmaximumsunterdrückung) (Ebenfalls Listing \ref{lst:sobel})}
 Leider liefert der Sobel-Operator Kanten, die mehrere Pixel breit sind. Schließlich verlaufen die Kanten in einem Foto nicht vollkommen abrupt, sondern verlaufen über mehrere Pixel. 
@@ -88,28 +89,28 @@ Da die beiden Ableitungsfunktionen ein rechtwinkliges Dreieck bilden, kann mithi
 Mit diesem Winkel können die Pixel bestimmt werden, die an der gleichen Kante liegen. Wenn der Ableitungswert des Pixels nicht das Maximum seiner Nachbarn darstellt, kann sein Ableitungswert auf 0 gesetzt werden (Der Pixel wird in der Ausgabegrafik unterdrückt). Schließlich gibt es entlang der Kante einen stärken Farbintensitätsunterschied.  
 
 Wenn der Winkel beispielsweise \(0^{\circ}\) beträgt, verläuft die Kante in horizontale Richtung. Dann wird der Ableitungswert des Pixels mit seinem nördlichen und südlichen Nachbarn verglichen.
-Nur wenn der Ableitungswert das Maximum von diesen Pixeln darstellt, ist er Teil der 1px breiten Kante. Sonst ändert sich bei diesem Pixel zwar die Farbe, aber es folgt unmittelbar ein noch stärkerer Farbumschlag.
+Nur wenn der Ableitungswert das Maximum von diesen Pixeln darstellt, ist er Teil der 1px breiten Kante. Sonst ändert sich bei diesem Pixel zwar die Farbe. Aber es folgt unmittelbar ein noch stärkerer Farbumschlag.
 
 \subsubsection{Binärisierung mit Hysterese (Listing \ref{lst:hyst})}
 Zur Binärisierung des Ergebnisses der Sobel-Operators wende ich eine Technik namens \textit{Hysterese} an. Bei einer Hysterese wird zunächst mit einem hohen Schwellwert das Bild binärisiert. 
 Im Kontext meiner Implementierung bedeutet dies, dass alle Pixel mit einem Ableitungswert höher als 40 im Ausgabebild der Canny-Eckenerkennung schwarz gefärbt werden.
 
-Da aber möglicherweise eine Kante auch aus weniger stark abgesetzten Pixeln besteht, akzeptiert die Hysterese für an erkannte Kantenpunkte anliegende Punkte einen niedrigeren Schwellwert. Sobald ein Punkt einer Ecke gefunden wurde, wird diese "`verfolgt"'.
+Da aber möglicherweise eine Kante auch aus weniger stark abgesetzten Pixeln besteht, akzeptiert die Hysterese für an bereits erkannte Kantenpunkte anliegende Punkte einen niedrigeren Schwellwert. Sobald ein Punkt einer Ecke gefunden wurde, wird diese "`verfolgt"'.
 
-Diese Verfolgung ist mit einem Stack implemementiert. Jeder im ersten ersten Erkennungsschritt erkannte Pixel wird auf diesen Stack gelegt. Nach Abschluss des ersten Erkennungsschrittes werden alle Pixel, die an ein Pixel aus dem Stack angrenzen, noch nicht markiert wurden und über dem verringerten Schwellwert von 10 liegen, schwarz markiert. Diese Pixel werden widerum auf den Stack gelegt, sodass die Kante mit dem verringerten Schwellwert verfolgt wird. 
+Diese Verfolgung ist mit einem Stack implemementiert. Jeder im Erkennungsschritt mit hohem Schwellwert erkannte Pixel wird auf diesen Stack gelegt. Nach Abschluss des Erkennungsschrittes werden alle Pixel, die an ein Pixel aus dem Stack angrenzen, noch nicht gefunden wurden und über dem verringerten Schwellwert von 1 liegen, schwarz markiert. Diese Pixel werden wiederum auf den Stack gelegt, sodass die Kante mit dem verringerten Schwellwert verfolgt wird. 
 
 \subsubsection{Dilation (Listing \ref{lst:dilation})}
-Aufgrund der Non-Maximum-Supression sind kleine Lücken in der Grafik entstanden. Dies verhindert eine sinnvolle Ausführung von den in meinem Algorithmus häufg verwendeten Flood-Fills. Daher wende ich auf das Ergebnis der Hysterese Dilation an. Hierbei wird jedes Pixel, dass mehr als einen schwarzen Nachbarn hat, geschwärzt.
+Aufgrund der Non-Maximum-Supression sind kleine Lücken in der Grafik entstanden. Dies verhindert eine sinnvolle Ausführung von den in meinem Algorithmus häufg verwendeten Flood-Fills. Daher wende ich auf das Ergebnis der Hysterese Dilation an. Hierbei wird jedes Pixel, das mehr als einen schwarzen Nachbarn hat, geschwärzt.
 Damit verdicke ich die Linie. Allerdings ist sie weiterhin weitaus exakter, als sie es ohne Non-Maximum-Supression wäre.
 
 \subsection{Einfärben des Bildes (Listing \ref{lst:ausf})}
 Der Canny-Detektor gibt ein Bild aus Kanten aus (Mittlere Grafik in Abb. \ref{abb:transform}). Die weiteren Berechnungsschritte benötigen jedoch ein Bild, in dem der Kreis, der Kreisring und die Segmente komplett schwarz eingefärbt sind. Unter Ausnutzung der Annahme aus der Lösungsidee habe ich einen Algorithmus formuliert.
-Dieser nimmt als Eingabe das Ergebnis des Canny-Eckenerkennungsprozesses und hat als Ausgabe ein Binärbild als boolesches 2D-Array. Damit ist die Ausgabe der neuen Bidleinleseprozedur identisch zu der Ausgabe der simplen Einleseprozedur aus Kapitel 1.
+Dieser nimmt als Eingabe das Ergebnis des Canny-Eckenerkennungsprozesses und hat als Ausgabe ein Binärbild als boolesches 2D-Array. Damit ist das Ausgabeformat der neuen Bidleinleseprozedur identisch zu dem der simplen Einleseprozedur aus Kapitel 1.
 
 Von Pixel(0|0) ausgehend werden alle im Canny-Bild erreichbaren weißen Pixel mithilfe einer Flood-Fill im Ausgabebild als weiß abgespeichert, da diese den Hintergrund darstellen.
 
 Anschließend werden alle Kantenpixel, die an den Hintergrund angrenzen, schwarz markiert. Diese Pixel stellen eine Kante zum Vordergrundbereich dar.
-Da sie die Kante zum Vordergrundbereich sind, werden alle an diese Pixel angrenzenden Nicht-Kanten-Pixel, die im Ausgabebild noch nicht markiert wurden, als Schwarz markiert. Schließlich befindet sich dieser Bereich weiterhin im Vordergrund.
+Da sie die Kante zum Vordergrundbereich sind, werden alle an diese Pixel angrenzenden Nicht-Kanten-Pixel, die im Ausgabebild noch nicht markiert wurden, schwarz markiert. Schließlich befindet sich dieser Bereich weiterhin im Vordergrund.
 Diese Prozedur wird abwechselnd zur Bestimmung von Vorder- und Hintergrundbereichen eingesetzt.
 
 Praktisch umgesetzt habe ich dies mit einer Entlehnung aus der Graphentheorie.\footnote{\url{https://en.wikipedia.org/wiki/Connected-component_labeling}}. Mein Algorithmus basiert auf der im Abschnitt "`One component at a time"' vorgestellten Idee.
@@ -121,10 +122,10 @@ Danach fahre ich mit der nächsten Kantengruppe fort, nur vergebe ich dort den W
 \subsection {Rotation der Kreis-Codes (Listing \ref{lst:decode})}
 In einem Foto ist nicht davon auszugehen, dass der Nutzer das erste Segment exakt an der x-Achse ausrichtet. Daher muss der Trapezkranz aus Kapitel 2 so über den Kreisring gelegt werden, dass jedes Trapez möglich exakt über einem Kreisringsegment liegt. 
 
-Dies gelingt, indem wir die Achse so verschieben, dass sie auf einer Kante zwischen zwei Kreisringsegmenten liegt. Dafür müssen wir eine beliebige Kante auf dem äußeren Kreisring finden. Bei einer solchen Kante muss in einem Abstand von \(4,7u\) vom Pol (vgl Abb. \ref{abb:dims}) eine Kante vom Canny-Algorithmus vorliegen. Also muss an dieser Stelle im Ausgabebild von Canny True stehen.
+Dies gelingt, indem die Achse so verschoben wird, dass sie auf einer Kante zwischen zwei Kreisringsegmenten liegt. Dafür muss eine beliebige Kante auf dem äußeren Kreisring gefunden werden. An einer solchen Stelle muss in einem Abstand von \(4,7u\) vom Pol (vgl. Abb. \ref{abb:dims}) eine Kante vorliegen. Also muss an dieser Stelle im Ausgabebild von Canny True stehen. Zu beachten ist, dass hier nicht das ausgefüllte Bild genommen werden darf, da nach Kanten, nicht nach Segmenten, gesucht wird.
+So suche ich in jedem Winkel vom Pol aus eine Kante.
 
-So suche ich in alle Richtungen vom Pol aus eine Kante.
-Dann addiere ich den Winkel \(\delta\) zwischen der x-Achse und dem Strahl zur ersten Kante auf den Winkel zwischen x-Achse und einteilenden Strahl hinauf. Statt den Formeln \ref{eq:nKoords} nutze ich also folgende Formeln:
+Dann addiere ich den Winkel \(0^{\circ} \le \delta \le 360^{\circ}\) zwischen der x-Achse und dem Strahl zu einer beliebigen Kante auf jeden der einteilenden Strahlwinkel hinauf. Somit verschiebe ich den gesamten Trapezkranz so, dass er exakt auf den Trapezen liegt. Statt den Formeln \ref{eq:nKoords} nutze ich folgende Formeln:
 
 \begin{gather}
 	\begin{split}
@@ -145,7 +146,7 @@ Dann addiere ich den Winkel \(\delta\) zwischen der x-Achse und dem Strahl zur e
 Dass dadurch mehr als \(360^{\circ}\) in den Sinus eingegeben werden ist unwsesentlich, da sich die Sinuskurve nach \(360^{\circ}\) wiederholt.
 \pagebreak
 \section{Beispiele}
-Aller Optimierungen zum Trotz erkennt mein Programm auf den weiteren Beispielen nicht alle Kreis-Codes. Ausgabebilder aller BwInf-Beispiele finden Sie in der Einsendung. Hier gebe ich tabellarisch wieder, wie vollständig das Programm die Beispieleingaben dekodiert hat. \\ 
+Allen Optimierungen zum Trotz erkennt mein Programm in den weiteren Beispielen nicht alle Kreis-Codes. Ausgabebilder aller BwInf-Beispiele finden Sie in der Einsendung. Hier gebe ich tabellarisch wieder, wie vollständig das Programm die Beispieleingaben dekodiert hat. \\ 
 (\checkmark{} Vollständig, \(\varnothing\) unvollständig, \(\times\) ohne Ergebnis)
 
 \begin{table}[!h]
@@ -168,7 +169,7 @@ Auch wenn es mir nicht gelungen ist, das Programm so zu optimieren, dass alle Co
 \includegraphics[width=0.9\textwidth]{Grafiken/Ausgaben/noise50}
 \end{minipage}
 \begin{minipage}{0.3\textwidth}
-Dieses Bild ist extrem Verrauscht. Nichtsdestotrotz ist eine Erkennung theoretisch möglich, wenn man die Treshold im Quellcode manuell auf 75 anhebt. Leider werden in diesem Fall in zahlreichen anderen Bildern die Kreis-Codes nicht komplett erkannt.
+Dieses Bild ist extrem verrauscht. Nichtsdestotrotz ist eine Erkennung theoretisch möglich, wenn man die Treshold im Quellcode manuell auf 75 anhebt. Leider werden in diesem Fall in zahlreichen anderen Bildern die Kreis-Codes nicht komplett erkannt.
 \end{minipage}
 
 \subsubsection{Beispiele 1 und 4}
@@ -177,7 +178,7 @@ Dieses Bild ist extrem Verrauscht. Nichtsdestotrotz ist eine Erkennung theoretis
 \includegraphics[width=0.9\textwidth]{Grafiken/Ausgaben/cam4}
 \end{minipage}
 \begin{minipage}{0.3\textwidth}
-Hier scheitert mein Algorithmus an den zahlreichen weißen Punkten in den nicht erkannten Kreis-Codes. Eine stärkere Weichzeichnung ist nicht zielführend, da dann die Kantengrenzen verwischen.
+Hier scheitert mein Algorithmus an den zahlreichen weißen Punkten in den nicht erkannten Kreis-Codes. Eine stärkere Weichzeichnung ist nicht zielführend, da dann die Kantengrenzen verwischen. Ein geringerer Schwellwert sorgt für False Positives an den Farbwechseln.
 \end{minipage}
 
 \subsubsection{Beispiel 8}
@@ -193,15 +194,14 @@ In diesem Bild sind die Kreise so unscharf, dass eine Erkennung der Kanten bei e
 \includegraphics[width=0.9\textwidth]{Grafiken/Ausgaben/camB}
 \end{minipage}
 \begin{minipage}{0.3\textwidth}
-In der oberen rechten Hälfte ist das Blatt geknickt worden. Da in meinem Algorithmus keinrlei Maßnahmen zur Begradigung eingebaut sind, kann der Kreis-Code nicht entziffert werden, da die Trapeze nicht auf den Kreisringsegmenten liegen. Auch nach einer Internetrecherche habe ich keinen Algorithmus gefunden, der dieses Problem ohne eine gerade Referenz behebt.
+In der oberen rechten Hälfte ist das Blatt geknickt worden. Da in meinem Algorithmus keinerlei Maßnahmen zur Begradigung eingebaut sind, kann der Kreis-Code nicht entziffert werden, da die Trapeze nicht auf den Kreisringsegmenten liegen. Auch nach einer Internetrecherche habe ich keinen Algorithmus gefunden, der dieses Problem ohne eine gerade Referenz behebt.
 \end{minipage}
 
+\pagebreak
 \section{Eigene Beispiele}
-In meinen Beispielen habe ich typische Use-Cases von Barcodes evaluiert. Zum einen habe ich es in eine Texdokument (blatt.png) eingebettet, da insbesondere QR-Codes oft genutzt werden, um z.B. Links anzugeben.
+In meinen Beispielen habe ich typische Use-Cases von Barcodes evaluiert. Zum einen habe ich Kreis-Codes in ein Texdokument (blatt.png) eingebettet, da insbesondere QR-Codes oft genutzt werden, um z.B. Links anzugeben.
 Auch habe ich einen Kreiscode an meine Zimmerwand geheftet. Damit zeige ich, dass die Bildumrandung nicht zwingend Weiß sein muss, sondern auch sonstige ruhige Flächen wie Raufasertapeten ein geeignete Träger für einen Kreis-Code sind.
 Zuguterletzt habe ich ein Bild mit roten Kreis-Codes erstellt. Oftmals möchten Nutzer Barcodes kreativ personalisieren, damit sie besser in ihre Umgebung passen.
-
-Alle Cases hat das Programm korrekt dekodiert.
 
 \begin{center}
 \includegraphics[width=0.4\textwidth]{Grafiken/Ausgaben/blatt}
@@ -212,12 +212,11 @@ Alle Cases hat das Programm korrekt dekodiert.
 \includegraphics[width=0.8\textwidth]{Grafiken/Ausgaben/raufaser}
 \end{center}
 
-\pagebreak
 \section {Operationsbereich des Programmes}
-Mit den Erfahrungen aus den BwInf-Beispielen und eigenen Testsfällen habe ich untersucht, welche Vorraussetzungen gegeben sein müssen, damit die Dekodierung erfolgreich ist:
+Mit den Erfahrungen aus den BwInf-Beispielen und eigenen Testfällen habe ich untersucht, welche Vorraussetzungen gegeben sein müssen, damit die Dekodierung erfolgreich ist:
 \begin{itemize}
-	\item Der Hintergrund muss eine ruhige, zusammenhängende Fläche sein. Sonst gelingt die Flood-Fill zur Hintergrundmarkierung nicht. Wenn Beispielsweise das Blatt Papier auf eine schwarze Unterlage gelegt wird, ist das gesamte Blattinnere invertiert, da die Außenkante des Blattes als Kante eines Kreis-Codes aufgefasst wird.
+	\item Der Hintergrund muss eine ruhige, zusammenhängende Fläche sein. Sonst gelingt die Flood-Fill zur Hintergrundmarkierung nicht. Wenn beispielsweise das Blatt Papier auf eine schwarze Unterlage gelegt wird, ist das gesamte Blattinnere invertiert, da die Außenkante des Blattes als Kante eines Kreis-Codes aufgefasst wird. Ruhig bedeutet in diesem Zusammenhang, dass Farben sanft ineinander verlaufen müssen.
 	\item Der Sobel-Operator muss an mindestens einer Stelle jeder Linie des Kreis-Codes einen Wert höher als 40 liefern. Sonst wird diese Kante nicht verfolgt. Die Farbe des Kreis-Codes ist beliebig, es muss nur der Kontrast zum Hintergrund hinreichend groß sein.
 	\item Das Blatt darf nicht zerknickt oder zerknüllt sein, die Kamera muss senkrecht auf den Kreis-Code zeigen. Schließlich basieren die Formeln für den Trapezkranz auf der Annahme, das das Bild glatt vorliegt. 
-	\item Das Rauschen des Kamerabildes darf nicht zu groß sein. Ein Rauschen wie in Bild Noise-50 entsteht allerdings nur in stark verstrahlten Gebieten, daher ist die Entrauschung meines Bildes für Alltagssituationen aureichend.
+	\item Das Rauschen des Kamerabildes darf nicht zu groß sein. Ein Rauschen wie in Bild Noise-50 entsteht allerdings nur in stark verstrahlten Gebieten oder GIMP, daher ist die Entrauschung meines Programmes für Alltagssituationen aureichend.
 \end{itemize}

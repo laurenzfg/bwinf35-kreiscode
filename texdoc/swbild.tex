@@ -2,7 +2,7 @@
 \subsection{Kreismittelpunkterkennung}
 Um möglichst effizient Kreismittelpunkte zu bestimmen, mache ich mir zunächst folgende Eigenschaft von Kreisen zunutze: Am Mittelpunkt eines Kreises ist der Abstand zu der äußeren Umrandung des Kreises in jede Richtung gleich. Dieser Abstand entspricht dem Radius.
 
-In einem Bild lassen sich solche Punkte finden, indem man von jedem schwarzen Bildpunkt misst, wie weit man sich ind dem Bild in vertikale wie horizontale Richtung "`bewegen"' kann, ohne auf ein weißes Feld zu stoßen. Wenn dieser Abstand nach rechts, links, oben und unten gleich groß ist, genügt der Punkt der erstgenannten Eigenschaft von Kreisen. 
+In einem Bild lassen sich solche Punkte finden, indem man von jedem schwarzen Bildpunkt misst, wie weit man sich in dem Bild in vertikale wie horizontale Richtung "`bewegen"' kann, ohne auf ein weißes Feld zu stoßen. Wenn dieser Abstand nach rechts, links, oben und unten gleich groß ist, genügt der Punkt der erstgenannten Eigenschaft von Kreisen. 
 
 Von einem Vergleich des Abstandes in weitere Richtungen (wie z.B. in diagonale Richtung) sollte man bei einer Bitmap aus Pixeln absehen, da bei einer Bitmap aus quadratischen Pixeln diagonale Messungen oder gar Messungen unter beliebigem Winkel ungenaue Ergebnisse liefern. 
 Zwar sind solche Messungen prinzipiell möglich, liefern aber anders als vertikale oder horizontale Messungen keine ganzzahligen Ergebnisse, da eine Pixeldiagonale \(\sqrt{2}\) Pixelseiten lang ist.
@@ -15,9 +15,9 @@ Zwar sind solche Messungen prinzipiell möglich, liefern aber anders als vertika
 	\label{abb:mischformen}
 \end{figure}
 
-Da die erstgenannte Eigenschaft jedoch auch auf Punkte in Quadraten und anderen unregelmäßigen Formen zutrifft (s. Grafik \ref{abb:mischformen}), muss für eine zuverlässige Erkennung eine zweite Eigenschaft von Kreisen genutzt werden: Bei bekanntem Durchmesser kann die Fläche eines Kreises mit der Kreisformel\footnote{: \(\frac{\pi d^2}{4}\)} bestimmt werden.
+Da die erstgenannte Eigenschaft jedoch auch auf Punkte in Quadraten und anderen unregelmäßigen Formen zutrifft (s. Abbildung \ref{abb:mischformen}), muss für eine zuverlässige Erkennung eine zweite Eigenschaft von Kreisen genutzt werden: Bei bekanntem Durchmesser kann die Fläche eines Kreises mit der Kreisformel\footnote{: \(\frac{\pi d^2}{4}\)} bestimmt werden.
 Diese Soll-Fläche kann anschließend mit der tatsächlichen Fläche des vermeintlichen Kreises verglichen werden. Sollte das Delta zwischen diesen beiden Flächengrößen nahe 0 sein, handelt es sich mit sehr großer Wahrscheinlichkeit um einen Kreismittelpunkt. 
-Dass Soll und Ist identisch sind ist unmöglich, da sich ein Kreis in einer Bitmap aus quadratischen Pixeln zusammensetzt. Ein Kreis lässt sich nicht aus Quadraten exakt zusammensetzen.
+Dass Soll und Ist identisch sind, ist unmöglich, da sich ein Kreis in einer Bitmap aus quadratischen Pixeln zusammensetzt. Ein Kreis lässt sich nicht aus Quadraten exakt zusammensetzen.
 
 Da die Wahrscheinlichkeit eines False Positives nach Überprüfen beider Kriterien sehr gering ist, nehme ich an, dass jeder Punkt, auf den beide Kriterien zutreffen, ein Kreismittelpunkt ist. 
 Allerdings ist es aufgrund von Kompressionsartefakten oder einer geringen Bildauflösung möglich, dass es mehrere sehr nahe liegende Punkte gibt, auf die diese Bedingungen zutreffen. Damit der Mittelpunkt für jeden Kreis eindeutig bestimmt wird, merkt sich der Algorithmus bei der Flächenermittlung die Felder, von denen bereits die Fläche ermittelt wurde. 
@@ -31,12 +31,12 @@ So kann der Algorithmus bei Pixeln, die schon beachtet wurden, abbrechen. Schlie
 \end{wrapfigure}
 
 \subsection{Kreisringerkennung}
-Danach gilt es noch zu bestimmen, ob es sich bei dem Kreismittelpunkt um einen Mittelpunkt eines \task{}s handelt, schließlich sollen Mittelpunkte sonstiger Kreise nicht ausgegeben werden. Dies wäre nicht im Sinne der nachfolgenden Teilaufgaben. Hierzu können wir uns die Proportionen eines \task{}s zu nutze machen:
+Danach gilt es noch zu bestimmen, ob es sich bei dem Kreismittelpunkt um einen Mittelpunkt eines \task{}s handelt, schließlich sollen Mittelpunkte sonstiger Kreise nicht ausgegeben werden. Dies wäre nicht im Sinne der nachfolgenden Teilaufgaben. Hierzu nutze ich die bekannten Proportionen eines \task{}s:
 
 Der Durchmesser des Kreises ist als \(3u\) definiert, der Kreisring und die Zwischenräume haben eine Breite von \(1u\). 
 Daraus folgt, dass wenn man den Kreismittelpunkt in eine beliebige Richtung um den Kreisdurchmesser (\(3u\)) verschiebt, der neue Punkt im mittleren, durchgehend schwarzen, Kreisring liegen muss. (siehe Abb. \ref{abb:dims})
 
-Von diesem Punkt ausgehend können wir wieder den Ist-Flächeninhalt des Kreisringes mit dem erwarteten Flächeninhalt vergleichen. Da der Kreisring aus einem Kreis mit einem Durchmesser von \(7u\), von dem die inneren \(5u\) ausgeschnitten wurden, besteht, muss der Kreisring folgenden Flächeninhalt haben:\footnote{\url{https://de.wikipedia.org/wiki/Kreisring}}
+Von diesem Punkt ausgehend vergleiche ich den Ist-Flächeninhalt des Kreisringes mit dem erwarteten Flächeninhalt. Da der Kreisring aus einem Kreis mit einem Durchmesser von \(7u\), von dem die inneren \(5u\) ausgeschnitten wurden, besteht, muss der Kreisring folgenden Flächeninhalt haben:\footnote{\url{https://de.wikipedia.org/wiki/Kreisring}}
 
 \begin{equation}
 	A=\frac{\pi{}\times(D^2-d^2)}{4}=\frac{\pi{}\times((7u)^2-(5u)^2)}{4}=6\pi{}u^2
@@ -49,7 +49,7 @@ Zunächst implementierte ich mithilfe von ImageIO, einer Klasse der Java-Standar
 Wenn dieser über die entsprechende Checkbox in der GUI zugeschaltet wird, können alle gängigen Bildformate gelesen werden. 
 Nachteil ist eine deutlich längere Einlesezeit. Darüber hinaus muss ImageMagick lokal installiert sein und der Befehl \texttt{convert} im PATH enthalten sein.\footnote{Getestet unter Ubuntu und Fedora.} 
 
-Darauf überlegte ich mir eine möglichst effiziente Datenstruktur für Grafiken, da die Interaktion über ImageIO mit Bitmaps nicht sonderlich effizient ist. Da für die Erkennung von Kreisen in einer Grafik genaue Informationen über die Farbe eines Bildpunktes nicht relevant sind, kann das Bild beim Einlesevorgang in ein boolesches 2D-Array überführt werden: In diesem Array, das die gleiche Größe wie das eingelesene Bild besitzt, sind schwarze Bildpunkte als True gespeichert.
+Darauf überlegte ich mir eine möglichst effiziente Datenstruktur für Grafiken, dennd die Interaktion über ImageIO mit Bitmaps istn nicht sonderlich effizient. Da für die Erkennung von Kreisen in einer Grafik genaue Informationen über die Farbe eines Bildpunktes nicht relevant sind, kann das Bild beim Einlesevorgang in ein boolesches 2D-Array überführt werden: In diesem Array, das die gleiche Größe wie das eingelesene Bild besitzt, sind schwarze Bildpunkte als True gespeichert.
 In der in Teilaufgabe 1 gegebenen Schwarz-Weiß-Grafik ist die Bestimmung schwarzer Bildbunkte noch simpel: Schwarze Bildpunkte sind im Array True, sonstige sind False. Weitere Fälle, wie zum Beispiel graue Felder, müssen noch nicht beachtet werden.
 Nach der Einleseprozedur ist ein Binärbild gegeben.
 
@@ -61,10 +61,10 @@ Die erste Eigenschaft aus der Aufgabenstellung lässt sich mit der soeben vorber
 An solchen Stellen ist die erste Eigenschaft gegeben, da in alle Richtungen der Abstand zum Rand des True-Segmentes identisch ist. Wie in der Lösungsidee dargestellt, entspricht dann eine Streifenlänge dem Kreisdurchmesser.
 
 \subsection{Kreismittelpunkterkennung (Listing \ref{lst:kreise})}
-Für diese Suche bestimme ich zunächst alle Mittelpunkte horizontaler Streifen. Dies geschieht, indem ich mit einer Suche über das ganze Bild alle Koordinaten bestimme, deren horizontale Streifenlänge größer null ist und denen ein False-Pixel vorrausgeht.
+Für diese Suche bestimme ich zunächst alle Mittelpunkte horizontaler Streifen. Dies geschieht, indem ich mit einer Suche über das ganze Bild alle Koordinaten bestimme, deren horizontale Streifenlänge größer null ist und denen ein False-Pixel vorausgeht.
 Hiermit finde ich Anfangsstellen horizontaler Streifen. Ich habe definiert, dass Streifen sich nicht über mehrere Zeilen erstrecken können, sodass es für jeden Streifen in einer Zeile einen Anfangspunkt gibt.
 Wenn auf die x-Koordinate dieser Anfangsstelle die Hälfte der Länge des Streifens hinzuaddiert wird, erhalte ich den Mittelpunktes des Streifens.
-Die y-Koordinate ist für einen \textit{horizontale} Streifen durchgehend gleich und ist daher aus der Schleife der linearen Suche gegeben.
+Die y-Koordinate ist für einen \textit{horizontalen} Streifen durchgehend gleich und ist daher aus der Schleife der linearen Suche gegeben.
 
 An dem soeben bestimmten Mittelpunkten lese ich die Längen der vertikalen Streifen an den gleichen Stellen aus. Wenn die Differenz zwischen diesen beiden Längen 0 oder 1 ist, werte ich die Längen der Streifen als gleich.
 Ein Fehler von 1 kann durch Ungenauigkeiten bei ganzzahliger Division leicht entstehen und ist daher an dieser Stelle unwesentlich.
@@ -72,7 +72,7 @@ Ein Fehler von 1 kann durch Ungenauigkeiten bei ganzzahliger Division leicht ent
 Anschließend überprüfe ich, ob an dieser Stelle auch der vertikale Streifen seinen Mittelpunkt hat. Nur dann ist der Abstand an dieser Stelle in alle Richtungen identisch. Dazu verschiebe ich den Mittelpunkt um eine halbe vertikale Streifenlänge - 1 (halber Durchmesser = Radius) nach oben und unten. Da dieser Wert kleiner als der Kreisradius ist, müssen beide Punkte noch innerhalb des Kreises liegen und damit True sein. Außerdem muss die Streifenlänge an allen Stellen identisch sein.
 Eine Überprüfung dieser Werte über die gesamte Streifenlänge wäre ebenfalls möglich, würde aber gerade bei hochaufgelösten Bildern unnötig Zeit verbrauchen. Aufgrund des Vergleiches der Streifenlängen ist ein False Positive unwahrscheinlich.
 
-Für den Vergleich der Ist- und Soll-Fläche wird zunächst die Soll-Fläche mit der Kreisformel berechnet. Der Durchmesser des Kreises ist mit der Länge einer der beiden Zusammenhängigkeitskomponenten gegeben. Die tatsächliche Größe der Fläche kann mit einer Flood-Fill\footnote{\url{https://en.wikipedia.org/wiki/Flood_fill}} ermittelt werden.
+Für den Vergleich der Ist- und Soll-Fläche wird zunächst die Soll-Fläche mit der Kreisformel berechnet. Der Durchmesser des Kreises ist mit der Länge einer der beiden Streifen gegeben. Die tatsächliche Größe der Fläche kann mit einer Flood-Fill\footnote{\url{https://en.wikipedia.org/wiki/Flood_fill}} ermittelt werden.
 Die Flood-Fill-Methode wird mit dem Mittelpunkt aufgerufen und erhöht einen Zähler. Die Methode ruft sich anschließend für alle angrenzenden True-Felder selbst auf. Um zu verhindern, dass die Rekursion unendlich stattfindet, wird für jedes Feld, dass von der "`Flut"' berührt wurde, in einem weiteren Array eine ID gespeichert.
 Diese ID wird fortlaufend für jeden Flood-Fill-Durchlauf vergeben. Im Code der Flood-Fill ist der Rekursion die Bedingung vorangestellt, dass nur Felder, für die noch keine ID vergeben wurde, aufgerufen werden. Damit entspricht nach Ablauf der Flood-Fill der Zählerinhalt der Ist-Fläche.
 
