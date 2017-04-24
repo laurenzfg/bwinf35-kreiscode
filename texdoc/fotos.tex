@@ -121,10 +121,10 @@ Danach fahre ich mit der nächsten Kantengruppe fort, nur vergebe ich dort den W
 \subsection {Rotation der Kreis-Codes (Listing \ref{lst:decode})}
 In einem Foto ist nicht davon auszugehen, dass der Nutzer das erste Segment exakt an der x-Achse ausrichtet. Daher muss der Trapezkranz aus Kapitel 2 so über den Kreisring gelegt werden, dass jedes Trapez möglich exakt über einem Kreisringsegment liegt. 
 
-Dies gelingt, indem wir die Achse so verschieben, dass sie auf einer Kante zwischen zwei Kreisringsegmenten liegt. Dafür müssen wir eine beliebige Kante auf dem äußeren Kreisring finden. Bei einer solchen Kante muss in einem Abstand von \(5u\) vom Pol (vgl Abb. \ref{abb:dims}) eine Kante vom Canny-Algorithmus vorliegen. Also muss an dieser Stelle im Ausgabebild von Canny True stehen.
+Dies gelingt, indem wir die Achse so verschieben, dass sie auf einer Kante zwischen zwei Kreisringsegmenten liegt. Dafür müssen wir eine beliebige Kante auf dem äußeren Kreisring finden. Bei einer solchen Kante muss in einem Abstand von \(4,7u\) vom Pol (vgl Abb. \ref{abb:dims}) eine Kante vom Canny-Algorithmus vorliegen. Also muss an dieser Stelle im Ausgabebild von Canny True stehen.
 
 So suche ich in alle Richtungen vom Pol aus eine Kante.
-Dann addiere ich den Winkel \(\delta\) zwischen der x-Achse und dem Strahl zur ersten Kante auf den Winkel zwischen x-Achse und eintelenden Strahl hinauf. Statt den Formeln \ref{eq:nKoords} nutze ich also folgende Formeln:
+Dann addiere ich den Winkel \(\delta\) zwischen der x-Achse und dem Strahl zur ersten Kante auf den Winkel zwischen x-Achse und einteilenden Strahl hinauf. Statt den Formeln \ref{eq:nKoords} nutze ich also folgende Formeln:
 
 \begin{gather}
 	\begin{split}
@@ -155,24 +155,69 @@ Aller Optimierungen zum Trotz erkennt mein Programm auf den weiteren Beispielen 
     \end{tabular} \\ \\
     \begin{tabular}{lllllll}
     Bitmap & Noise 25      & Noise 50      & ROT         & CMYK        & Grey (GIF)  & Grey (JPG)  \\ \hline
-    \checkmark & \(\varnothing\) & \(\times\) & \checkmark & \checkmark & \checkmark & \checkmark \\
+    \checkmark & \checkmark & \(\times\) & \checkmark & \checkmark & \checkmark & \checkmark \\
     \end{tabular}
     \caption {BwInf-Beispieleingaben}
 \end{table}
 
-Auch wenn es mir nicht gelungen ist, das Programm so zu optimieren, dass alle Codes dekodiert werden, habe ich alle unvollständigen Dekodierungen analysiert:
+\subsection{Fehleranalyse}
+Auch wenn es mir nicht gelungen ist, das Programm so zu optimieren, dass alle Codes dekodiert werden, habe ich in allen unvollständigen Dekodierungen die Fehlerursache gesucht:
 
-\vspace{2em}
-
+\subsubsection{Noise 50}
 \begin{minipage}{0.7\textwidth}
-\includegraphics[width=0.9\textwidth]{Grafiken/Ausgaben/cam1}
+\includegraphics[width=0.9\textwidth]{Grafiken/Ausgaben/noise50}
 \end{minipage}
 \begin{minipage}{0.3\textwidth}
-Hier scheitert mein Algorithmus an den zahlreichen weißen Punkten in den nicht erkannten Kreis-Codes. Eine stärkere Weichzeichnung ist nicht zielführend, da dann die Kantengrenzen verwischen.
+Dieses Bild ist extrem Verrauscht. Nichtsdestotrotz ist eine Erkennung theoretisch möglich, wenn man die Treshold im Quellcode manuell auf 75 anhebt. Leider werden in diesem Fall in zahlreichen anderen Bildern die Kreis-Codes nicht komplett erkannt.
 \end{minipage}
+
+\subsubsection{Beispiele 1 und 4}
 \begin{minipage}{0.7\textwidth}
+\includegraphics[width=0.9\textwidth]{Grafiken/Ausgaben/cam1}
 \includegraphics[width=0.9\textwidth]{Grafiken/Ausgaben/cam4}
 \end{minipage}
 \begin{minipage}{0.3\textwidth}
 Hier scheitert mein Algorithmus an den zahlreichen weißen Punkten in den nicht erkannten Kreis-Codes. Eine stärkere Weichzeichnung ist nicht zielführend, da dann die Kantengrenzen verwischen.
 \end{minipage}
+
+\subsubsection{Beispiel 8}
+\begin{minipage}{0.7\textwidth}
+\includegraphics[width=0.9\textwidth]{Grafiken/Ausgaben/cam8}
+\end{minipage}
+\begin{minipage}{0.3\textwidth}
+In diesem Bild sind die Kreise so unscharf, dass eine Erkennung der Kanten bei einigen Kreisringen fehlschlägt
+\end{minipage}
+
+\subsubsection{Beispiel B}
+\begin{minipage}{0.7\textwidth}
+\includegraphics[width=0.9\textwidth]{Grafiken/Ausgaben/camB}
+\end{minipage}
+\begin{minipage}{0.3\textwidth}
+In der oberen rechten Hälfte ist das Blatt geknickt worden. Da in meinem Algorithmus keinrlei Maßnahmen zur Begradigung eingebaut sind, kann der Kreis-Code nicht entziffert werden, da die Trapeze nicht auf den Kreisringsegmenten liegen. Auch nach einer Internetrecherche habe ich keinen Algorithmus gefunden, der dieses Problem ohne eine gerade Referenz behebt.
+\end{minipage}
+
+\section{Eigene Beispiele}
+In meinen Beispielen habe ich typische Use-Cases von Barcodes evaluiert. Zum einen habe ich es in eine Texdokument (blatt.png) eingebettet, da insbesondere QR-Codes oft genutzt werden, um z.B. Links anzugeben.
+Auch habe ich einen Kreiscode an meine Zimmerwand geheftet. Damit zeige ich, dass die Bildumrandung nicht zwingend Weiß sein muss, sondern auch sonstige ruhige Flächen wie Raufasertapeten ein geeignete Träger für einen Kreis-Code sind.
+Zuguterletzt habe ich ein Bild mit roten Kreis-Codes erstellt. Oftmals möchten Nutzer Barcodes kreativ personalisieren, damit sie besser in ihre Umgebung passen.
+
+Alle Cases hat das Programm korrekt dekodiert.
+
+\begin{center}
+\includegraphics[width=0.4\textwidth]{Grafiken/Ausgaben/blatt}
+\hspace{1em}
+\includegraphics[width=0.4\textwidth]{Grafiken/Ausgaben/farbig}
+\end{center}
+\begin{center}
+\includegraphics[width=0.8\textwidth]{Grafiken/Ausgaben/raufaser}
+\end{center}
+
+\pagebreak
+\section {Operationsbereich des Programmes}
+Mit den Erfahrungen aus den BwInf-Beispielen und eigenen Testsfällen habe ich untersucht, welche Vorraussetzungen gegeben sein müssen, damit die Dekodierung erfolgreich ist:
+\begin{itemize}
+	\item Der Hintergrund muss eine ruhige, zusammenhängende Fläche sein. Sonst gelingt die Flood-Fill zur Hintergrundmarkierung nicht. Wenn Beispielsweise das Blatt Papier auf eine schwarze Unterlage gelegt wird, ist das gesamte Blattinnere invertiert, da die Außenkante des Blattes als Kante eines Kreis-Codes aufgefasst wird.
+	\item Der Sobel-Operator muss an mindestens einer Stelle jeder Linie des Kreis-Codes einen Wert höher als 40 liefern. Sonst wird diese Kante nicht verfolgt. Die Farbe des Kreis-Codes ist beliebig, es muss nur der Kontrast zum Hintergrund hinreichend groß sein.
+	\item Das Blatt darf nicht zerknickt oder zerknüllt sein, die Kamera muss senkrecht auf den Kreis-Code zeigen. Schließlich basieren die Formeln für den Trapezkranz auf der Annahme, das das Bild glatt vorliegt. 
+	\item Das Rauschen des Kamerabildes darf nicht zu groß sein. Ein Rauschen wie in Bild Noise-50 entsteht allerdings nur in stark verstrahlten Gebieten, daher ist die Entrauschung meines Bildes für Alltagssituationen aureichend.
+\end{itemize}
